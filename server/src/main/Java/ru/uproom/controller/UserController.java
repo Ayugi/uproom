@@ -15,8 +15,9 @@ import java.util.List;
 
 /**
  * Created by HEDIN on 12.07.2014.
+ * todo hash pass
  */
-@Controller(value = "user")
+@Controller
 @RequestMapping(value = "user")
 public class UserController {
     @Autowired
@@ -30,8 +31,24 @@ public class UserController {
 
     @RequestMapping(method = RequestMethod.GET, value = "register")
     @ResponseBody
-    public String register(@RequestParam String login, @RequestParam String password){
+    public String register(@RequestParam String login,
+                           @RequestParam String password,
+                           @RequestParam String name){
         userDao.saveNewUser(new User(login, password));
         return "ok";
     }
+
+    @RequestMapping(method = RequestMethod.GET, value = "login")
+    @ResponseBody
+    public User login(@RequestParam String login,
+                        @RequestParam String password){
+        return new User("testLogin", "");
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "logout")
+    @ResponseBody
+    public String logout(){
+        return "ok";
+    }
+
 }
