@@ -53,6 +53,7 @@
 
     <build>
         <plugins>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -65,7 +66,15 @@
 
         </plugins>
     </build>
+    <!--
+    <distributionManagement>
+        <snapshotRepository>
+            <id></id>
+            <url>http://localhost:8081/nexus/content/repositories/snapshots</url>
 
+        </snapshotRepository>
+    </distributionManagement>
+    -->
 
 </project>
 
