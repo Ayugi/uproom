@@ -28,7 +28,7 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
 
     private MainCommander commander = null;
     private MainWatcher watcher = null;
-    private ZWaveNodeList nodes = null;
+    private ZWaveHome home = null;
 
 
     //##############################################################################################################
@@ -99,12 +99,12 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
     //------------------------------------------------------------------------
     //  список узлов сети Z-Wave
 
-    public ZWaveNodeList getNodes() {
-        return nodes;
+    public ZWaveHome getHome() {
+        return home;
     }
 
-    public void setNodes(ZWaveNodeList nodes) {
-        this.nodes = nodes;
+    public void setHome(ZWaveHome home) {
+        this.home = home;
     }
 
 
@@ -220,20 +220,24 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
                 try {
                     line = reader.readLine();
                 } catch (IOException e) {
+                    line = null;
                     System.out.println("[ERR] - CommunicationWithServer - run - " + e.getLocalizedMessage());
                 }
                 if (line == null) continue;
 
                 System.out.println("[INF] - CommunicationWithServer - run - command : " + line);
-                writer.println("Ok");
 
                 // формирование команды
                 ZWaveCommand command = new ZWaveCommand();
-                command.setCommand(line);
+                command.setCommandFromString(line);
                 command.setHomeId(watcher.getHomeId());
 
                 // исполнение команды
-                commander.execute(command);
+                ZWaveFeedback feedback = commander.execute(command);
+
+                // ответное сообщение серверу
+                if (feedback != null) writer.println(feedback.getFeedback());
+                else writer.println(command.getCommand() + " ( err )");
 
                 System.out.println("[INF] - CommunicationWithServer - run - command finished ");
             } while (!commander.isExit() && !isReconnect() && line != null);

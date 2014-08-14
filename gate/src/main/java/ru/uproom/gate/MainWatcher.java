@@ -3,9 +3,7 @@ package ru.uproom.gate;
 import org.zwave4j.Manager;
 import org.zwave4j.Notification;
 import org.zwave4j.NotificationWatcher;
-import org.zwave4j.ValueId;
 
-import java.util.HashMap;
 
 /**
  *
@@ -19,11 +17,11 @@ public class MainWatcher implements NotificationWatcher {
     //##############################################################################################################
     //######    параметры класса
 
-    private static boolean PRINT_DEBUG_MESSAGES = true;
-    private static long homeId;
-    private static boolean ready = false;
-    private static Manager manager = null;
-    private static HashMap<Short, ZwaveNode> nodes = new HashMap<Short, ZwaveNode>();
+    private boolean PRINT_DEBUG_MESSAGES = true;
+    private long homeId;
+    private boolean ready = false;
+    private boolean failed = false;
+    private ZWaveHome home = null;
 
 
     //##############################################################################################################
@@ -31,28 +29,34 @@ public class MainWatcher implements NotificationWatcher {
 
 
     //------------------------------------------------------------------------
-    //  Объект управления сетью устройств Z-Wave
-
-    public boolean setManager(Manager _manager) {
-        manager = _manager;
-        return _manager != null;
-    }
-
-    public Manager getManager() {
-        return manager;
-    }
-
-
-    //------------------------------------------------------------------------
     //  Признак готовности к работе драйвера контроллера
 
-    public boolean getReady() {
+    public boolean isReady() {
         return ready;
     }
 
     public void setReady(boolean _ready) {
-        if (_ready) System.out.println("---- zwave network ready ----");
+        if (_ready) {
+            System.out.println("---- zwave network ready ----");
+            setFailed(false);
+        }
         ready = _ready;
+    }
+
+
+    //------------------------------------------------------------------------
+    //  Признак неудачного запуска драйвера
+
+    public boolean isFailed() {
+        return failed;
+    }
+
+    public void setFailed(boolean failed) {
+        if (failed) {
+            System.out.println("---- zwave network failed ----");
+            setReady(false);
+        }
+        this.failed = failed;
     }
 
 
@@ -68,12 +72,20 @@ public class MainWatcher implements NotificationWatcher {
     }
 
 
+    //------------------------------------------------------------------------
+    //  список узлов сети Z-Wave
+
+    public ZWaveHome getHome() {
+        return home;
+    }
+
+    public void setHome(ZWaveHome home) {
+        this.home = home;
+    }
+
+
     //##############################################################################################################
     //######    методы класса-
-
-    private String getValue(ValueId _vaValueId) {
-        return "=value=";
-    }
 
 
     //------------------------------------------------------------------------
@@ -81,12 +93,6 @@ public class MainWatcher implements NotificationWatcher {
 
     @Override
     public void onNotification(Notification notification, Object o) {
-
-        // Менеджер должен быть установлен до того, как начнут обрабатываться события
-        if (manager == null) {
-            System.out.println("Manager not set");
-            return;
-        }
 
         // Список событий
         switch (notification.getType()) {
@@ -190,8 +196,7 @@ public class MainWatcher implements NotificationWatcher {
         setHomeId(notification.getHomeId());
 
         // вывод отладочной информации
-        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format(
-                "Driver ready\n" +
+        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("Driver ready\n" +
                         "\thome id: %d",
                 notification.getHomeId()
         ));
@@ -202,10 +207,11 @@ public class MainWatcher implements NotificationWatcher {
 
     public void onNotificationDriverFailed(Notification notification, Object o) {
 
+        // Драйвер не поднят
+        setFailed(true);
+
         // вывод отладочной информации
-        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format(
-                "Driver failed"
-        ));
+        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("Driver failed"));
     }
 
 
@@ -214,9 +220,7 @@ public class MainWatcher implements NotificationWatcher {
     public void onNotificationDriverReset(Notification notification, Object o) {
 
         // вывод отладочной информации
-        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format(
-                "Driver reset"
-        ));
+        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("Driver reset"));
     }
 
 
@@ -225,9 +229,7 @@ public class MainWatcher implements NotificationWatcher {
     public void onNotificationAwakeNodesQueried(Notification notification, Object o) {
 
         // вывод отладочной информации
-        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format(
-                "Awake nodes queried"
-        ));
+        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("Awake nodes queried"));
     }
 
 
@@ -236,13 +238,11 @@ public class MainWatcher implements NotificationWatcher {
     public void onNotificationAllNodesQueried(Notification notification, Object o) {
 
         // Контроллер сети готов к работе
-        getManager().writeConfig(getHomeId());
+        Manager.get().writeConfig(getHomeId());
         setReady(true);
 
         // вывод отладочной информации
-        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format(
-                "All nodes queried"
-        ));
+        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("All nodes queried"));
     }
 
 
@@ -251,13 +251,11 @@ public class MainWatcher implements NotificationWatcher {
     public void onNotificationAllNodesQueriedSomeDead(Notification notification, Object o) {
 
         // Контроллер сети готов к работе
-        getManager().writeConfig(getHomeId());
+        Manager.get().writeConfig(getHomeId());
         setReady(true);
 
         // вывод отладочной информации
-        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format(
-                "All nodes queried some dead"
-        ));
+        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("All nodes queried some dead"));
     }
 
 
@@ -266,9 +264,7 @@ public class MainWatcher implements NotificationWatcher {
     public void onNotificationPollingEnabled(Notification notification, Object o) {
 
         // вывод отладочной информации
-        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format(
-                "Polling enabled"
-        ));
+        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("Polling enabled"));
     }
 
 
@@ -277,9 +273,7 @@ public class MainWatcher implements NotificationWatcher {
     public void onNotificationPollingDisabled(Notification notification, Object o) {
 
         // вывод отладочной информации
-        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format(
-                "Polling disabled"
-        ));
+        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("Polling disabled"));
     }
 
 
@@ -288,8 +282,7 @@ public class MainWatcher implements NotificationWatcher {
     public void onNotificationNodeNew(Notification notification, Object o) {
 
         // вывод отладочной информации
-        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format(
-                "Node new\n" +
+        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("Node new\n" +
                         "\tnode id: %d",
                 notification.getNodeId()
         ));
@@ -299,18 +292,22 @@ public class MainWatcher implements NotificationWatcher {
     // ======  добавление нового устройства в сеть Z-Wave
 
     public void onNotificationNodeAdded(Notification notification, Object o) {
+        ZWaveNode node = new ZWaveNode();
+        Manager manager = Manager.get();
 
         // Определение идентификатора узла и добавление его в список известных узлов
-        short nodeId = notification.getNodeId();
-        nodes.put(nodeId, new ZwaveNode());
+        node.setNodeId(notification.getNodeId());
+        node.setNodeType(manager.getNodeType(homeId, node.getNodeId()));
+        node.setNodeName(manager.getNodeName(homeId, node.getNodeId()));
+        node.setNodeLocation(manager.getNodeLocation(homeId, node.getNodeId()));
+        getHome().put(node.getNodeId(), node);
 
         // вывод отладочной информации
-        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format(
-                "Node added\n" +
+        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("Node added\n" +
                         "\tnode id: %d" +
                         "\tnode type: %s",
-                nodeId,
-                manager.getNodeType(homeId, nodeId)
+                node.getNodeId(),
+                node.getNodeType()
         ));
     }
 
@@ -321,15 +318,14 @@ public class MainWatcher implements NotificationWatcher {
 
         // Определение идентификатора узла и удаление его из списка известных узлов
         short nodeId = notification.getNodeId();
-        nodes.remove(nodeId);
+        getHome().remove(nodeId);
 
         // вывод отладочной информации
-        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format(
-                "Node removed\n" +
+        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("Node removed\n" +
                         "\tnode id: %d" +
                         "\tnode type: %s",
                 nodeId,
-                manager.getNodeType(homeId, nodeId)
+                Manager.get().getNodeType(homeId, nodeId)
         ));
     }
 
@@ -339,8 +335,7 @@ public class MainWatcher implements NotificationWatcher {
     public void onNotificationEssentialNodeQueriesComplete(Notification notification, Object o) {
 
         // вывод отладочной информации
-        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format(
-                "Node essential queries complete\n" +
+        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("Node essential queries complete\n" +
                         "\tnode id: %d",
                 notification.getNodeId()
         ));
@@ -352,8 +347,7 @@ public class MainWatcher implements NotificationWatcher {
     public void onNotificationNodeQueriesComplete(Notification notification, Object o) {
 
         // вывод отладочной информации
-        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format(
-                "Node queries complete\n" +
+        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("Node queries complete\n" +
                         "\tnode id: %d",
                 notification.getNodeId()
         ));
@@ -365,8 +359,7 @@ public class MainWatcher implements NotificationWatcher {
     public void onNotificationNodeEvent(Notification notification, Object o) {
 
         // вывод отладочной информации
-        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format(
-                "Node event\n" +
+        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("Node event\n" +
                         "\tnode id: %d\n" +
                         "\tevent id: %d",
                 notification.getNodeId(),
@@ -380,8 +373,7 @@ public class MainWatcher implements NotificationWatcher {
     public void onNotificationNodeNaming(Notification notification, Object o) {
 
         // вывод отладочной информации
-        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format(
-                "Node naming\n" +
+        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("Node naming\n" +
                         "\tnode id: %d",
                 notification.getNodeId()
         ));
@@ -396,12 +388,11 @@ public class MainWatcher implements NotificationWatcher {
         short nodeId = notification.getNodeId();
 
         // вывод отладочной информации
-        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format(
-                "Node protocol info\n" +
+        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("Node protocol info\n" +
                         "\tnode id: %d\n" +
                         "\ttype: %s",
                 nodeId,
-                manager.getNodeType(notification.getHomeId(), nodeId)
+                Manager.get().getNodeType(notification.getHomeId(), nodeId)
         ));
     }
 
@@ -410,9 +401,22 @@ public class MainWatcher implements NotificationWatcher {
 
     public void onNotificationValueAdded(Notification notification, Object o) {
 
+        // находим узел в который добавляется параметр
+        ZWaveNode node = home.get(notification.getNodeId());
+        if (node == null) return;
+
+        // добавляем параметр
+        ZWaveValue value = new ZWaveValue();
+        value.setValueId(notification.getValueId());
+        Integer index = ZWaveValueIndexFactory.createIndex(
+                value.getValueCommandClass(),
+                value.getValueInstance(),
+                value.getValueIndex()
+        );
+        node.put(index, value);
+
         // вывод отладочной информации
-        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format(
-                "Value added\n" +
+        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("Value added\n" +
                         "\tnode id: %d\n" +
                         "\tcommand class: %d\n" +
                         "\tinstance: %d\n" +
@@ -427,8 +431,8 @@ public class MainWatcher implements NotificationWatcher {
                 notification.getValueId().getIndex(),
                 notification.getValueId().getGenre().name(),
                 notification.getValueId().getType().name(),
-                manager.getValueLabel(notification.getValueId()),
-                getValue(notification.getValueId())
+                Manager.get().getValueLabel(notification.getValueId()),
+                value.getValueAsString()
         ));
     }
 
@@ -437,9 +441,20 @@ public class MainWatcher implements NotificationWatcher {
 
     public void onNotificationValueRemoved(Notification notification, Object o) {
 
+        // находим узел из которого удаляется параметр
+        ZWaveNode node = home.get(notification.getNodeId());
+        if (node == null) return;
+
+        // удаляем параметр
+        Integer index = ZWaveValueIndexFactory.createIndex(
+                notification.getValueId().getCommandClassId(),
+                notification.getValueId().getInstance(),
+                notification.getValueId().getIndex()
+        );
+        node.remove(index);
+
         // вывод отладочной информации
-        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format(
-                "Value removed\n" +
+        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("Value removed\n" +
                         "\tnode id: %d\n" +
                         "\tcommand class: %d\n" +
                         "\tinstance: %d\n" +
@@ -456,19 +471,33 @@ public class MainWatcher implements NotificationWatcher {
 
     public void onNotificationValueChanged(Notification notification, Object o) {
 
+        // находим узел параметр которого обновился
+        ZWaveNode node = home.get(notification.getNodeId());
+        if (node == null) return;
+
+        // находим параметр
+        Integer index = ZWaveValueIndexFactory.createIndex(
+                notification.getValueId().getCommandClassId(),
+                notification.getValueId().getInstance(),
+                notification.getValueId().getIndex()
+        );
+        ZWaveValue value = node.get(index);
+        if (value == null) return;
+
         // вывод отладочной информации
-        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format(
-                "Value changed\n" +
+        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("Value changed\n" +
                         "\tnode id: %d\n" +
+                        "\tlabel: %s\n" +
                         "\tcommand class: %d\n" +
                         "\tinstance: %d\n" +
                         "\tindex: %d\n" +
                         "\tvalue: %s",
                 notification.getNodeId(),
+                Manager.get().getValueLabel(notification.getValueId()),
                 notification.getValueId().getCommandClassId(),
                 notification.getValueId().getInstance(),
                 notification.getValueId().getIndex(),
-                getValue(notification.getValueId())
+                value.getValueAsString()
         ));
     }
 
@@ -477,9 +506,21 @@ public class MainWatcher implements NotificationWatcher {
 
     public void onNotificationValueRefreshed(Notification notification, Object o) {
 
+        // находим узел параметр которого обновился
+        ZWaveNode node = home.get(notification.getNodeId());
+        if (node == null) return;
+
+        // находим параметр
+        Integer index = ZWaveValueIndexFactory.createIndex(
+                notification.getValueId().getCommandClassId(),
+                notification.getValueId().getInstance(),
+                notification.getValueId().getIndex()
+        );
+        ZWaveValue value = node.get(index);
+        if (value == null) return;
+
         // вывод отладочной информации
-        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format(
-                "Value refreshed\n" +
+        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("Value refreshed\n" +
                         "\tnode id: %d\n" +
                         "\tcommand class: %d\n" +
                         "\tinstance: %d\n" +
@@ -489,7 +530,7 @@ public class MainWatcher implements NotificationWatcher {
                 notification.getValueId().getCommandClassId(),
                 notification.getValueId().getInstance(),
                 notification.getValueId().getIndex(),
-                getValue(notification.getValueId())
+                value.getValueAsString()
         ));
     }
 
@@ -499,8 +540,7 @@ public class MainWatcher implements NotificationWatcher {
     public void onNotificationGroup(Notification notification, Object o) {
 
         // вывод отладочной информации
-        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format(
-                "Group\n" +
+        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("Group\n" +
                         "\tnode id: %d\n" +
                         "\tgroup id: %d",
                 notification.getNodeId(),
@@ -514,8 +554,7 @@ public class MainWatcher implements NotificationWatcher {
     public void onNotificationSceneEvent(Notification notification, Object o) {
 
         // вывод отладочной информации
-        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format(
-                "Scene event\n" +
+        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("Scene event\n" +
                         "\tscene id: %d",
                 notification.getSceneId()
         ));
@@ -527,8 +566,7 @@ public class MainWatcher implements NotificationWatcher {
     public void onNotificationCreateButton(Notification notification, Object o) {
 
         // вывод отладочной информации
-        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format(
-                "Button create\n" +
+        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("Button create\n" +
                         "\tbutton id: %d",
                 notification.getButtonId()
         ));
@@ -540,8 +578,7 @@ public class MainWatcher implements NotificationWatcher {
     public void onNotificationDeleteButton(Notification notification, Object o) {
 
         // вывод отладочной информации
-        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format(
-                "Button delete\n" +
+        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("Button delete\n" +
                         "\tbutton id: %d",
                 notification.getButtonId()
         ));
@@ -553,8 +590,7 @@ public class MainWatcher implements NotificationWatcher {
     public void onNotificationButtonOn(Notification notification, Object o) {
 
         // вывод отладочной информации
-        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format(
-                "Button on\n" +
+        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("Button on\n" +
                         "\tbutton id: %d",
                 notification.getButtonId()
         ));
@@ -566,8 +602,7 @@ public class MainWatcher implements NotificationWatcher {
     public void onNotificationButtonOff(Notification notification, Object o) {
 
         // вывод отладочной информации
-        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format(
-                "Button off\n" +
+        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("Button off\n" +
                         "\tbutton id: %d",
                 notification.getButtonId()
         ));
@@ -579,8 +614,7 @@ public class MainWatcher implements NotificationWatcher {
     public void onNotificationError(Notification notification, Object o) {
 
         // вывод отладочной информации
-        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format(
-                "Error Notification\n" +
+        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("Error Notification\n" +
                         "\thome id: %d" +
                         "\tnode id: %d",
                 notification.getHomeId(),
@@ -594,10 +628,8 @@ public class MainWatcher implements NotificationWatcher {
     public void onNotificationUnknown(Notification notification, Object o) {
 
         // вывод отладочной информации
-        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format(
-                "Unhandled Notification : " +
+        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("Unhandled Notification : " +
                         notification.getType().name()
         ));
     }
-
 }

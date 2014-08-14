@@ -1,15 +1,16 @@
 package ru.uproom.gate;
 
-import org.zwave4j.*;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import org.zwave4j.Manager;
+import org.zwave4j.NativeLibraryLoader;
+import org.zwave4j.Options;
+import org.zwave4j.ZWave4j;
 
 /**
  * Created by osipenko on 27.07.14.
  */
 public class Main {
+
+    private static String ZWAVE_DRIVER_NAME = "/dev/ttyUSB0";
 
     public static void main(String[] args) {
 
@@ -25,85 +26,66 @@ public class Main {
         // создаем объект управления сетью Z-Wave
         Manager manager = Manager.create();
 
+        // создаем список узлов сети Z-Wave
+        ZWaveHome home = new ZWaveHome();
+
         // добавляем обработчик событий объекта управления сетью Z-Wave
         MainWatcher watcher = new MainWatcher();
-        watcher.setManager(manager);
+        watcher.setHome(home);
         manager.addWatcher(watcher, null);
 
+        // добавляем обработчик команд контроллера сети Z-Wave
+        MainCommander commander = new MainCommander();
+        commander.setWatcher(watcher);
+        commander.setHome(home);
+
         // активируем драйвер контроллера Z-Wave
-        manager.addDriver("/dev/ttyUSB3");
+        manager.addDriver(ZWAVE_DRIVER_NAME);
 
-        final BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        // активируем канал связи с сервером
+        CommunicationWithServer communicator = new CommunicationWithServer("localhost", 6009);
+        communicator.setHome(home);
+        communicator.setCommander(commander);
+        communicator.setWatcher(watcher);
+        Thread communicatorThread = new Thread(communicator);
+        communicatorThread.start();
 
-        String line = null;
+        // цикл исполнения команд
+        boolean next = false;
         do {
+
+            // если сеть готова к обмену данными
+            if (watcher.isReady()) {
+                next = communicator.readNext();
+            }
+
+            // Если сеть не готова, перезапускаем драйвер
+            if (watcher.isFailed()) {
+                watcher.setFailed(false);
+                manager.removeDriver(ZWAVE_DRIVER_NAME);
+                manager.addDriver(ZWAVE_DRIVER_NAME);
+            }
+
+            // Прореживание сигналов во избежание перегрузки процессора
             try {
-                line = br.readLine();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            if (!watcher.getReady() || line == null) {
-                continue;
+                Thread.sleep(200);
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
             }
 
-            if (line.equals("on")) {
-                manager.switchAllOn(watcher.getHomeId());
+        } while (!commander.isExit());
 
-            } else if (line.equals("off")) {
-                manager.switchAllOff(watcher.getHomeId());
+        System.out.println("---- program stopping ----");
 
-                // добавление существующих устройств
-            } else if (line.equals("add mode")) {
-                if (manager.beginControllerCommand(watcher.getHomeId(),
-                        ControllerCommand.ADD_DEVICE,
-                        new ControllerCallback() {
-                            @Override
-                            public void onCallback(ControllerState controllerState, ControllerError controllerError, Object o) {
-                                System.out.println(String.format(
-                                        "Add mode\n" +
-                                                "\tcontroller in state: %s" +
-                                                "\tcontroller error: %s",
-                                        controllerState,
-                                        controllerError
-                                ));
-                            }
-                        })) System.out.println("Add Mode approved");
-                else System.out.println("Add Mode cancelled");
-
-                // Удаление существующих устройств
-            } else if (line.equals("remove mode")) {
-                if (manager.beginControllerCommand(watcher.getHomeId(),
-                        ControllerCommand.REMOVE_DEVICE,
-                        new ControllerCallback() {
-                            @Override
-                            public void onCallback(ControllerState controllerState, ControllerError controllerError, Object o) {
-                                System.out.println(String.format(
-                                        "Remove mode\n" +
-                                                "\tcontroller in state: %s" +
-                                                "\tcontroller error: %s",
-                                        controllerState,
-                                        controllerError
-                                ));
-                            }
-                        })) System.out.println("Remove Mode enabled");
-                else System.out.println("Remove Mode disabled");
-
-                // прерывание исполняющейся команды
-            } else if (line.equals("cancel")) {
-                if (manager.cancelControllerCommand(watcher.getHomeId())) System.out.println("Current Mode cancelled");
-                else System.out.println("Current Mode stilled");
+        while (communicatorThread.isInterrupted()) {
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
             }
-        } while (line != null && !line.equals("q"));
-
-
-        try {
-            br.close();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
-
         manager.removeWatcher(watcher, null);
-        manager.removeDriver("/dev/ttyUSB0");
+        manager.removeDriver(ZWAVE_DRIVER_NAME);
         Manager.destroy();
         Options.destroy();
 
