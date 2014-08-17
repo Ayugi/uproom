@@ -3,6 +3,7 @@ package ru.uproom.gate;
 import org.zwave4j.Manager;
 import org.zwave4j.ValueId;
 
+import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -15,6 +16,7 @@ public class ZWaveValue {
     //======    параметры класса
 
     private ValueId valueId = null;
+    private ArrayList<ZWaveValueCallback> events = new ArrayList<ZWaveValueCallback>();
 
 
     //=============================================================================================================
@@ -63,6 +65,26 @@ public class ZWaveValue {
     public Short getValueInstance() {
         return valueId.getInstance();
     }
+
+
+    //------------------------------------------------------------------------
+    //  события, связанные с данным параметром
+
+    public boolean addEvent(ZWaveValueCallback event) {
+        return events.add(event);
+    }
+
+    public boolean removeEvent(ZWaveValueCallback event) {
+        return events.remove(event);
+    }
+
+    public void callEvents() {
+        for (ZWaveValueCallback event : events) {
+            event.onCallback(this);
+        }
+    }
+
+
 
 
     //=============================================================================================================

@@ -12,6 +12,7 @@ public class ZWaveFeedback {
 
     private long homeId = 0;
     private String feedback = "";
+    private boolean created = false;
 
 
     //##############################################################################################################
@@ -39,5 +40,17 @@ public class ZWaveFeedback {
 
     public void setFeedback(String feedback) {
         this.feedback = feedback;
+    }
+
+
+    //------------------------------------------------------------------------
+    //  текст ответа
+
+    public boolean isCreated() {
+        return created;
+    }
+
+    public void setCreated(boolean created) {
+        this.created = created;
     }
 }

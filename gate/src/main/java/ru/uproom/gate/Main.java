@@ -51,13 +51,7 @@ public class Main {
         communicatorThread.start();
 
         // цикл исполнения команд
-        boolean next = false;
         do {
-
-            // если сеть готова к обмену данными
-            if (watcher.isReady()) {
-                next = communicator.readNext();
-            }
 
             // Если сеть не готова, перезапускаем драйвер
             if (watcher.isFailed()) {

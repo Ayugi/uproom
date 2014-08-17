@@ -16,6 +16,10 @@ public class ZWaveCommand {
     private String command = "";
     private short nodeId = 0;
     private int valueIndex = 0;
+    private short groupId = 0;
+    private short targetId = 0;
+    private String valueNew = "0";
+    private short level = 0;
 
 
     //##############################################################################################################
@@ -49,7 +53,6 @@ public class ZWaveCommand {
     //------------------------------------------------------------------------
     //  идентификатор узла
 
-
     public short getNodeId() {
         return nodeId;
     }
@@ -62,7 +65,6 @@ public class ZWaveCommand {
     //------------------------------------------------------------------------
     //  идентификатор параметра
 
-
     public int getValueIndex() {
         return valueIndex;
     }
@@ -70,6 +72,56 @@ public class ZWaveCommand {
     public void setValueIndex(int valueIndex) {
         this.valueIndex = valueIndex;
     }
+
+
+    //------------------------------------------------------------------------
+    //  идентификатор группы узлов
+
+    public short getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(short groupId) {
+        this.groupId = groupId;
+    }
+
+
+    //------------------------------------------------------------------------
+    //  идентификатор целевого узла
+
+    public short getTargetId() {
+        return targetId;
+    }
+
+    public void setTargetId(short targetId) {
+        this.targetId = targetId;
+    }
+
+
+    //------------------------------------------------------------------------
+    //  новое значение для параметра
+
+    public String getValueNew() {
+        return valueNew;
+    }
+
+    public void setValueNew(String valueNew) {
+        this.valueNew = valueNew;
+    }
+
+
+    //------------------------------------------------------------------------
+    //  новое значение для уровня
+
+    public short getLevel() {
+        return level;
+    }
+
+    public void setLevel(short level) {
+        this.level = level;
+    }
+
+
 
 
     //##############################################################################################################
@@ -90,8 +142,12 @@ public class ZWaveCommand {
                 String[] parts = param.split("=");
                 if (parts.length > 1) {
 
-                    if (parts[0].equalsIgnoreCase("NodeID")) nodeId = Short.parseShort(parts[1]);
-                    else if (parts[0].equalsIgnoreCase("ValueID")) valueIndex = Integer.parseInt(parts[1]);
+                    if (parts[0].equalsIgnoreCase("NodeID")) setNodeId(Short.parseShort(parts[1]));
+                    else if (parts[0].equalsIgnoreCase("ValueID")) setValueIndex(Integer.parseInt(parts[1]));
+                    else if (parts[0].equalsIgnoreCase("GroupID")) setGroupId(Short.parseShort(parts[1]));
+                    else if (parts[0].equalsIgnoreCase("TargetID")) setTargetId(Short.parseShort(parts[1]));
+                    else if (parts[0].equalsIgnoreCase("Value")) setValueNew(parts[1]);
+                    else if (parts[0].equalsIgnoreCase("Level")) setLevel(Short.parseShort(parts[1]));
 
                 }
 
@@ -99,6 +155,5 @@ public class ZWaveCommand {
         }
 
     }
-
 
 }

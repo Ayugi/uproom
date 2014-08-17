@@ -18,7 +18,6 @@ public class MainWatcher implements NotificationWatcher {
     //######    параметры класса
 
     private boolean PRINT_DEBUG_MESSAGES = true;
-    private long homeId;
     private boolean ready = false;
     private boolean failed = false;
     private ZWaveHome home = null;
@@ -57,18 +56,6 @@ public class MainWatcher implements NotificationWatcher {
             setReady(false);
         }
         this.failed = failed;
-    }
-
-
-    //------------------------------------------------------------------------
-    //  Идентификатор совокупности помещений (дома) ассоциированного с сетью
-
-    public long getHomeId() {
-        return homeId;
-    }
-
-    public void setHomeId(long _homeId) {
-        homeId = _homeId;
     }
 
 
@@ -193,7 +180,7 @@ public class MainWatcher implements NotificationWatcher {
     public void onNotificationDriverReady(Notification notification, Object o) {
 
         // получение и установка идентификатора дома
-        setHomeId(notification.getHomeId());
+        getHome().setHomeId(notification.getHomeId());
 
         // вывод отладочной информации
         if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("Driver ready\n" +
@@ -238,7 +225,7 @@ public class MainWatcher implements NotificationWatcher {
     public void onNotificationAllNodesQueried(Notification notification, Object o) {
 
         // Контроллер сети готов к работе
-        Manager.get().writeConfig(getHomeId());
+        Manager.get().writeConfig(getHome().getHomeId());
         setReady(true);
 
         // вывод отладочной информации
@@ -251,7 +238,7 @@ public class MainWatcher implements NotificationWatcher {
     public void onNotificationAllNodesQueriedSomeDead(Notification notification, Object o) {
 
         // Контроллер сети готов к работе
-        Manager.get().writeConfig(getHomeId());
+        Manager.get().writeConfig(getHome().getHomeId());
         setReady(true);
 
         // вывод отладочной информации
@@ -281,6 +268,10 @@ public class MainWatcher implements NotificationWatcher {
 
     public void onNotificationNodeNew(Notification notification, Object o) {
 
+        // Определение идентификатора узла и добавление его в список известных узлов
+        ZWaveNode node = new ZWaveNode(getHome(), notification.getNodeId());
+        getHome().put(node.getNodeId(), node);
+
         // вывод отладочной информации
         if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("Node new\n" +
                         "\tnode id: %d",
@@ -292,14 +283,9 @@ public class MainWatcher implements NotificationWatcher {
     // ======  добавление нового устройства в сеть Z-Wave
 
     public void onNotificationNodeAdded(Notification notification, Object o) {
-        ZWaveNode node = new ZWaveNode();
-        Manager manager = Manager.get();
 
         // Определение идентификатора узла и добавление его в список известных узлов
-        node.setNodeId(notification.getNodeId());
-        node.setNodeType(manager.getNodeType(homeId, node.getNodeId()));
-        node.setNodeName(manager.getNodeName(homeId, node.getNodeId()));
-        node.setNodeLocation(manager.getNodeLocation(homeId, node.getNodeId()));
+        ZWaveNode node = new ZWaveNode(getHome(), notification.getNodeId());
         getHome().put(node.getNodeId(), node);
 
         // вывод отладочной информации
@@ -325,7 +311,7 @@ public class MainWatcher implements NotificationWatcher {
                         "\tnode id: %d" +
                         "\tnode type: %s",
                 nodeId,
-                Manager.get().getNodeType(homeId, nodeId)
+                Manager.get().getNodeType(getHome().getHomeId(), nodeId)
         ));
     }
 
@@ -392,7 +378,7 @@ public class MainWatcher implements NotificationWatcher {
                         "\tnode id: %d\n" +
                         "\ttype: %s",
                 nodeId,
-                Manager.get().getNodeType(notification.getHomeId(), nodeId)
+                Manager.get().getNodeType(getHome().getHomeId(), nodeId)
         ));
     }
 
@@ -402,7 +388,7 @@ public class MainWatcher implements NotificationWatcher {
     public void onNotificationValueAdded(Notification notification, Object o) {
 
         // находим узел в который добавляется параметр
-        ZWaveNode node = home.get(notification.getNodeId());
+        ZWaveNode node = getHome().get(notification.getNodeId());
         if (node == null) return;
 
         // добавляем параметр
@@ -472,7 +458,7 @@ public class MainWatcher implements NotificationWatcher {
     public void onNotificationValueChanged(Notification notification, Object o) {
 
         // находим узел параметр которого обновился
-        ZWaveNode node = home.get(notification.getNodeId());
+        ZWaveNode node = getHome().get(notification.getNodeId());
         if (node == null) return;
 
         // находим параметр
@@ -483,6 +469,9 @@ public class MainWatcher implements NotificationWatcher {
         );
         ZWaveValue value = node.get(index);
         if (value == null) return;
+
+        // если есть подписчики, оповещаем их
+        value.callEvents();
 
         // вывод отладочной информации
         if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("Value changed\n" +
@@ -507,7 +496,7 @@ public class MainWatcher implements NotificationWatcher {
     public void onNotificationValueRefreshed(Notification notification, Object o) {
 
         // находим узел параметр которого обновился
-        ZWaveNode node = home.get(notification.getNodeId());
+        ZWaveNode node = getHome().get(notification.getNodeId());
         if (node == null) return;
 
         // находим параметр
@@ -538,6 +527,14 @@ public class MainWatcher implements NotificationWatcher {
     // ======  событие связанное с группой устройств
 
     public void onNotificationGroup(Notification notification, Object o) {
+
+        // узел связанный с группой
+        ZWaveNode node = getHome().get(notification.getNodeId());
+        if (node == null) return;
+
+        // Если такой группы еще не было, добавляем ее
+        if (!node.existGroup(notification.getGroupIdx()))
+            node.addGroup(notification.getGroupIdx());
 
         // вывод отладочной информации
         if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("Group\n" +
@@ -612,13 +609,55 @@ public class MainWatcher implements NotificationWatcher {
     // ======  аварийное событие в сети
 
     public void onNotificationError(Notification notification, Object o) {
+        String notificationCode = "";
+
+        // обработка кодов оповещений
+        switch (notification.getNotification()) {
+
+            case 0: // MSG_COMPLETE
+                notificationCode = "MSG_COMPLETE";
+                break;
+
+            case 1: // TIMEOUT
+                notificationCode = "TIMEOUT";
+                break;
+
+            case 2: // NO_OPERATION
+                notificationCode = "NO_OPERATION";
+                break;
+
+            case 3: // AWAKE
+                notificationCode = "AWAKE";
+                break;
+
+            case 4: // SLEEP
+                notificationCode = "SLEEP";
+                break;
+
+            case 5: // DEAD
+                notificationCode = "DEAD";
+                onNotificationNodeRemoved(notification, new Object());
+                break;
+
+            case 6: // ALIVE
+                notificationCode = "ALIVE";
+                onNotificationNodeAdded(notification, new Object());
+                break;
+
+            default:
+                notificationCode = String.format("UNKNOWN (%d)", notification.getNotification());
+
+        }
+
 
         // вывод отладочной информации
         if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("Error Notification\n" +
                         "\thome id: %d" +
-                        "\tnode id: %d",
+                        "\tnode id: %d" +
+                        "\tnotify : %s",
                 notification.getHomeId(),
-                notification.getNodeId()
+                notification.getNodeId(),
+                notificationCode
         ));
     }
 

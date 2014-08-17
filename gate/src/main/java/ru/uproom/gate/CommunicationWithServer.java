@@ -159,15 +159,6 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
 
 
     //------------------------------------------------------------------------
-    //  чтение команд внешних систем
-
-    public boolean readNext() {
-
-        return true;
-    }
-
-
-    //------------------------------------------------------------------------
     //  завершение работы с обменом данными
 
     @Override
@@ -230,7 +221,7 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
                 // формирование команды
                 ZWaveCommand command = new ZWaveCommand();
                 command.setCommandFromString(line);
-                command.setHomeId(watcher.getHomeId());
+                command.setHomeId(watcher.getHome().getHomeId());
 
                 // исполнение команды
                 ZWaveFeedback feedback = commander.execute(command);
