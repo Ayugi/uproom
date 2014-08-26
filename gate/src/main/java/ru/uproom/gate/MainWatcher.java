@@ -332,6 +332,11 @@ public class MainWatcher implements NotificationWatcher {
 
     public void onNotificationNodeQueriesComplete(Notification notification, Object o) {
 
+        // вызов обработчиков событий для данного узла
+        ZWaveNode node = getHome().get(notification.getNodeId());
+        if (node == null) return;
+        node.callEvents(notification);
+
         // вывод отладочной информации
         if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("Node queries complete\n" +
                         "\tnode id: %d",
@@ -610,6 +615,13 @@ public class MainWatcher implements NotificationWatcher {
 
     public void onNotificationError(Notification notification, Object o) {
         String notificationCode = "";
+
+        // вызвавший событие узел
+        ZWaveNode node = getHome().get(notification.getNodeId());
+        if (node == null) return;
+
+        // вызов обработчиков событий для данного узла
+        node.callEvents(notification);
 
         // обработка кодов оповещений
         switch (notification.getNotification()) {

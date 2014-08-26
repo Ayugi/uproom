@@ -13,6 +13,7 @@ public class ZWaveFeedback {
     private long homeId = 0;
     private String feedback = "";
     private boolean created = false;
+    private boolean successful = false;
 
 
     //##############################################################################################################
@@ -52,5 +53,17 @@ public class ZWaveFeedback {
 
     public void setCreated(boolean created) {
         this.created = created;
+    }
+
+
+    //------------------------------------------------------------------------
+    //  текст ответа
+
+    public boolean isSuccessful() {
+        return successful;
+    }
+
+    public void setSuccessful(boolean successful) {
+        this.successful = successful;
     }
 }

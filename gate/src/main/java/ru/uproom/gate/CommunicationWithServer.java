@@ -25,6 +25,7 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
     private PrintWriter writer = null;
     private boolean connected = false;
     private boolean reconnect = false;
+    private int times = 0;
 
     private MainCommander commander = null;
     private MainWatcher watcher = null;
@@ -36,8 +37,11 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
 
 
     public CommunicationWithServer() {
+
     }
 
+
+    // direction - направление
     public CommunicationWithServer(String host, int port) {
         this.host = host;
         this.port = port;
@@ -132,6 +136,34 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
     }
 
 
+    //------------------------------------------------------------------------
+    //  количество попыток подключения
+
+    public int getTimes() {
+        return times;
+    }
+
+    public void setTimes(int times) {
+        this.times = times;
+    }
+
+
+    //------------------------------------------------------------------------
+    //  получение внутренних сущностей
+
+    protected Socket getSocket() {
+        return socket;
+    }
+
+    protected BufferedReader getReader() {
+        return reader;
+    }
+
+    protected PrintWriter getWriter() {
+        return writer;
+    }
+
+
     //##############################################################################################################
     //######    методы класса
 
@@ -141,18 +173,36 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
 
     public void open() {
 
-        try {
-            // создаем сокет
-            socket = new Socket(host, port);
-            // Поток чтения
-            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            // поток записи
-            writer = new PrintWriter(socket.getOutputStream(), true);
-            // признак удачного соединения
-            setConnected(true);
-        } catch (IOException e) {
-            setConnected(false);
-            System.out.println("[ERR] - CommunicationWithServer - open - " + e.getLocalizedMessage());
+        int counter = 0;
+        while (!commander.isExit() && !isConnected() && (counter < getTimes() || getTimes() <= 0)) {
+            try {
+                // создаем сокет
+                socket = new Socket(host, port);
+                // Поток чтения
+                reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                // поток записи
+                writer = new PrintWriter(socket.getOutputStream(), true);
+                // признак удачного соединения
+                setConnected(true);
+            } catch (IOException e) {
+                setConnected(false);
+                System.out.println("[ERR] - CommunicationWithServer - open - " + e.getLocalizedMessage());
+            }
+
+            // если не установлено соединение
+            if (!isConnected()) {
+                // закрываем текущее соединение
+                close();
+                // ожидаем следующую попытку подключения
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+
+            // следующая попытка
+            counter++;
         }
 
     }
@@ -181,35 +231,27 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
 
     }
 
+
+    //------------------------------------------------------------------------
+    //  обработка данных в цикле обмена
+
     @Override
     public void run() {
 
-        while (!commander.isExit()) {
+        // установка соединения с сервером
+        open();
+        if (!isConnected()) return;
 
-            // установка соединения с сервером
-            open();
-            // если не установлено соединение
-            if (!isConnected()) {
-                // закрываем текущее соединение
-                close();
-                // ожидаем следующую попытку подключения
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException ex) {
-                    Thread.currentThread().interrupt();
-                }
-                // следующая попытка
-                continue;
-            }
+        // если соединение установлено - обмениваемся данными
+        while (!getCommander().isExit()) {
 
-            // если соединение установлено
             String line = null;
             do {
                 System.out.println("[INF] - CommunicationWithServer - run - waiting for next command...");
 
-                // попытка чтения очередной порции данных
+                // попытка чтения очередной команды
                 try {
-                    line = reader.readLine();
+                    line = getReader().readLine();
                 } catch (IOException e) {
                     line = null;
                     System.out.println("[ERR] - CommunicationWithServer - run - " + e.getLocalizedMessage());
@@ -221,22 +263,27 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
                 // формирование команды
                 ZWaveCommand command = new ZWaveCommand();
                 command.setCommandFromString(line);
-                command.setHomeId(watcher.getHome().getHomeId());
+                command.setHomeId(getWatcher().getHome().getHomeId());
 
                 // исполнение команды
-                ZWaveFeedback feedback = commander.execute(command);
+                ZWaveFeedback feedback = getCommander().execute(command);
 
                 // ответное сообщение серверу
-                if (feedback != null) writer.println(feedback.getFeedback());
-                else writer.println(command.getCommand() + " ( err )");
+                if (feedback != null) getWriter().println(feedback.getFeedback());
+                else getWriter().println(command.getCommand() + " ( err )");
 
                 System.out.println("[INF] - CommunicationWithServer - run - command finished ");
-            } while (!commander.isExit() && !isReconnect() && line != null);
+            } while (!getCommander().isExit() && !isReconnect() && line != null);
         }
 
         // закрываем существующее соединение
         close();
 
     }
+
+
+    //------------------------------------------------------------------------
+    //  поток ожидания команд сервера
+
 
 }

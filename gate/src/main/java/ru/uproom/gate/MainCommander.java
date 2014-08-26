@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * Реализация класса обработки команд контроллеру сети Z-Wave
  *
  * todo : диагностика наличия контроллера
+ * todo : подписка на события в ватчере, нопремер таймаут
  *
  * Created by osipenko on 05.08.14.
  */
@@ -85,8 +86,15 @@ public class MainCommander {
             return feedback;
         }
 
-        // команда включения всех устройств ( switch all on )
-        if (command.getCommand().equalsIgnoreCase("switch all on")) feedback = commandSwitchAllOn(command);
+        // получение статистики драйвера ( get driver statistics )
+        if (command.getCommand().equalsIgnoreCase("get driver statistics"))
+            feedback = commandGetDriverStatistics(command);
+            // перезапуск драйвера ( restart controller )
+        else if (command.getCommand().equalsIgnoreCase("restart controller"))
+            feedback = commandRestartController(command);
+
+            // команда включения всех устройств ( switch all on )
+        else if (command.getCommand().equalsIgnoreCase("switch all on")) feedback = commandSwitchAllOn(command);
             // команда отключения всех устройств ( switch all off )
         else if (command.getCommand().equalsIgnoreCase("switch all off")) feedback = commandSwitchAllOff(command);
 
@@ -102,10 +110,18 @@ public class MainCommander {
             // прерывание исполняющейся команды ( cancel )
         else if (command.getCommand().equals("cancel")) feedback = commandCancel(command);
 
+            // Получение идентификатора контроллера сети ( get controller node )
+        else if (command.getCommand().equals("get controller node")) feedback = commandControllerNodeId(command);
             // Получение списка узлов сети ( get node list )
         else if (command.getCommand().equals("get node list")) feedback = commandGetNodeList(command);
             // Получение информации об узле сети ( get node, nodeId=# )
         else if (command.getCommand().equals("get node")) feedback = commandGetNode(command);
+            // Проверка неисправного состояния узла сети ( is node failed, nodeId=# )
+        else if (command.getCommand().equals("is node failed")) feedback = commandIsNodeFailed(command);
+            // Обновление информации об узле сети ( refresh node, nodeId=# )
+        else if (command.getCommand().equals("refresh node")) feedback = commandRefreshNodeInfo(command);
+            // Запрос информации о состоянии узла сети ( node state, nodeId=# )
+        else if (command.getCommand().equals("node state")) feedback = commandRequestNodeState(command);
             // Включение узла сети ( set node on, nodeId=# )
         else if (command.getCommand().equals("set node on")) feedback = commandSetNodeOn(command);
             // Включение узла сети ( set node off, nodeId=# )
@@ -141,12 +157,37 @@ public class MainCommander {
     //  Обработка команд сети устройств Z-Wave
 
 
+    // ======  команда - Получить статистику драйвера
+
+    public ZWaveFeedback commandGetDriverStatistics(ZWaveCommand command) {
+
+        DriverData statistics = new DriverData();
+        Manager.get().getDriverStatistics(getHome().getHomeId(), statistics);
+        ZWaveFeedback feedback = new ZWaveFeedback();
+        feedback.setFeedback("{\"point\":\"getDriverStatistics\",\"message\":\"ok\"}");
+
+        return feedback;
+    }
+
+
+    // ======  команда - Перезапуск драйвера
+
+    public ZWaveFeedback commandRestartController(ZWaveCommand command) {
+        ZWaveFeedback feedback = new ZWaveFeedback();
+
+        getWatcher().setFailed(true);
+        feedback.setFeedback("{\"point\":\"restartController\",\"message\":\"ok\"}");
+
+        return feedback;
+    }
+
+
     // ======  команда - Включить все узлы
 
     public ZWaveFeedback commandSwitchAllOn(ZWaveCommand command) {
         Manager.get().switchAllOn(watcher.getHome().getHomeId());
         ZWaveFeedback feedback = new ZWaveFeedback();
-        feedback.setFeedback(command.getCommand() + " ( yes )");
+        feedback.setFeedback("{\"point\":\"switchAllOn\",\"message\":\"ok\"}");
         return feedback;
     }
 
@@ -156,7 +197,7 @@ public class MainCommander {
     public ZWaveFeedback commandSwitchAllOff(ZWaveCommand command) {
         Manager.get().switchAllOff(watcher.getHome().getHomeId());
         ZWaveFeedback feedback = new ZWaveFeedback();
-        feedback.setFeedback(command.getCommand() + " ( yes )");
+        feedback.setFeedback("{\"point\":\"switchAllOff\",\"message\":\"ok\"}");
         return feedback;
     }
 
@@ -273,8 +314,10 @@ public class MainCommander {
                                 controllerError
                         ));
                     }
-                })) feedback.setFeedback(String.format("%s ( yes )", command.getCommand()));
-        else feedback.setFeedback(String.format("%s ( no )", command.getCommand()));
+                })) feedback.setFeedback("{\"point\":\"removeFailedNode\",\"message\":\"ok\"}");
+
+        else
+            feedback.setFeedback("{\"errorPoint\":\"removeFailedNode\",\"errorCode\":\"98\",\"errorMessage\":\"remove not accepted\" }");
 
         return feedback;
     }
@@ -286,7 +329,7 @@ public class MainCommander {
         ZWaveFeedback feedback = new ZWaveFeedback();
 
         Manager.get().testNetwork(home.getHomeId(), 1);
-        feedback.setFeedback(String.format("%s ( yes )", command.getCommand()));
+        feedback.setFeedback("{\"point\":\"testNetwork\",\"message\":\"ok\"}");
 
         return feedback;
     }
@@ -298,8 +341,20 @@ public class MainCommander {
         ZWaveFeedback feedback = new ZWaveFeedback();
 
         if (Manager.get().cancelControllerCommand(watcher.getHome().getHomeId()))
-            feedback.setFeedback(String.format("%s ( yes )", command.getCommand()));
-        else feedback.setFeedback(String.format("%s ( no )", command.getCommand()));
+            feedback.setFeedback("{\"point\":\"cancel\",\"message\":\"ok\"}");
+        else
+            feedback.setFeedback("{\"errorPoint\":\"cancel\",\"errorCode\":\"98\",\"errorMessage\":\"cancel not accepted\" }");
+
+        return feedback;
+    }
+
+
+    // ======  команда - Получение списка узлов сети
+
+    public ZWaveFeedback commandControllerNodeId(ZWaveCommand command) {
+        ZWaveFeedback feedback = new ZWaveFeedback();
+
+        feedback.setFeedback(String.format("{\"controller\":\"%d\"}", Manager.get().getControllerNodeId(getHome().getHomeId())));
 
         return feedback;
     }
@@ -332,6 +387,129 @@ public class MainCommander {
 
         // процесс
         feedback.setFeedback(node.getNodeInfo());
+
+        return feedback;
+    }
+
+
+    // ======  команда - проверка недостоверности узла
+
+    public ZWaveFeedback commandIsNodeFailed(ZWaveCommand command) {
+        ZWaveFeedback feedback = new ZWaveFeedback();
+
+        // Проверка корректности данных команды
+        ZWaveNode node = home.get(command.getNodeId());
+        if (node == null) {
+            feedback.setFeedback(String.format("{\"errorPoint\":\"getNode\",\"errorCode\":\"1\",\"errorMessage\":\"undefined node %d\" }",
+                    command.getNodeId()
+            ));
+            return feedback;
+        }
+
+        // процесс
+        Boolean result = Manager.get().isNodeFailed(getHome().getHomeId(), node.getNodeId());
+        feedback.setFeedback(String.format("{\"node\":\"%d\",\"failed\":\"%s\"}", node.getNodeId(), result.toString()));
+
+        return feedback;
+    }
+
+
+    // ======  команда - обновление информации об узле
+
+    public ZWaveFeedback commandRefreshNodeInfo(ZWaveCommand command) {
+        final ZWaveFeedback feedback = new ZWaveFeedback();
+
+        // Проверка корректности данных команды
+        ZWaveNode node = home.get(command.getNodeId());
+        if (node == null) {
+            feedback.setFeedback(String.format("{\"errorPoint\":\"getNode\",\"errorCode\":\"1\",\"errorMessage\":\"undefined node %d\" }",
+                    command.getNodeId()
+            ));
+            return feedback;
+        }
+
+        Boolean result = Manager.get().isNodeFailed(getHome().getHomeId(), node.getNodeId());
+        if (Manager.get().refreshNodeInfo(getHome().getHomeId(), node.getNodeId()))
+            feedback.setFeedback(String.format("{\"point\":\"refreshNodeInfo\",\"message\":\"ok\"}"));
+        else
+            feedback.setFeedback(String.format("{\"errorPoint\":\"getNode\",\"errorCode\":\"97\",\"errorMessage\":\"info about node %d not refreshed\" }",
+                    command.getNodeId()
+            ));
+
+        return feedback;
+    }
+
+
+    // ======  команда - Запрос состояния узла сети
+
+    public ZWaveFeedback commandRequestNodeState(ZWaveCommand command) {
+        final ZWaveFeedback feedback = new ZWaveFeedback();
+
+        // Проверка корректности данных команды
+        ZWaveNode node = home.get(command.getNodeId());
+        if (node == null) {
+            feedback.setFeedback(String.format("{\"errorPoint\":\"requestNodeState\",\"errorCode\":\"1\",\"errorMessage\":\"undefined node %d\" }",
+                    command.getNodeId()
+            ));
+            return feedback;
+        }
+
+
+        // формирование реакции на событие
+        ZWaveNodeCallback callback = new ZWaveNodeCallback() {
+            @Override
+            public void onCallback(ZWaveNode node, Notification notification) {
+                // Если в процессе возник таймаут (1 == TIMEOUT)
+                if (notification.getType() == NotificationType.NOTIFICATION && notification.getNotification() == 1) {
+                    feedback.setFeedback(String.format("{\"errorPoint\":\"requestNodeState\",\"errorCode\":\"4\",\"errorMessage\":\"node %d disconnected\"}",
+                            node.getNodeId()
+                    ));
+                    feedback.setSuccessful(false);
+                }
+                // Если возникло событие NODE_QUERIES_COMPLETE
+                else if (notification.getType() == NotificationType.NODE_QUERIES_COMPLETE) {
+                    feedback.setFeedback(String.format("{\"point\":\"requestNodeState\",\"message\":\"node %d request complete\"}",
+                            node.getNodeId()
+                    ));
+                    feedback.setSuccessful(true);
+                }
+                // Необрабатываемое событие
+                else {
+                    feedback.setFeedback(String.format("{\"point\":\"requestNodeState\",\"message\":\"node %d send notification %s\"}",
+                            node.getNodeId(),
+                            notification.getType().toString()
+                    ));
+                }
+                // ответ получен
+                feedback.setCreated(true);
+            }
+        };
+        node.addEvent(callback);
+
+        // запрос состояния удачен
+        if (Manager.get().requestNodeState(getHome().getHomeId(), node.getNodeId())) {
+            // ожидаем срабатывания триггера изменении параметра (~ 2сек)
+            int count = 0;
+            while (!feedback.isCreated() && count < 40) {
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                }
+                count++;
+            }
+            // В случае, если проверяемым узлом был контроллер сети, перезапускаем его
+            if (!feedback.isSuccessful() && Manager.get().getControllerNodeId(getHome().getHomeId()) == node.getNodeId())
+                getWatcher().setFailed(true);
+        }
+        // Запрос состояния неудачен
+        else {
+            feedback.setFeedback(String.format("{\"errorPoint\":\"requestNodeState\",\"errorCode\":\"97\"\"errorMessage\":\"node %d not requested\"}",
+                    node.getNodeId()
+            ));
+        }
+        // закрываем триггер
+        node.removeEvent(callback);
 
         return feedback;
     }

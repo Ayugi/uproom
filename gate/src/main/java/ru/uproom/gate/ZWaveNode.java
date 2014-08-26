@@ -1,6 +1,7 @@
 package ru.uproom.gate;
 
 import org.zwave4j.Manager;
+import org.zwave4j.Notification;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -31,6 +32,7 @@ public class ZWaveNode extends TreeMap<Integer, ZWaveValue> {
     private String nodeManufacturerName = "";
     private short nodeVersion = 0;
     private ArrayList<Short> groups = new ArrayList<Short>();
+    private ArrayList<ZWaveNodeCallback> events = new ArrayList<ZWaveNodeCallback>();
 
 
     //=============================================================================================================
@@ -218,6 +220,23 @@ public class ZWaveNode extends TreeMap<Integer, ZWaveValue> {
         return (groups.indexOf(group) >= 0);
     }
 
+
+    //------------------------------------------------------------------------
+    //  реакция на события
+
+    public boolean addEvent(ZWaveNodeCallback event) {
+        return events.add(event);
+    }
+
+    public boolean removeEvent(ZWaveNodeCallback event) {
+        return events.remove(event);
+    }
+
+    public void callEvents(Notification notification) {
+        for (ZWaveNodeCallback event : events) {
+            event.onCallback(this, notification);
+        }
+    }
 
 
 

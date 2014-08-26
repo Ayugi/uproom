@@ -10,7 +10,8 @@ import org.zwave4j.ZWave4j;
  */
 public class Main {
 
-    private static String ZWAVE_DRIVER_NAME = "/dev/ttyUSB0";
+    private static String ZWAVE_DRIVER_NAME = "/dev/ttyUSB3";
+    private static String ADDRESS_SERVER_NAME = "http://";
 
     public static void main(String[] args) {
 
