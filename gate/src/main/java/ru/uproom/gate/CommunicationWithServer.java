@@ -175,6 +175,7 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
 
         int counter = 0;
         while (!commander.isExit() && !isConnected() && (counter < getTimes() || getTimes() <= 0)) {
+
             try {
                 // создаем сокет
                 socket = new Socket(host, port);
@@ -238,12 +239,12 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
     @Override
     public void run() {
 
-        // установка соединения с сервером
-        open();
-        if (!isConnected()) return;
+        // обмен данными начат
+        do {
 
-        // если соединение установлено - обмениваемся данными
-        while (!getCommander().isExit()) {
+            // установка соединения с сервером
+            open();
+            if (!isConnected()) continue;
 
             String line = null;
             do {
@@ -274,10 +275,11 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
 
                 System.out.println("[INF] - CommunicationWithServer - run - command finished ");
             } while (!getCommander().isExit() && !isReconnect() && line != null);
-        }
 
-        // закрываем существующее соединение
-        close();
+            // закрываем существующее соединение
+            close();
+
+        } while (!getCommander().isExit());
 
     }
 
