@@ -13,6 +13,7 @@
         <property name="lookupOnStartup" value="true"/>
         <property name="expectedType" value="javax.sql.DataSource"/>
     </bean>
+
     <context:component-scan base-package="ru.uproom"/>
 
     <bean id="jpaDialect" class="org.springframework.orm.jpa.vendor.HibernateJpaDialect" />

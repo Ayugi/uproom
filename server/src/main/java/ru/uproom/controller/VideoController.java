@@ -15,7 +15,7 @@ import java.util.List;
 @Controller
 @RequestMapping(value = "video")
 public class VideoController {
-    @RequestMapping(method = RequestMethod.GET, value = "list")
+    @RequestMapping(method = RequestMethod.GET, value = "")
     @ResponseBody
     public List<Video> listDevices() {
         Video video = new Video();
