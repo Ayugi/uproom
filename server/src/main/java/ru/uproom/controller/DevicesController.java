@@ -3,10 +3,7 @@ package ru.uproom.controller;
 import java.util.List;
 
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import ru.uproom.domain.Device;
 import ru.uproom.domain.DeviceState;
 
@@ -19,6 +16,7 @@ import java.util.ArrayList;
 @RequestMapping(value = "device")
 public class DevicesController {
     @RequestMapping(method = RequestMethod.GET, value = "list")
+    @ResponseBody
     public List<Device> listDevices() {
         Device device1 = deviceStub();
 
@@ -34,16 +32,19 @@ public class DevicesController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "add")
+    @ResponseBody
     public Device addDevice(@RequestParam String name) {
         return deviceStub();
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "remove/{id}")
+    @ResponseBody
     public String removeDevice(@PathVariable String id) {
         return "ok";
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "turn/{id}")
+    @ResponseBody
     public Device turnDevice(@PathVariable String id,
                              @RequestParam boolean on) {
         return deviceStub();
