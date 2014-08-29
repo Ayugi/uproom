@@ -6,5 +6,6 @@ package ru.uproom.gate.transport;
 public enum CommandType {
     AddNode,
     ListDevices,
-    ChangeDeviceState
+    ChangeDeviceState,
+    Handshake
 }
