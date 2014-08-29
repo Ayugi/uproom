@@ -7,15 +7,15 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 /**
- * Класс, реализующий функционал обмена данными с облачным сервером
- * <p/>
+ * class with functionality of changing data with server
+ *
  * Created by osipenko on 08.08.14.
  */
 public class CommunicationWithServer implements AutoCloseable, Runnable {
 
 
     //##############################################################################################################
-    //######    параметры класса
+    //######    parameters
 
 
     private String host = "localhost";
@@ -33,7 +33,7 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
 
 
     //##############################################################################################################
-    //######    конструкторы
+    //######    constructors
 
 
     public CommunicationWithServer() {
@@ -41,7 +41,6 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
     }
 
 
-    // direction - направление
     public CommunicationWithServer(String host, int port) {
         this.host = host;
         this.port = port;
@@ -49,11 +48,11 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
 
 
     //##############################################################################################################
-    //######    обработка параметров класса
+    //######    processing class parameters
 
 
     //------------------------------------------------------------------------
-    //  адрес сервера
+    //  host address
 
     public String getHost() {
         return host;
@@ -65,7 +64,7 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
 
 
     //------------------------------------------------------------------------
-    //  порт сервера
+    //  host port
 
     public int getPort() {
         return port;
@@ -77,7 +76,7 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
 
 
     //------------------------------------------------------------------------
-    //  Объект обработки команд внешних систем (облачного сервиса, например)
+    //  object processing of external command
 
     public MainCommander getCommander() {
         return commander;
@@ -89,7 +88,7 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
 
 
     //------------------------------------------------------------------------
-    //  обработчик событий сети узлов Z-Wave
+    //  object processing of Z-Wave events
 
     public MainWatcher getWatcher() {
         return watcher;
@@ -101,7 +100,7 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
 
 
     //------------------------------------------------------------------------
-    //  список узлов сети Z-Wave
+    //  map of Z-Wave Nodes
 
     public ZWaveHome getHome() {
         return home;
@@ -113,7 +112,7 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
 
 
     //------------------------------------------------------------------------
-    //  установлено ли соединение с сервером
+    //  sign communications with server
 
     public boolean isConnected() {
         return connected;
@@ -125,7 +124,7 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
 
 
     //------------------------------------------------------------------------
-    //  требование переподключения
+    //  reconnect required
 
     public boolean isReconnect() {
         return reconnect;
@@ -137,7 +136,7 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
 
 
     //------------------------------------------------------------------------
-    //  количество попыток подключения
+    //  number of reconnects
 
     public int getTimes() {
         return times;
@@ -149,7 +148,7 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
 
 
     //------------------------------------------------------------------------
-    //  получение внутренних сущностей
+    //  internal things
 
     protected Socket getSocket() {
         return socket;
@@ -165,43 +164,40 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
 
 
     //##############################################################################################################
-    //######    методы класса
+    //######    methods
 
 
     //------------------------------------------------------------------------
-    //  установление связи с системой внешнего управления
+    //  open link with external system
+
+    private void createConnect() {
+        try {
+            // creating socket
+            socket = new Socket(host, port);
+            // stream reading from socket
+            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            // stream writing to socket
+            writer = new PrintWriter(socket.getOutputStream(), true);
+            // connect established
+            setConnected(true);
+        } catch (IOException e) {
+            setConnected(false);
+            System.out.println("[ERR] - CommunicationWithServer - open - " + e.getLocalizedMessage());
+        }
+    }
+
+
+    //------------------------------------------------------------------------
+    //  open link with external system (repeatedly)
 
     public void open() {
 
         int counter = 0;
         while (!commander.isExit() && !isConnected() && (counter < getTimes() || getTimes() <= 0)) {
-
-            try {
-                // создаем сокет
-                socket = new Socket(host, port);
-                // Поток чтения
-                reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                // поток записи
-                writer = new PrintWriter(socket.getOutputStream(), true);
-                // признак удачного соединения
-                setConnected(true);
-            } catch (IOException e) {
-                setConnected(false);
-                System.out.println("[ERR] - CommunicationWithServer - open - " + e.getLocalizedMessage());
-            }
-
-            // если не установлено соединение
-            if (!isConnected()) {
-                // закрываем текущее соединение
-                close();
-                // ожидаем следующую попытку подключения
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException ex) {
-                    Thread.currentThread().interrupt();
-                }
-            }
-
+            // create link
+            createConnect();
+            // check link
+            checkLink();
             // следующая попытка
             counter++;
         }
@@ -210,7 +206,24 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
 
 
     //------------------------------------------------------------------------
-    //  завершение работы с обменом данными
+    //  check link and close it if not work
+
+    public void checkLink() {
+        // check link
+        if (!isConnected()) {
+            // close current link
+            close();
+            // wait time after communication gap
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+    //------------------------------------------------------------------------
+    //  close connection
 
     @Override
     public void close() {
@@ -234,15 +247,15 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
 
 
     //------------------------------------------------------------------------
-    //  обработка данных в цикле обмена
+    //  data working
 
     @Override
     public void run() {
 
-        // обмен данными начат
+        // data exchange begin
         do {
 
-            // установка соединения с сервером
+            // open connection
             open();
             if (!isConnected()) continue;
 
@@ -250,7 +263,7 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
             do {
                 System.out.println("[INF] - CommunicationWithServer - run - waiting for next command...");
 
-                // попытка чтения очередной команды
+                // reading of next command
                 try {
                     line = getReader().readLine();
                 } catch (IOException e) {
@@ -261,31 +274,26 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
 
                 System.out.println("[INF] - CommunicationWithServer - run - command : " + line);
 
-                // формирование команды
+                // creating command
                 ZWaveCommand command = new ZWaveCommand();
                 command.setCommandFromString(line);
                 command.setHomeId(getWatcher().getHome().getHomeId());
 
-                // исполнение команды
+                // executing command
                 ZWaveFeedback feedback = getCommander().execute(command);
 
-                // ответное сообщение серверу
+                // response creating
                 if (feedback != null) getWriter().println(feedback.getFeedback());
                 else getWriter().println(command.getCommand() + " ( err )");
 
                 System.out.println("[INF] - CommunicationWithServer - run - command finished ");
             } while (!getCommander().isExit() && !isReconnect() && line != null);
 
-            // закрываем существующее соединение
+            // close connection
             close();
 
         } while (!getCommander().isExit());
 
     }
-
-
-    //------------------------------------------------------------------------
-    //  поток ожидания команд сервера
-
 
 }

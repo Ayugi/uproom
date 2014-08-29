@@ -6,6 +6,7 @@
 
     <groupId>ru.uproom.gate</groupId>
     <artifactId>main</artifactId>
+    <name>gate</name>
     <version>1.0.0-SNAPSHOT</version>
 
     <dependencies>
