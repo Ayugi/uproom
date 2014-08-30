@@ -7,4 +7,8 @@ import java.io.Serializable;
  */
 public class Command implements Serializable{
     private CommandType type;
+
+    public CommandType getType() {
+        return type;
+    }
 }
