@@ -8,8 +8,8 @@ package ru.uproom.gate.transport;
  */
 public class HandshakeCommand extends Command{
     private String gateId;
-    public HandshakeCommand(CommandType type, String gateId) {
-        super(type);
+    public HandshakeCommand(String gateId) {
+        super(CommandType.Handshake);
         this.gateId = gateId;
     }
 

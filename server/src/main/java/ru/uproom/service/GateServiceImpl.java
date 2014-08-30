@@ -7,9 +7,10 @@ import ru.uproom.gate.transport.Command;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by HEDIN on 28.08.2014.
@@ -18,6 +19,8 @@ import java.net.Socket;
 public class GateServiceImpl implements GateTransport {
 
     private static final Logger LOG = LoggerFactory.getLogger(GateServiceImpl.class);
+
+    private Map<String, GateSocketHandler> activeSockets = new HashMap<>();
 
     @Override
     public void sendCommand(Command command, String userId) {
@@ -55,25 +58,24 @@ public class GateServiceImpl implements GateTransport {
             try {
                 while (running) {
                     Socket accept = serverSocket.accept();
-                    System.out.print("new connection");
-                    // TODO handshake, store as user socket
-                    ObjectInputStream stream = new ObjectInputStream(accept.getInputStream());
-                    try {
-                        while (true) {
-                            Object o = stream.readObject();
-                            System.out.print("handshake so");
-                            LOG.info("handshake");
-                        }
-                    } catch (ClassNotFoundException e) {
-                        e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-                    }
-
+                    handleConnection(accept);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
         }
+
+        private void handleConnection(Socket accept) throws IOException {
+            GateSocketHandler handler = new GateSocketHandler(accept);
+            String userId = handler.handshake();
+            activeSockets.put(userId, handler);
+            handler.startListener();
+        }
+    }
+
+    public GateSocketHandler getHandler(String id) {
+        return activeSockets.get(id);
     }
 }
 
