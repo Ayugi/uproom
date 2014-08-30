@@ -1,5 +1,9 @@
 package ru.uproom.gate;
 
+import ru.uproom.gate.transport.Command;
+import ru.uproom.gate.transport.CommandType;
+import ru.uproom.gate.transport.HandshakeCommand;
+
 import java.io.*;
 import java.net.Socket;
 
@@ -18,8 +22,6 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
     private String host = "localhost";
     private int port = 6009;
     private Socket socket = null;
-    private BufferedReader reader = null;
-    private PrintWriter writer = null;
     private ObjectInputStream input = null;
     private ObjectOutputStream output = null;
     private boolean connected = false;
@@ -167,14 +169,6 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
         return socket;
     }
 
-    protected BufferedReader getReader() {
-        return reader;
-    }
-
-    protected PrintWriter getWriter() {
-        return writer;
-    }
-
     protected ObjectInputStream getInput() {
         return input;
     }
@@ -197,10 +191,8 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
             socket = new Socket(host, port);
             // stream reading from socket
             input = new ObjectInputStream(socket.getInputStream());
-            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             // stream writing to socket
             output = new ObjectOutputStream(socket.getOutputStream());
-            writer = new PrintWriter(socket.getOutputStream(), true);
             // connect established
             setConnected(true);
         } catch (IOException e) {
@@ -245,6 +237,7 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
         }
     }
 
+
     //------------------------------------------------------------------------
     //  close connection
 
@@ -252,8 +245,8 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
     public void close() {
 
         try {
-            if (reader != null) reader.close();
-            if (writer != null) writer.close();
+            if (input != null) input.close();
+            if (output != null) output.close();
         } catch (IOException e) {
             System.out.println("[ERR] - CommunicationWithServer - close - " + e.getLocalizedMessage());
         }
@@ -264,58 +257,84 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
             System.out.println("[ERR] - CommunicationWithServer - close - " + e.getLocalizedMessage());
         }
 
+        socket = null;
+        input = null;
+        output = null;
         setConnected(false);
 
     }
 
 
     //------------------------------------------------------------------------
-    //  data working
+    //  send command from gate to server
+
+    public boolean sendCommand(Command command) {
+
+        try {
+            getOutput().writeObject(command);
+        } catch (IOException e) {
+            System.out.println("[ERR] - RequestToServer - sendCommand - " + e.getLocalizedMessage());
+            return false;
+        }
+
+        return true;
+    }
+
+
+    //------------------------------------------------------------------------
+    //  receive command from server to gate
+
+    public Command receiveCommand() {
+
+        Command command = null;
+        System.out.println("[INF] - RequestToServer - receiveCommand - waiting for next command...");
+
+        // get next command
+        try {
+            command = (Command) getInput().readObject();
+        } catch (IOException e) {
+            command = null;
+            System.out.println("[ERR] - RequestToServer - receiveCommand - " + e.getLocalizedMessage());
+        } catch (ClassNotFoundException e) {
+            command = null;
+            System.out.println("[ERR] - RequestToServer - receiveCommand - " + e.getLocalizedMessage());
+        }
+
+        System.out.println("[INF] - RequestToServer - receiveCommand - have command : " + command.getType().name());
+        return command;
+    }
+
+
+    //------------------------------------------------------------------------
+    //  receiving command from server to gate
 
     @Override
     public void run() {
 
-        // data exchange begin
-        do {
+        while (!getCommander().isExit()) {
 
-            // open connection
+            // create connecting with server
             open();
-            if (!isConnected()) continue;
+            if (!isConnected()) return;
 
-            String line = null;
+            // if connected - send server gate ID
+            System.out.println("[INF] - RequestToServer - run - authorization (send User ID to server)");
+            if (!sendCommand(new HandshakeCommand(getGateId()))) continue;
+
+            // working with commands from server
+            Command command = null;
             do {
-                System.out.println("[INF] - CommunicationWithServer - run - waiting for next command...");
+                // get new command
+                command = receiveCommand();
+                if (command == null) continue;
+                // execute received command
+                getCommander().execute(command);
+                // get next command
+            } while (!getCommander().isExit() && command != null);
+        }
 
-                // reading of next command
-                try {
-                    line = getReader().readLine();
-                } catch (IOException e) {
-                    line = null;
-                    System.out.println("[ERR] - CommunicationWithServer - run - " + e.getLocalizedMessage());
-                }
-                if (line == null) continue;
-
-                System.out.println("[INF] - CommunicationWithServer - run - command : " + line);
-
-                // creating command
-                ZWaveCommand command = new ZWaveCommand();
-                command.setCommandFromString(line);
-                command.setHomeId(getWatcher().getHome().getHomeId());
-
-                // executing command
-                ZWaveFeedback feedback = getCommander().execute(command);
-
-                // response creating
-                if (feedback != null) getWriter().println(feedback.getFeedback());
-                else getWriter().println(command.getCommand() + " ( err )");
-
-                System.out.println("[INF] - CommunicationWithServer - run - command finished ");
-            } while (!getCommander().isExit() && !isReconnect() && line != null);
-
-            // close connection
-            close();
-
-        } while (!getCommander().isExit());
+        // закрываем существующее соединение
+        close();
 
     }
 }
