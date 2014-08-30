@@ -20,7 +20,11 @@ public class Main {
         NativeLibraryLoader.loadLibrary(ZWave4j.LIBRARY_NAME, ZWave4j.class);
 
         // reading current librarian options
-        final Options options = Options.create("/home/osipenko/.uproom21/zwave", "/home/osipenko/.uproom21/config", "");
+        final Options options = Options.create(
+                "/home/osipenko/.uproom21/zwave",
+                "/home/osipenko/.uproom21/config",
+                ""
+        );
         options.addOptionBool("ConsoleOutput", false);
         options.lock();
 

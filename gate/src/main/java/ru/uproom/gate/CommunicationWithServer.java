@@ -1,9 +1,6 @@
 package ru.uproom.gate;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 
 /**
@@ -23,6 +20,8 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
     private Socket socket = null;
     private BufferedReader reader = null;
     private PrintWriter writer = null;
+    private ObjectInputStream input = null;
+    private ObjectOutputStream output = null;
     private boolean connected = false;
     private boolean reconnect = false;
     private int times = 0;
@@ -30,6 +29,8 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
     private MainCommander commander = null;
     private MainWatcher watcher = null;
     private ZWaveHome home = null;
+
+    private String gateId = "";
 
 
     //##############################################################################################################
@@ -148,6 +149,18 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
 
 
     //------------------------------------------------------------------------
+    //  number of reconnects
+
+    public String getGateId() {
+        return gateId;
+    }
+
+    public void setGateId(String gateId) {
+        this.gateId = gateId;
+    }
+
+
+    //------------------------------------------------------------------------
     //  internal things
 
     protected Socket getSocket() {
@@ -160,6 +173,14 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
 
     protected PrintWriter getWriter() {
         return writer;
+    }
+
+    protected ObjectInputStream getInput() {
+        return input;
+    }
+
+    protected ObjectOutputStream getOutput() {
+        return output;
     }
 
 
@@ -175,8 +196,10 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
             // creating socket
             socket = new Socket(host, port);
             // stream reading from socket
+            input = new ObjectInputStream(socket.getInputStream());
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             // stream writing to socket
+            output = new ObjectOutputStream(socket.getOutputStream());
             writer = new PrintWriter(socket.getOutputStream(), true);
             // connect established
             setConnected(true);
@@ -295,5 +318,4 @@ public class CommunicationWithServer implements AutoCloseable, Runnable {
         } while (!getCommander().isExit());
 
     }
-
 }

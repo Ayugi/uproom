@@ -1,5 +1,9 @@
 package ru.uproom.gate;
 
+import ru.uproom.gate.transport.Command;
+import ru.uproom.gate.transport.CommandType;
+import ru.uproom.gate.transport.HandshakeCommand;
+
 import java.io.IOException;
 
 /**
@@ -9,52 +13,75 @@ public class RequestToServer extends CommunicationWithServer {
 
 
     //------------------------------------------------------------------------
-    //  обработка данных в цикле обмена
+    //  send command from gate to server
+
+    public boolean sendCommand(Command command) {
+
+        try {
+            getOutput().writeObject(command);
+        } catch (IOException e) {
+            System.out.println("[ERR] - RequestToServer - sendCommand - " + e.getLocalizedMessage());
+            return false;
+        }
+
+        return true;
+    }
+
+
+    //------------------------------------------------------------------------
+    //  receive command from server to gate
+
+    public Command receiveCommand() {
+
+        Command command = null;
+        System.out.println("[INF] - RequestToServer - receiveCommand - waiting for next command...");
+
+        // get next command
+        try {
+            command = (Command) getInput().readObject();
+        } catch (IOException e) {
+            command = null;
+            System.out.println("[ERR] - RequestToServer - receiveCommand - " + e.getLocalizedMessage());
+        } catch (ClassNotFoundException e) {
+            command = null;
+            System.out.println("[ERR] - RequestToServer - receiveCommand - " + e.getLocalizedMessage());
+        }
+
+        System.out.println("[INF] - RequestToServer - receiveCommand - have command : " + command.getType().name());
+        return command;
+    }
+
+
+    //------------------------------------------------------------------------
+    //  receiving command from server to gate
 
     @Override
     public void run() {
 
-        // установка соединения с сервером
-        open();
-        if (!isConnected()) return;
-
-        // если соединение установлено - отсылаем запрос серверу
         while (!getCommander().isExit()) {
 
-            String line = null;
+            // create connecting with server
+            open();
+            if (!isConnected()) return;
+
+            // if connected - send server gate ID
+            System.out.println("[INF] - RequestToServer - run - authorization (send User ID to server)");
+            if (!sendCommand(new HandshakeCommand(CommandType.Handshake, getGateId()))) continue;
+
+            // working with commands from server
+            Command command = null;
             do {
-                System.out.println("[INF] - RequestToServer - run - waiting for next command...");
-
-                // попытка чтения очередной команды
-                try {
-                    line = getReader().readLine();
-                } catch (IOException e) {
-                    line = null;
-                    System.out.println("[ERR] - RequestToServer - run - " + e.getLocalizedMessage());
-                }
-                if (line == null) continue;
-
-                System.out.println("[INF] - RequestToServer - run - command : " + line);
-
-                // формирование команды
-                ZWaveCommand command = new ZWaveCommand();
-                command.setCommandFromString(line);
-                command.setHomeId(getWatcher().getHome().getHomeId());
-
-                // исполнение команды
-                ZWaveFeedback feedback = getCommander().execute(command);
-
-                // ответное сообщение серверу
-                if (feedback != null) getWriter().println(feedback.getFeedback());
-                else getWriter().println(command.getCommand() + " ( err )");
-
-                System.out.println("[INF] - RequestToServer - run - command finished ");
-            } while (!getCommander().isExit() && !isReconnect() && line != null);
+                // get new command
+                command = receiveCommand();
+                if (command == null) continue;
+                // execute received command
+                getCommander().execute(command);
+                // get next command
+            } while (!getCommander().isExit() && command != null);
         }
 
         // закрываем существующее соединение
         close();
-
 
     }
 }
