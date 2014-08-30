@@ -11,4 +11,8 @@ public class Command implements Serializable{
     public Command(CommandType type) {
         this.type = type;
     }
+
+    public CommandType getType() {
+        return type;
+    }
 }
