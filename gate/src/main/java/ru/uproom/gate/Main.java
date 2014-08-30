@@ -10,40 +10,44 @@ import org.zwave4j.ZWave4j;
  */
 public class Main {
 
-    private static String ZWAVE_DRIVER_NAME = "/dev/ttyUSB3";
+    private static String ZWAVE_DRIVER_NAME = "/dev/ttyUSB0";
     private static String ADDRESS_SERVER_NAME = "http://";
 
     public static void main(String[] args) {
 
-        // загрузка библиотеки openZWave
+        // loading openZWave library
         System.out.println("---- program started ----");
         NativeLibraryLoader.loadLibrary(ZWave4j.LIBRARY_NAME, ZWave4j.class);
 
-        // загрузка текущих опций библиотеки
-        final Options options = Options.create("/home/osipenko/.uproom21/zwave", "/home/osipenko/.uproom21/config", "");
+        // reading current librarian options
+        final Options options = Options.create(
+                "/home/osipenko/.uproom21/zwave",
+                "/home/osipenko/.uproom21/config",
+                ""
+        );
         options.addOptionBool("ConsoleOutput", false);
         options.lock();
 
-        // создаем объект управления сетью Z-Wave
+        // creating main Z-Wave object
         Manager manager = Manager.create();
 
-        // создаем список узлов сети Z-Wave
+        // creating map of Z-Wave Nodes
         ZWaveHome home = new ZWaveHome();
 
-        // добавляем обработчик событий объекта управления сетью Z-Wave
+        // add main class of Z-Wave notifications
         MainWatcher watcher = new MainWatcher();
         watcher.setHome(home);
         manager.addWatcher(watcher, null);
 
-        // добавляем обработчик команд контроллера сети Z-Wave
+        // add a command handler controller Z-Wave network
         MainCommander commander = new MainCommander();
         commander.setWatcher(watcher);
         commander.setHome(home);
 
-        // активируем драйвер контроллера Z-Wave
+        // activating Z-Wave controller driver
         manager.addDriver(ZWAVE_DRIVER_NAME);
 
-        // активируем канал связи с сервером
+        // creating link with server
         CommunicationWithServer communicator = new CommunicationWithServer("localhost", 6009);
         communicator.setHome(home);
         communicator.setCommander(commander);
@@ -51,17 +55,17 @@ public class Main {
         Thread communicatorThread = new Thread(communicator);
         communicatorThread.start();
 
-        // цикл исполнения команд
+        // event control loop
         do {
 
-            // Если сеть не готова, перезапускаем драйвер
+            // if Z-Wave driver not ready, restart it
             if (watcher.isFailed()) {
                 watcher.setFailed(false);
                 manager.removeDriver(ZWAVE_DRIVER_NAME);
                 manager.addDriver(ZWAVE_DRIVER_NAME);
             }
 
-            // Прореживание сигналов во избежание перегрузки процессора
+            // Decimation signal to avoid overloading of the processor
             try {
                 Thread.sleep(200);
             } catch (InterruptedException ex) {
@@ -70,6 +74,7 @@ public class Main {
 
         } while (!commander.isExit());
 
+        // exit from program
         System.out.println("---- program stopping ----");
 
         while (communicatorThread.isInterrupted()) {

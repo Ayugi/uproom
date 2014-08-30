@@ -1,22 +1,25 @@
 package ru.uproom.gate;
 
 import org.zwave4j.*;
+import ru.uproom.gate.transport.Command;
+import ru.uproom.gate.transport.CommandType;
 
+import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Реализация класса обработки команд контроллеру сети Z-Wave
  *
- * todo : диагностика наличия контроллера
- * todo : подписка на события в ватчере, нопремер таймаут
+ * todo : переводим все комментарии на английский язык
+ * todo : создать пул классов CommandHandler, которые будут обрабатывать класс Command. Хранить в Map
  *
  * Created by osipenko on 05.08.14.
  */
-public class MainCommander {
+public class MainCommander extends TreeMap<CommandType, CommandHandler> {
 
 
     //##############################################################################################################
-    //######    параметры класса
+    //######    fields
 
 
     private MainWatcher watcher = null;
@@ -25,11 +28,34 @@ public class MainCommander {
 
 
     //##############################################################################################################
-    //######    обработка параметров класса
+    //######    constructors
+
+
+    public MainCommander() {
+        super();
+        // filling map with reflection API
+        for (CommandType type : CommandType.values()) {
+            try {
+                Class c = Class.forName(type.name() + "CommandHandler");
+                CommandHandler handler = (CommandHandler) c.newInstance();
+                this.put(type, handler);
+            } catch (ClassNotFoundException e) {
+                System.out.println("[ERR] - MainCommander - constructor - " + e.getLocalizedMessage());
+            } catch (InstantiationException e) {
+                System.out.println("[ERR] - MainCommander - constructor - " + e.getLocalizedMessage());
+            } catch (IllegalAccessException e) {
+                System.out.println("[ERR] - MainCommander - constructor - " + e.getLocalizedMessage());
+            }
+        }
+    }
+
+
+    //##############################################################################################################
+    //######    getters / setters
 
 
     //------------------------------------------------------------------------
-    //  обработчик событий сети Z-Wave
+    //  Z-Wave notifications handler
 
     public boolean setWatcher(MainWatcher _watcher) {
         watcher = _watcher;
@@ -42,7 +68,7 @@ public class MainCommander {
 
 
     //------------------------------------------------------------------------
-    //  признак завершения
+    //  sign to exit
 
     public boolean isExit() {
         return exit;
@@ -54,7 +80,7 @@ public class MainCommander {
 
 
     //------------------------------------------------------------------------
-    //  список узлов сети Z-Wave
+    //  Z-Wave nodes
 
     public ZWaveHome getHome() {
         return home;
@@ -68,11 +94,26 @@ public class MainCommander {
 
 
     //##############################################################################################################
-    //######    методы класса-
+    //######    methods-
 
 
     //------------------------------------------------------------------------
-    //  первичный обработчик команд
+    //  executioner of commands from server
+
+    public boolean execute(Command command) {
+
+        // find handler for command
+        CommandHandler handler = this.get(command.getType());
+        if (handler == null) {
+            System.out.println(String.format("[ERR] - MainCommander - execute - handler for command (%s) not found",
+                    command.getType().name()
+            ));
+            return false;
+        }
+
+        // execution command
+        return handler.execute(command);
+    }
 
     public ZWaveFeedback execute(ZWaveCommand command) {
 
