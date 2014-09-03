@@ -1,5 +1,7 @@
 package ru.uproom.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import ru.uproom.gate.transport.Command;
 
@@ -7,12 +9,18 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by HEDIN on 28.08.2014.
  */
 @Service
-public class GateServiceImpl implements GateTransport{
+public class GateServiceImpl implements GateTransport {
+
+    private static final Logger LOG = LoggerFactory.getLogger(GateServiceImpl.class);
+
+    private Map<String, GateSocketHandler> activeSockets = new HashMap<>();
 
     @Override
     public void sendCommand(Command command, String userId) {
@@ -20,7 +28,8 @@ public class GateServiceImpl implements GateTransport{
     }
 
     @PostConstruct
-    public void init(){
+    public void init() {
+        LOG.info("INIT");
         try {
             ServerSocket serverSocket = new ServerSocket(8282);
             Thread listener = new Thread(new SocketListener(serverSocket));
@@ -30,7 +39,7 @@ public class GateServiceImpl implements GateTransport{
         }
     }
 
-    private class SocketListener implements Runnable{
+    private class SocketListener implements Runnable {
 
         private ServerSocket serverSocket;
         private boolean running = true;
@@ -39,7 +48,7 @@ public class GateServiceImpl implements GateTransport{
             this.serverSocket = serverSocket;
         }
 
-        public void stop(){
+        public void stop() {
             running = false;
         }
 
@@ -49,13 +58,24 @@ public class GateServiceImpl implements GateTransport{
             try {
                 while (running) {
                     Socket accept = serverSocket.accept();
-                    System.out.print("new connection");
-                    // TODO handshake, store as user socket
+                    handleConnection(accept);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
         }
+
+        private void handleConnection(Socket accept) throws IOException {
+            GateSocketHandler handler = new GateSocketHandler(accept);
+            String userId = handler.handshake();
+            activeSockets.put(userId, handler);
+            handler.startListener();
+        }
+    }
+
+    public GateSocketHandler getHandler(String id) {
+        return activeSockets.get(id);
     }
 }
+
