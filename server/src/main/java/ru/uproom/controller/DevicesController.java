@@ -13,9 +13,9 @@ import java.util.ArrayList;
  * Created by hedin on 13.07.2014.
  */
 @Controller
-@RequestMapping(value = "device")
+@RequestMapping(value = "devices")
 public class DevicesController {
-    @RequestMapping(method = RequestMethod.GET, value = "list")
+    @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
     public List<Device> listDevices() {
         Device device1 = deviceStub();
@@ -31,13 +31,13 @@ public class DevicesController {
         return deviceList;
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "add")
+    @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
     public Device addDevice(@RequestParam String name) {
         return deviceStub();
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "remove/{id}")
+    @RequestMapping(method = RequestMethod.DELETE, value = "{id}")
     @ResponseBody
     public String removeDevice(@PathVariable String id) {
         return "ok";
