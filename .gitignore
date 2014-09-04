@@ -4,6 +4,9 @@ settings_loca.py
 # C extensions
 *.so
 
+# Vagrant
+.vagrant
+
 # Packages
 *.egg
 *.egg-info
@@ -19,7 +22,7 @@ develop-eggs
 lib
 lib64
 __pycache__
-components/*
+components
 
 # Installer logs
 pip-log.txt
