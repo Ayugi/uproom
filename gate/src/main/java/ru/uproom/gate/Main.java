@@ -47,16 +47,22 @@ public class Main {
         // activating Z-Wave controller driver
         manager.addDriver(ZWAVE_DRIVER_NAME);
 
+        // creating test object for server transport system
+        System.out.println("Main >>>> create test link object");
+        ServerTransportTest serverTransportTest = new ServerTransportTest(6009);
+        Thread threadServerTransportTest = new Thread(serverTransportTest);
+        threadServerTransportTest.start();
         // creating link with server
-        CommunicationWithServer communicator = new CommunicationWithServer("localhost", 6009);
-        communicator.setHome(home);
-        communicator.setCommander(commander);
-        communicator.setWatcher(watcher);
-        Thread communicatorThread = new Thread(communicator);
-        communicatorThread.start();
+        System.out.println("Main >>>> create link object");
+        ServerTransportKeeper link = new ServerTransportKeeper("localhost", 6009, 3, 500, 5000, commander);
+        System.out.println("Main >>>> continue after creating");
+        // add subscriber for set/break link with server
+        link.add(watcher);
 
         // event control loop
         do {
+
+            // channel for messages from gate to server
 
             // if Z-Wave driver not ready, restart it
             if (watcher.isFailed()) {
@@ -77,13 +83,8 @@ public class Main {
         // exit from program
         System.out.println("---- program stopping ----");
 
-        while (communicatorThread.isInterrupted()) {
-            try {
-                Thread.sleep(200);
-            } catch (InterruptedException ex) {
-                Thread.currentThread().interrupt();
-            }
-        }
+        serverTransportTest.close();
+        link.close();
         manager.removeWatcher(watcher, null);
         manager.removeDriver(ZWAVE_DRIVER_NAME);
         Manager.destroy();

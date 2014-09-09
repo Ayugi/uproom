@@ -1,10 +1,10 @@
-package ru.uproom.gate;
+package ru.uproom.gate.handlers;
 
 import ru.uproom.gate.transport.Command;
 
 /**
  * marker interface for classes of command handling
- * <p/>
+ * </p>
  * Created by osipenko on 30.08.14.
  */
 public interface CommandHandler {

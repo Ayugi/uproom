@@ -3,24 +3,28 @@ package ru.uproom.gate;
 import org.zwave4j.Manager;
 import org.zwave4j.Notification;
 import org.zwave4j.NotificationWatcher;
+import ru.uproom.gate.transport.ChangeDeviceStateCommand;
 
 
 /**
- *
- * Реализация класса обработки событий библиотеки управления сетью устройств Z-Wave
- *
+ * Z-Wave events watcher
+ * <p/>
  * Created by osipenko on 27.07.14.
  */
-public class MainWatcher implements NotificationWatcher {
+public class MainWatcher implements NotificationWatcher, ServerTransportUser {
 
 
     //##############################################################################################################
-    //######    параметры класса
+    //######    fields
+
 
     private boolean PRINT_DEBUG_MESSAGES = true;
     private boolean ready = false;
     private boolean failed = false;
     private ZWaveHome home = null;
+
+    private boolean link = false;
+    private ServerTransport transport = null;
 
 
     //##############################################################################################################
@@ -68,6 +72,22 @@ public class MainWatcher implements NotificationWatcher {
 
     public void setHome(ZWaveHome home) {
         this.home = home;
+    }
+
+
+    //------------------------------------------------------------------------
+    //  object which send messages to server
+
+    public ServerTransport getTransport() {
+        return transport;
+    }
+
+    public void setTransport(ServerTransport transport) {
+        if (transport == null) link = false;
+        else {
+            this.transport = transport;
+            link = true;
+        }
     }
 
 
@@ -172,15 +192,22 @@ public class MainWatcher implements NotificationWatcher {
 
 
     //------------------------------------------------------------------------
-    //  События библиотеки Z-Wave
+    //  Z-Wave library event handlers
 
 
-    // ======  запуск драйвера успешно произведен
+    // ======  driver set up successfully
 
     public void onNotificationDriverReady(Notification notification, Object o) {
 
-        // получение и установка идентификатора дома
+        // HomeID in Z-Wave notation - our GateID
         getHome().setHomeId(notification.getHomeId());
+
+        // send message to server
+        if (link) transport.sendCommand(new ChangeDeviceStateCommand(
+                String.format("%d", getHome().getHomeId()),
+                Manager.get().getControllerNodeId(getHome().getHomeId()),
+                "READY"
+        ));
 
         // вывод отладочной информации
         if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("Driver ready\n" +
@@ -196,6 +223,13 @@ public class MainWatcher implements NotificationWatcher {
 
         // Драйвер не поднят
         setFailed(true);
+
+        // send message to server
+        if (link) transport.sendCommand(new ChangeDeviceStateCommand(
+                String.format("%d", getHome().getHomeId()),
+                Manager.get().getControllerNodeId(getHome().getHomeId()),
+                "FAULT"
+        ));
 
         // вывод отладочной информации
         if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("Driver failed"));

@@ -1,21 +1,22 @@
 package ru.uproom.gate;
 
 import org.zwave4j.*;
+import ru.uproom.gate.handlers.CommandHandler;
 import ru.uproom.gate.transport.Command;
 import ru.uproom.gate.transport.CommandType;
 
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicReference;
 
+// todo : move all command handlers into different classes
+
 /**
- * Реализация класса обработки команд контроллеру сети Z-Wave
  *
- * todo : переводим все комментарии на английский язык
- * todo : создать пул классов CommandHandler, которые будут обрабатывать класс Command. Хранить в Map
- *
+ * Main object for handling server commands
+ * </p>
  * Created by osipenko on 05.08.14.
  */
-public class MainCommander extends TreeMap<CommandType, CommandHandler> {
+public class MainCommander extends TreeMap<CommandType, CommandHandler> implements GateCommander {
 
 
     //##############################################################################################################
@@ -36,15 +37,15 @@ public class MainCommander extends TreeMap<CommandType, CommandHandler> {
         // filling map with reflection API
         for (CommandType type : CommandType.values()) {
             try {
-                Class c = Class.forName(type.name() + "CommandHandler");
+                Class c = Class.forName("ru.uproom.gate.handlers." + type.name() + "CommandHandler");
                 CommandHandler handler = (CommandHandler) c.newInstance();
                 this.put(type, handler);
             } catch (ClassNotFoundException e) {
-                System.out.println("[ERR] - MainCommander - constructor - " + e.getLocalizedMessage());
+                System.out.println("[ERR CNF] - MainCommander - constructor - " + e.getMessage());
             } catch (InstantiationException e) {
-                System.out.println("[ERR] - MainCommander - constructor - " + e.getLocalizedMessage());
+                System.out.println("[ERR INS] - MainCommander - constructor - " + e.getMessage());
             } catch (IllegalAccessException e) {
-                System.out.println("[ERR] - MainCommander - constructor - " + e.getLocalizedMessage());
+                System.out.println("[ERR ILA] - MainCommander - constructor - " + e.getMessage());
             }
         }
     }
@@ -115,83 +116,83 @@ public class MainCommander extends TreeMap<CommandType, CommandHandler> {
         return handler.execute(command);
     }
 
-    public ZWaveFeedback execute(ZWaveCommand command) {
-
-        ZWaveFeedback feedback = null;
-
-        // Команда завершения работы шлюза
-        if (command.getCommand().equalsIgnoreCase("quit")) {
-            setExit(true);
-            feedback = new ZWaveFeedback();
-            feedback.setFeedback("quit ( ок )");
-            return feedback;
-        }
-
-        // получение статистики драйвера ( get driver statistics )
-        if (command.getCommand().equalsIgnoreCase("get driver statistics"))
-            feedback = commandGetDriverStatistics(command);
-            // перезапуск драйвера ( restart controller )
-        else if (command.getCommand().equalsIgnoreCase("restart controller"))
-            feedback = commandRestartController(command);
-
-            // команда включения всех устройств ( switch all on )
-        else if (command.getCommand().equalsIgnoreCase("switch all on")) feedback = commandSwitchAllOn(command);
-            // команда отключения всех устройств ( switch all off )
-        else if (command.getCommand().equalsIgnoreCase("switch all off")) feedback = commandSwitchAllOff(command);
-
-            // добавление новых устройств ( add mode )
-        else if (command.getCommand().equalsIgnoreCase("add mode")) feedback = commandAddNode(command);
-            // Удаление существующих устройств ( remove mode )
-        else if (command.getCommand().equalsIgnoreCase("remove mode")) feedback = commandRemoveNode(command);
-            // удаление несуществующих устройств ( remove failed node )
-        else if (command.getCommand().equalsIgnoreCase("remove failed node"))
-            feedback = commandRemoveFailedNode(command);
-            // проверка состояния сети ( test network )
-        else if (command.getCommand().equalsIgnoreCase("test network")) feedback = commandTestNetwork(command);
-            // прерывание исполняющейся команды ( cancel )
-        else if (command.getCommand().equals("cancel")) feedback = commandCancel(command);
-
-            // Получение идентификатора контроллера сети ( get controller node )
-        else if (command.getCommand().equals("get controller node")) feedback = commandControllerNodeId(command);
-            // Получение списка узлов сети ( get node list )
-        else if (command.getCommand().equals("get node list")) feedback = commandGetNodeList(command);
-            // Получение информации об узле сети ( get node, nodeId=# )
-        else if (command.getCommand().equals("get node")) feedback = commandGetNode(command);
-            // Проверка неисправного состояния узла сети ( is node failed, nodeId=# )
-        else if (command.getCommand().equals("is node failed")) feedback = commandIsNodeFailed(command);
-            // Обновление информации об узле сети ( refresh node, nodeId=# )
-        else if (command.getCommand().equals("refresh node")) feedback = commandRefreshNodeInfo(command);
-            // Запрос информации о состоянии узла сети ( node state, nodeId=# )
-        else if (command.getCommand().equals("node state")) feedback = commandRequestNodeState(command);
-            // Включение узла сети ( set node on, nodeId=# )
-        else if (command.getCommand().equals("set node on")) feedback = commandSetNodeOn(command);
-            // Включение узла сети ( set node off, nodeId=# )
-        else if (command.getCommand().equals("set node off")) feedback = commandSetNodeOff(command);
-            // Включение узла сети ( set node level, nodeId=#, level=# )
-        else if (command.getCommand().equals("set node level")) feedback = commandSetNodeLevel(command);
-
-            // Получение списка параметров узла ( get value list, nodeId=# )
-        else if (command.getCommand().equals("get value list")) feedback = commandGetValueList(command);
-            // Получение значения параметра узла ( get value, nodeId=#, valueId=# )
-        else if (command.getCommand().equals("get value")) feedback = commandGetValue(command);
-            // Установка значения параметра узла ( set value, nodeId=#, valueId=#, value=# )
-        else if (command.getCommand().equals("set value")) feedback = commandSetValue(command);
-
-            // ассоциирование двух узлов между собой ( add association, nodeId=#, targetId=#, groupId=#)
-        else if (command.getCommand().equals("add association")) feedback = commandAddAssociation(command);
-            // удаление ассоциации двух узлов между собой ( remove association, nodeId=#, targetId=#, groupId=# )
-        else if (command.getCommand().equals("remove association")) feedback = commandRemoveAssociation(command);
-            // список ассоциаций узла ( get associations, nodeId=#, groupId=# )
-        else if (command.getCommand().equals("get associations")) feedback = commandGetAssociations(command);
-            // ассоциирование двух узлов между собой ( get max associations, nodeId=#, groupId=# )
-        else if (command.getCommand().equals("get max associations")) feedback = commandGetMaxAssociation(command);
-            // количество групп узла ( get groups number, nodeId=# )
-        else if (command.getCommand().equals("get groups number")) feedback = commandGetNumGroups(command);
-
-
-        return feedback;
-
-    }
+//    public ZWaveFeedback execute(ZWaveCommand command) {
+//
+//        ZWaveFeedback feedback = null;
+//
+//        // Команда завершения работы шлюза
+//        if (command.getCommand().equalsIgnoreCase("quit")) {
+//            setExit(true);
+//            feedback = new ZWaveFeedback();
+//            feedback.setFeedback("quit ( ок )");
+//            return feedback;
+//        }
+//
+//        // получение статистики драйвера ( get driver statistics )
+//        if (command.getCommand().equalsIgnoreCase("get driver statistics"))
+//            feedback = commandGetDriverStatistics(command);
+//            // перезапуск драйвера ( restart controller )
+//        else if (command.getCommand().equalsIgnoreCase("restart controller"))
+//            feedback = commandRestartController(command);
+//
+//            // команда включения всех устройств ( switch all on )
+//        else if (command.getCommand().equalsIgnoreCase("switch all on")) feedback = commandSwitchAllOn(command);
+//            // команда отключения всех устройств ( switch all off )
+//        else if (command.getCommand().equalsIgnoreCase("switch all off")) feedback = commandSwitchAllOff(command);
+//
+//            // добавление новых устройств ( add mode )
+//        else if (command.getCommand().equalsIgnoreCase("add mode")) feedback = commandAddNode(command);
+//            // Удаление существующих устройств ( remove mode )
+//        else if (command.getCommand().equalsIgnoreCase("remove mode")) feedback = commandRemoveNode(command);
+//            // удаление несуществующих устройств ( remove failed node )
+//        else if (command.getCommand().equalsIgnoreCase("remove failed node"))
+//            feedback = commandRemoveFailedNode(command);
+//            // проверка состояния сети ( test network )
+//        else if (command.getCommand().equalsIgnoreCase("test network")) feedback = commandTestNetwork(command);
+//            // прерывание исполняющейся команды ( cancel )
+//        else if (command.getCommand().equals("cancel")) feedback = commandCancel(command);
+//
+//            // Получение идентификатора контроллера сети ( get controller node )
+//        else if (command.getCommand().equals("get controller node")) feedback = commandControllerNodeId(command);
+//            // Получение списка узлов сети ( get node list )
+//        else if (command.getCommand().equals("get node list")) feedback = commandGetNodeList(command);
+//            // Получение информации об узле сети ( get node, nodeId=# )
+//        else if (command.getCommand().equals("get node")) feedback = commandGetNode(command);
+//            // Проверка неисправного состояния узла сети ( is node failed, nodeId=# )
+//        else if (command.getCommand().equals("is node failed")) feedback = commandIsNodeFailed(command);
+//            // Обновление информации об узле сети ( refresh node, nodeId=# )
+//        else if (command.getCommand().equals("refresh node")) feedback = commandRefreshNodeInfo(command);
+//            // Запрос информации о состоянии узла сети ( node state, nodeId=# )
+//        else if (command.getCommand().equals("node state")) feedback = commandRequestNodeState(command);
+//            // Включение узла сети ( set node on, nodeId=# )
+//        else if (command.getCommand().equals("set node on")) feedback = commandSetNodeOn(command);
+//            // Включение узла сети ( set node off, nodeId=# )
+//        else if (command.getCommand().equals("set node off")) feedback = commandSetNodeOff(command);
+//            // Включение узла сети ( set node level, nodeId=#, level=# )
+//        else if (command.getCommand().equals("set node level")) feedback = commandSetNodeLevel(command);
+//
+//            // Получение списка параметров узла ( get value list, nodeId=# )
+//        else if (command.getCommand().equals("get value list")) feedback = commandGetValueList(command);
+//            // Получение значения параметра узла ( get value, nodeId=#, valueId=# )
+//        else if (command.getCommand().equals("get value")) feedback = commandGetValue(command);
+//            // Установка значения параметра узла ( set value, nodeId=#, valueId=#, value=# )
+//        else if (command.getCommand().equals("set value")) feedback = commandSetValue(command);
+//
+//            // ассоциирование двух узлов между собой ( add association, nodeId=#, targetId=#, groupId=#)
+//        else if (command.getCommand().equals("add association")) feedback = commandAddAssociation(command);
+//            // удаление ассоциации двух узлов между собой ( remove association, nodeId=#, targetId=#, groupId=# )
+//        else if (command.getCommand().equals("remove association")) feedback = commandRemoveAssociation(command);
+//            // список ассоциаций узла ( get associations, nodeId=#, groupId=# )
+//        else if (command.getCommand().equals("get associations")) feedback = commandGetAssociations(command);
+//            // ассоциирование двух узлов между собой ( get max associations, nodeId=#, groupId=# )
+//        else if (command.getCommand().equals("get max associations")) feedback = commandGetMaxAssociation(command);
+//            // количество групп узла ( get groups number, nodeId=# )
+//        else if (command.getCommand().equals("get groups number")) feedback = commandGetNumGroups(command);
+//
+//
+//        return feedback;
+//
+//    }
 
 
     //------------------------------------------------------------------------
