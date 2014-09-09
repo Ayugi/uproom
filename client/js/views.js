@@ -1,4 +1,4 @@
-define(['exports', 'backbone', 'handlebars'], function(exports, Backbone) {
+define(['exports', 'backbone', 'hbs!/templates/device-item', 'handlebars'], function(exports, Backbone, DeviceTpl) {
 	var BaseView = Backbone.View.extend({
 		initialize: function(options) {
 			Backbone.View.prototype.initialize.call(this, options);
@@ -117,7 +117,7 @@ define(['exports', 'backbone', 'handlebars'], function(exports, Backbone) {
 				},
 
 				tagName: 'tr',
-				template: Handlebars.compile('<td>{{ title }}</td><td>{{ state }}</td>')
+				template: DeviceTpl
 			}),
 
 			reset: function(collection) {
