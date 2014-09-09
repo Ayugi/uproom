@@ -11,12 +11,6 @@
     <link rel="stylesheet" type="text/css" href="stylesheets/theme.css">
     <link rel="stylesheet" href="lib/font-awesome/css/font-awesome.css">
 
-    <!-- Bower components -->
-    <script src="components/jquery/dist/jquery.min.js" type="text/javascript"></script>
-    <script src="components/underscore/underscore-min.js" type="text/javascript"></script>
-    <script src="components/backbone/backbone.js" type="text/javascript"></script>
-    <script src="components/handlebars/handlebars.min.js" type="text/javascript"></script>
-
     <!-- Demo page code -->
 
     <style type="text/css">
@@ -164,28 +158,10 @@
     </script>
 
     <!-- Application .js -->
-    <script type="text/javascript" src="js/models.js"></script>
-    <script type="text/javascript" src="js/views.js"></script>
+    <!-- <script type="text/javascript" src="js/models.js"></script>
+    <script type="text/javascript" src="js/views.js"></script> -->
 
-    <script type="text/javascript">
-        var
-            devicesCollection = new DevicesCollection(),
-            app = (new DevicesView()).render();
-
-        // Reset list with empty collection it will catch add/change event
-        app.layout.list.reset(devicesCollection);
-
-        // WARN Query backend for user session state here
-        app.layout.auth.setCallback({success: function(user) {
-            app.user = user;
-
-            // In case of successfull authoization — fetch data
-            devicesCollection.fetch();
-            app.layout.accountMenu.reset(user);
-            
-            // And prepare UI
-            app.activate();
-        }});
-    </script>
+    <script data-main="js/app" src="components/requirejs-bower/require.js"></script>
+    <script src="js/config.js"></script>
   </body>
 </html>

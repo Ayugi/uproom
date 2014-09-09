@@ -1,9 +1,10 @@
-var
-	DeviceModel = Backbone.Model.extend({
+define(['exports', 'backbone'], function(exports, Backbone) {
+	exports.DeviceModel = Backbone.Model.extend({
 		getTitle: function() { return '$' + this.get('name') }
-	}),
+	});
 
-	DevicesCollection = Backbone.Collection.extend({
-		model: DeviceModel,
+	exports.DevicesCollection = Backbone.Collection.extend({
+		model: exports.DeviceModel,
 		url: DEVICES_URL
 	});
+});
