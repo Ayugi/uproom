@@ -1,7 +1,7 @@
 define(['backbone', 'views', 'models'], function(Backbone, Views, Models) {
 	var
 		devicesCollection = new Models.DevicesCollection(),
-		app = (new Views.DevicesView()).render();
+		app = (new Views.DevicesView({})).render();
 
 	// Reset list with empty collection it will catch add/change event
 	app.layout.list.reset(devicesCollection);

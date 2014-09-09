@@ -2,14 +2,15 @@ define(['exports', 'backbone', 'hbs!/templates/device-item', 'handlebars'], func
 	var BaseView = Backbone.View.extend({
 		initialize: function(options) {
 			Backbone.View.prototype.initialize.call(this, options);
+			this.app = options.app;
 			this.layout = {};
 		}
 	});
 
 	_.extend(exports, {
-		AccountMenuView: Backbone.View.extend({
+		AccountMenuView: BaseView.extend({
 			events: {'click [data-id=signout]': function(event) {
-				app.deactivate();
+				this.app.deactivate();
 				$('body').trigger('click'); // Hide account menu
 				return false;
 			}},
@@ -72,7 +73,7 @@ define(['exports', 'backbone', 'hbs!/templates/device-item', 'handlebars'], func
 			},
 
 			render: function() {
-				this.layout.accountMenu = new exports.AccountMenuView({el: '#fat-menu'});
+				this.layout.accountMenu = new exports.AccountMenuView({app: this, el: '#fat-menu'});
 				this.layout.auth        = new exports.AuthView({el: '#auth'});
 				this.layout.list        = new exports.ListView({el: '#list'});
 				this.layout.sidebar     = new exports.SidebarView({el: '#sidebar'});
