@@ -107,7 +107,7 @@ var
 			render: function() {
 				this.$el.html(this.template({
 					state: this.model.get('state').toLowerCase() == 'on' ? 'Вкл' : 'Выкл',
-					title: this.model.get('name')
+					title: this.model.getTitle()
 				}));
 
 				this.$el.data('id', this.model.id);
