@@ -1,7 +1,7 @@
 define([
 	'exports', 'backbone', 'hbs!/templates/device-item', 'hbs!/templates/account-menu',
-	'hbs!/templates/auth', 'hbs!/templates/devices-list', 'handlebars'
-], function(exports, Backbone, DeviceTpl, AccountMenuTpl, AuthTpl, DevicesListTpl) {
+	'hbs!/templates/auth', 'hbs!/templates/devices-list', 'hbs!/templates/sidebar', 'handlebars'
+], function(exports, Backbone, DeviceTpl, AccountMenuTpl, AuthTpl, DevicesListTpl, SidebarTpl) {
 	var BaseView = Backbone.View.extend({
 		initialize: function(options) {
 			Backbone.View.prototype.initialize.call(this, options);
@@ -85,7 +85,7 @@ define([
 				this.layout.accountMenu = (new exports.AccountMenuView({app: this, el: '#fat-menu'})).render();
 				this.layout.auth        = (new exports.AuthView({el: '#auth'})).render();
 				this.layout.list        = (new exports.ListView({el: '#list'})).render();
-				this.layout.sidebar     = new exports.SidebarView({el: '#sidebar'});
+				this.layout.sidebar     = (new exports.SidebarView({el: '#sidebar'})).render();
 				return this;
 			}
 		}),
@@ -146,6 +146,9 @@ define([
 			template: DevicesListTpl
 		}),
 		
-		SidebarView: Backbone.View
+		SidebarView: Backbone.View.extend({
+			render: function() { this.$el.html(this.template()); return this },
+			template: SidebarTpl
+		})
 	})
 })
