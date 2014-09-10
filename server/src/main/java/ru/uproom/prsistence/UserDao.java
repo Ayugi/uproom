@@ -1,5 +1,6 @@
 package ru.uproom.prsistence;
 
+import javassist.compiler.ast.StringL;
 import ru.uproom.domain.User;
 
 import java.util.List;
@@ -10,5 +11,5 @@ import java.util.List;
 public interface UserDao {
     List<User> listUsers();
     void saveNewUser(User user);
-
+    User authenticate(String login, String password);
 }

@@ -66,7 +66,7 @@ public class RequestToServer extends CommunicationWithServer {
 
             // if connected - send server gate ID
             System.out.println("[INF] - RequestToServer - run - authorization (send User ID to server)");
-            if (!sendCommand(new HandshakeCommand(CommandType.Handshake, getGateId()))) continue;
+            if (!sendCommand(new HandshakeCommand( getGateId()))) continue;
 
             // working with commands from server
             Command command = null;

@@ -8,7 +8,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import ru.uproom.domain.User;
 import ru.uproom.prsistence.UserDao;
+import ru.uproom.service.SessionHolder;
+import ru.uproom.service.SessionHolderImpl;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -23,6 +26,9 @@ public class UserController {
     @Autowired
     private UserDao userDao;
 
+    //@Autowired
+    private SessionHolder sessionHolder = SessionHolderImpl.getInstance();
+
     @RequestMapping(method = RequestMethod.GET, value = "list")
     @ResponseBody
     public List<User> listUsers() {
@@ -33,7 +39,7 @@ public class UserController {
     @ResponseBody
     public String register(@RequestParam String login,
                            @RequestParam String password,
-                           @RequestParam String name){
+                           @RequestParam String name) {
         userDao.saveNewUser(new User(login, password));
         return "ok";
     }
@@ -41,13 +47,20 @@ public class UserController {
     @RequestMapping(method = RequestMethod.GET, value = "login")
     @ResponseBody
     public User login(@RequestParam String login,
-                        @RequestParam String password){
-        return new User("testLogin", "");
+                      @RequestParam String password,
+                      HttpServletRequest request) {
+        User user = userDao.authenticate(login, password);
+        if (null == user)
+            return null;
+        String sid = request.getRemoteHost() + System.currentTimeMillis() + Math.random();
+        sessionHolder.newSession(sid, user);
+        request.getSession().setAttribute("SID",sid);
+        return user;
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "logout")
     @ResponseBody
-    public String logout(){
+    public String logout() {
         return "ok";
     }
 
