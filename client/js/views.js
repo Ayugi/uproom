@@ -1,6 +1,7 @@
 define([
-	'exports', 'backbone', 'hbs!/templates/device-item', 'hbs!/templates/account-menu', 'handlebars'
-], function(exports, Backbone, DeviceTpl, AccountMenuTpl) {
+	'exports', 'backbone', 'hbs!/templates/device-item', 'hbs!/templates/account-menu',
+	'hbs!/templates/auth', 'handlebars'
+], function(exports, Backbone, DeviceTpl, AccountMenuTpl, AuthTpl) {
 	var BaseView = Backbone.View.extend({
 		initialize: function(options) {
 			Backbone.View.prototype.initialize.call(this, options);
@@ -37,12 +38,16 @@ define([
 				}
 			},
 
+			render: function() { this.$el.html(this.template()); return this },
+			
 			// Define callbacks to be called on auth try
 			setCallback: function(funcs) {
 				this.callback = this.callback || {};
 				_.extend(this.callback = this.callback || {}, funcs);
 				return this;
-			}
+			},
+
+			template: AuthTpl
 		}),
 
 		// Manage application core views
@@ -78,7 +83,7 @@ define([
 
 			render: function() {
 				this.layout.accountMenu = (new exports.AccountMenuView({app: this, el: '#fat-menu'})).render();
-				this.layout.auth        = new exports.AuthView({el: '#auth'});
+				this.layout.auth        = (new exports.AuthView({el: '#auth'})).render();
 				this.layout.list        = new exports.ListView({el: '#list'});
 				this.layout.sidebar     = new exports.SidebarView({el: '#sidebar'});
 				return this;
