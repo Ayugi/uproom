@@ -7,7 +7,9 @@ define([
 			Backbone.View.prototype.initialize.call(this, options);
 			this.app = options.app;
 			this.layout = {};
-		}
+		},
+
+		render: function() { this.$el.html(this.template()); return this }
 	});
 
 	_.extend(exports, {
@@ -18,13 +20,12 @@ define([
 				return false;
 			}},
 
-			render: function() { this.$el.html(this.template()); return this },
 			reset: function(user) { this.$('[data-id=name]').html(user.name); return this },
 			template: AccountMenuTpl,
 		}),
 
 		// Get username/password and pass to backend for validation
-		AuthView: Backbone.View.extend({
+		AuthView: BaseView.extend({
 			events: {
 				'click [data-id=submit]': function() {
 					// Call backend auth method
@@ -37,8 +38,6 @@ define([
 					return false;
 				}
 			},
-
-			render: function() { this.$el.html(this.template()); return this },
 			
 			// Define callbacks to be called on auth try
 			setCallback: function(funcs) {
@@ -142,13 +141,9 @@ define([
 				return this;
 			},
 
-			render: function() { this.$el.html(this.template()); return this },
 			template: DevicesListTpl
 		}),
 		
-		SidebarView: Backbone.View.extend({
-			render: function() { this.$el.html(this.template()); return this },
-			template: SidebarTpl
-		})
+		SidebarView: BaseView.extend({template: SidebarTpl})
 	})
 })
