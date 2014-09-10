@@ -1,4 +1,6 @@
-define(['exports', 'backbone', 'hbs!/templates/device-item', 'handlebars'], function(exports, Backbone, DeviceTpl) {
+define([
+	'exports', 'backbone', 'hbs!/templates/device-item', 'hbs!/templates/account-menu', 'handlebars'
+], function(exports, Backbone, DeviceTpl, AccountMenuTpl) {
 	var BaseView = Backbone.View.extend({
 		initialize: function(options) {
 			Backbone.View.prototype.initialize.call(this, options);
@@ -15,7 +17,9 @@ define(['exports', 'backbone', 'hbs!/templates/device-item', 'handlebars'], func
 				return false;
 			}},
 
-			reset: function(user) { this.$('[data-id=name]').html(user.name); return this }
+			render: function() { this.$el.html(this.template()); return this },
+			reset: function(user) { this.$('[data-id=name]').html(user.name); return this },
+			template: AccountMenuTpl,
 		}),
 
 		// Get username/password and pass to backend for validation
@@ -73,7 +77,7 @@ define(['exports', 'backbone', 'hbs!/templates/device-item', 'handlebars'], func
 			},
 
 			render: function() {
-				this.layout.accountMenu = new exports.AccountMenuView({app: this, el: '#fat-menu'});
+				this.layout.accountMenu = (new exports.AccountMenuView({app: this, el: '#fat-menu'})).render();
 				this.layout.auth        = new exports.AuthView({el: '#auth'});
 				this.layout.list        = new exports.ListView({el: '#list'});
 				this.layout.sidebar     = new exports.SidebarView({el: '#sidebar'});
