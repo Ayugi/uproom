@@ -1,9 +1,10 @@
-package ru.uproom.gate;
+package ru.uproom.gate.handlers;
 
 import org.zwave4j.*;
-import ru.uproom.gate.handlers.CommandHandler;
-import ru.uproom.gate.transport.Command;
-import ru.uproom.gate.transport.CommandType;
+import ru.uproom.gate.notifications.MainWatcher;
+import ru.uproom.gate.transport.command.Command;
+import ru.uproom.gate.transport.command.CommandType;
+import ru.uproom.gate.zwave.*;
 
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicReference;
@@ -11,7 +12,6 @@ import java.util.concurrent.atomic.AtomicReference;
 // todo : move all command handlers into different classes
 
 /**
- *
  * Main object for handling server commands
  * </p>
  * Created by osipenko on 05.08.14.
@@ -92,8 +92,6 @@ public class MainCommander extends TreeMap<CommandType, CommandHandler> implemen
     }
 
 
-
-
     //##############################################################################################################
     //######    methods-
 
@@ -113,7 +111,7 @@ public class MainCommander extends TreeMap<CommandType, CommandHandler> implemen
         }
 
         // execution command
-        return handler.execute(command);
+        return handler.execute(command, watcher);
     }
 
 //    public ZWaveFeedback execute(ZWaveCommand command) {
@@ -449,8 +447,8 @@ public class MainCommander extends TreeMap<CommandType, CommandHandler> implemen
         }
 
         // процесс
-        Boolean result = Manager.get().isNodeFailed(getHome().getHomeId(), node.getNodeId());
-        feedback.setFeedback(String.format("{\"node\":\"%d\",\"failed\":\"%s\"}", node.getNodeId(), result.toString()));
+        Boolean result = Manager.get().isNodeFailed(getHome().getHomeId(), node.getZId());
+        feedback.setFeedback(String.format("{\"node\":\"%d\",\"failed\":\"%s\"}", node.getZId(), result.toString()));
 
         return feedback;
     }
@@ -470,8 +468,8 @@ public class MainCommander extends TreeMap<CommandType, CommandHandler> implemen
             return feedback;
         }
 
-        Boolean result = Manager.get().isNodeFailed(getHome().getHomeId(), node.getNodeId());
-        if (Manager.get().refreshNodeInfo(getHome().getHomeId(), node.getNodeId()))
+        Boolean result = Manager.get().isNodeFailed(getHome().getHomeId(), node.getZId());
+        if (Manager.get().refreshNodeInfo(getHome().getHomeId(), node.getZId()))
             feedback.setFeedback(String.format("{\"point\":\"refreshNodeInfo\",\"message\":\"ok\"}"));
         else
             feedback.setFeedback(String.format("{\"errorPoint\":\"getNode\",\"errorCode\":\"97\",\"errorMessage\":\"info about node %d not refreshed\" }",
@@ -504,21 +502,21 @@ public class MainCommander extends TreeMap<CommandType, CommandHandler> implemen
                 // Если в процессе возник таймаут (1 == TIMEOUT)
                 if (notification.getType() == NotificationType.NOTIFICATION && notification.getNotification() == 1) {
                     feedback.setFeedback(String.format("{\"errorPoint\":\"requestNodeState\",\"errorCode\":\"4\",\"errorMessage\":\"node %d disconnected\"}",
-                            node.getNodeId()
+                            node.getZId()
                     ));
                     feedback.setSuccessful(false);
                 }
                 // Если возникло событие NODE_QUERIES_COMPLETE
                 else if (notification.getType() == NotificationType.NODE_QUERIES_COMPLETE) {
                     feedback.setFeedback(String.format("{\"point\":\"requestNodeState\",\"message\":\"node %d request complete\"}",
-                            node.getNodeId()
+                            node.getZId()
                     ));
                     feedback.setSuccessful(true);
                 }
                 // Необрабатываемое событие
                 else {
                     feedback.setFeedback(String.format("{\"point\":\"requestNodeState\",\"message\":\"node %d send notification %s\"}",
-                            node.getNodeId(),
+                            node.getZId(),
                             notification.getType().toString()
                     ));
                 }
@@ -529,7 +527,7 @@ public class MainCommander extends TreeMap<CommandType, CommandHandler> implemen
         node.addEvent(callback);
 
         // запрос состояния удачен
-        if (Manager.get().requestNodeState(getHome().getHomeId(), node.getNodeId())) {
+        if (Manager.get().requestNodeState(getHome().getHomeId(), node.getZId())) {
             // ожидаем срабатывания триггера изменении параметра (~ 2сек)
             int count = 0;
             while (!feedback.isCreated() && count < 40) {
@@ -541,13 +539,13 @@ public class MainCommander extends TreeMap<CommandType, CommandHandler> implemen
                 count++;
             }
             // В случае, если проверяемым узлом был контроллер сети, перезапускаем его
-            if (!feedback.isSuccessful() && Manager.get().getControllerNodeId(getHome().getHomeId()) == node.getNodeId())
+            if (!feedback.isSuccessful() && Manager.get().getControllerNodeId(getHome().getHomeId()) == node.getZId())
                 getWatcher().setFailed(true);
         }
         // Запрос состояния неудачен
         else {
             feedback.setFeedback(String.format("{\"errorPoint\":\"requestNodeState\",\"errorCode\":\"97\"\"errorMessage\":\"node %d not requested\"}",
-                    node.getNodeId()
+                    node.getZId()
             ));
         }
         // закрываем триггер
@@ -882,5 +880,4 @@ public class MainCommander extends TreeMap<CommandType, CommandHandler> implemen
 
         return feedback;
     }
-
 }

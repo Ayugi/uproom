@@ -1,4 +1,4 @@
-package ru.uproom.gate.transport;
+package ru.uproom.gate.transport.command;
 
 /**
  * Created with IntelliJ IDEA.

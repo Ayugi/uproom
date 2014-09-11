@@ -1,4 +1,4 @@
-package ru.uproom.gate;
+package ru.uproom.gate.zwave;
 
 import org.zwave4j.Notification;
 

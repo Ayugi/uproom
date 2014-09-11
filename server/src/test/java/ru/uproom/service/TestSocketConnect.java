@@ -1,9 +1,8 @@
 package ru.uproom.service;
 
 import junit.framework.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
-import ru.uproom.gate.transport.HandshakeCommand;
+import ru.uproom.gate.transport.command.HandshakeCommand;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;

@@ -1,14 +1,17 @@
-package ru.uproom.gate;
+package ru.uproom.gate.zwave;
 
 import org.zwave4j.Manager;
 import org.zwave4j.Notification;
+import ru.uproom.gate.transport.dto.DeviceDTO;
+import ru.uproom.gate.transport.dto.DeviceState;
+import ru.uproom.gate.transport.dto.DeviceType;
 
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * Устройство в сети ZWave
+ * device in Z-Wave net
  * <p/>
  * Created by osipenko on 31.07.14.
  */
@@ -16,9 +19,11 @@ public class ZWaveNode extends TreeMap<Integer, ZWaveValue> {
 
 
     //=============================================================================================================
-    //======    параметры класса
+    //======    fields
 
 
+    // device type
+    DeviceType type;
     private ZWaveHome home = null;
     private boolean polled = false;
     private short nodeId = 0;
@@ -33,36 +38,46 @@ public class ZWaveNode extends TreeMap<Integer, ZWaveValue> {
     private short nodeVersion = 0;
     private ArrayList<Short> groups = new ArrayList<Short>();
     private ArrayList<ZWaveNodeCallback> events = new ArrayList<ZWaveNodeCallback>();
+    // device ID in server database
+    private int id;
+    // device ID in Z-Wave net
+    private short zId = 0;
+    // device state
+    private DeviceState state;
+
 
 
     //=============================================================================================================
-    //======    конструктор
+    //======    constructors
 
 
-    public ZWaveNode(ZWaveHome home, short nodeId) {
+    public ZWaveNode(ZWaveHome home, short zId) {
         Manager manager = Manager.get();
 
         setHome(home);
-        setNodeId(nodeId);
-        setNodeName(manager.getNodeName(getHome().getHomeId(), nodeId));
-        setNodeLocation(Manager.get().getNodeLocation(getHome().getHomeId(), nodeId));
-        setNodeType(Manager.get().getNodeType(getHome().getHomeId(), nodeId));
-        setNodeProductId(Manager.get().getNodeProductId(getHome().getHomeId(), nodeId));
-        setNodeProductName(Manager.get().getNodeProductName(getHome().getHomeId(), nodeId));
-        setNodeProductType(Manager.get().getNodeProductType(getHome().getHomeId(), nodeId));
-        setNodeManufacturerId(Manager.get().getNodeManufacturerId(getHome().getHomeId(), nodeId));
-        setNodeManufacturerName(Manager.get().getNodeManufacturerName(getHome().getHomeId(), nodeId));
-        setNodeVersion(Manager.get().getNodeVersion(getHome().getHomeId(), nodeId));
+        setZId(zId);
+        setNodeName(manager.getNodeName(getHome().getHomeId(), zId));
+        setNodeLocation(manager.getNodeLocation(getHome().getHomeId(), zId));
+        // get type information
+        setNodeType(manager.getNodeType(getHome().getHomeId(), zId));
+        if (manager.getControllerNodeId(home.getHomeId()) == zId) this.type = DeviceType.Controller;
+        // other info...
+        setNodeProductId(manager.getNodeProductId(getHome().getHomeId(), zId));
+        setNodeProductName(manager.getNodeProductName(getHome().getHomeId(), zId));
+        setNodeProductType(manager.getNodeProductType(getHome().getHomeId(), zId));
+        setNodeManufacturerId(manager.getNodeManufacturerId(getHome().getHomeId(), zId));
+        setNodeManufacturerName(manager.getNodeManufacturerName(getHome().getHomeId(), zId));
+        setNodeVersion(manager.getNodeVersion(getHome().getHomeId(), zId));
 
     }
 
 
     //=============================================================================================================
-    //======    обработка параметров класса
+    //======    getters and setters
 
 
     //------------------------------------------------------------------------
-    //  идентификатор дома
+    //  home
 
     public ZWaveHome getHome() {
         return home;
@@ -74,9 +89,9 @@ public class ZWaveNode extends TreeMap<Integer, ZWaveValue> {
 
 
     //------------------------------------------------------------------------
-    //  периодический опрос параметров узла
+    //  polling
 
-    public boolean getPolled() {
+    public boolean isPolled() {
         return polled;
     }
 
@@ -86,19 +101,31 @@ public class ZWaveNode extends TreeMap<Integer, ZWaveValue> {
 
 
     //------------------------------------------------------------------------
-    //  идентификатор узла
+    // device ID in Z-Wave net
 
-    public short getNodeId() {
-        return nodeId;
+    public short getZId() {
+        return zId;
     }
 
-    public void setNodeId(short _nodeId) {
-        nodeId = _nodeId;
+    public void setZId(short zId) {
+        this.zId = zId;
     }
 
 
     //------------------------------------------------------------------------
-    //  тип узла
+    // device ID in server database
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+
+    //------------------------------------------------------------------------
+    //  get node type in Z-Wave net
 
     public String getNodeType() {
         return nodeType;
@@ -110,7 +137,7 @@ public class ZWaveNode extends TreeMap<Integer, ZWaveValue> {
 
 
     //------------------------------------------------------------------------
-    //  наименование узла
+    //  get node name in Z-Wave net
 
     public String getNodeName() {
         return nodeName;
@@ -122,7 +149,7 @@ public class ZWaveNode extends TreeMap<Integer, ZWaveValue> {
 
 
     //------------------------------------------------------------------------
-    //  местоположение узла
+    //  get node location in Z-Wave net
 
     public String getNodeLocation() {
         return nodeLocation;
@@ -134,7 +161,7 @@ public class ZWaveNode extends TreeMap<Integer, ZWaveValue> {
 
 
     //------------------------------------------------------------------------
-    //  идентификатор продукта
+    //  get node product id in Z-Wave net
 
     public String getNodeProductId() {
         return nodeProductId;
@@ -146,7 +173,7 @@ public class ZWaveNode extends TreeMap<Integer, ZWaveValue> {
 
 
     //------------------------------------------------------------------------
-    //  наименование продукта
+    //  get node product name in Z-Wave net
 
     public String getNodeProductName() {
         return nodeProductName;
@@ -158,7 +185,7 @@ public class ZWaveNode extends TreeMap<Integer, ZWaveValue> {
 
 
     //------------------------------------------------------------------------
-    //  тип продукта
+    //  get node product type in Z-Wave net
 
     public String getNodeProductType() {
         return nodeProductType;
@@ -170,7 +197,7 @@ public class ZWaveNode extends TreeMap<Integer, ZWaveValue> {
 
 
     //------------------------------------------------------------------------
-    //  идентификатор производителя
+    //  get node manufacturer id in Z-Wave net
 
     public String getNodeManufacturerId() {
         return nodeManufacturerId;
@@ -182,7 +209,7 @@ public class ZWaveNode extends TreeMap<Integer, ZWaveValue> {
 
 
     //------------------------------------------------------------------------
-    //  наименование производителя
+    //  get node manufacturer name in Z-Wave net
 
     public String getNodeManufacturerName() {
         return nodeManufacturerName;
@@ -194,7 +221,7 @@ public class ZWaveNode extends TreeMap<Integer, ZWaveValue> {
 
 
     //------------------------------------------------------------------------
-    //  версия прошивки узла
+    //  get node firmware version
 
     public short getNodeVersion() {
         return nodeVersion;
@@ -206,7 +233,7 @@ public class ZWaveNode extends TreeMap<Integer, ZWaveValue> {
 
 
     //------------------------------------------------------------------------
-    //  группы управления
+    //  node groups
 
     public boolean addGroup(Short group) {
         return groups.add(group);
@@ -222,7 +249,7 @@ public class ZWaveNode extends TreeMap<Integer, ZWaveValue> {
 
 
     //------------------------------------------------------------------------
-    //  реакция на события
+    //  events handling
 
     public boolean addEvent(ZWaveNodeCallback event) {
         return events.add(event);
@@ -239,13 +266,24 @@ public class ZWaveNode extends TreeMap<Integer, ZWaveValue> {
     }
 
 
+    //------------------------------------------------------------------------
+    //  events handling
+
+    public DeviceState getState() {
+        return state;
+    }
+
+    public void setState(DeviceState state) {
+        this.state = state;
+    }
+
 
     //##############################################################################################################
-    //######    методы класса-
+    //######    methods
 
 
     //------------------------------------------------------------------------
-    //  получение списка параметров узла в виде строки
+    //  get node values list as string
 
     public String getValueList() {
         String result = "[";
@@ -263,7 +301,7 @@ public class ZWaveNode extends TreeMap<Integer, ZWaveValue> {
 
 
     //------------------------------------------------------------------------
-    //  получение полной информации об узле в виде строки
+    //  get all information about node as string
 
     public String getNodeInfo() {
         String result = String.format("{\"id\":\"%d\"," +
@@ -276,7 +314,7 @@ public class ZWaveNode extends TreeMap<Integer, ZWaveValue> {
                         "\"manufacturerId\":\"%s\"," +
                         "\"manufacturerName\":\"%s\"," +
                         "}",
-                getNodeId(),
+                getZId(),
                 getNodeName(),
                 getNodeLocation(),
                 getNodeType(),
@@ -292,12 +330,31 @@ public class ZWaveNode extends TreeMap<Integer, ZWaveValue> {
 
 
     //------------------------------------------------------------------------
+    //  get node information as DTO
+
+    public DeviceDTO getDeviceInfo() {
+        DeviceDTO dto = new DeviceDTO(id, home.getHomeId(), zId, DeviceType.None);
+
+        Map<String, String> parameters = dto.getParameters();
+        // add to map all values
+        for (Map.Entry<Integer, ZWaveValue> entry : this.entrySet()) {
+            parameters.put(entry.getValue().getValueLabel(), entry.getValue().getValueAsString());
+        }
+        // add to map needed fields
+        // todo : discuss with Hedin about this conception
+        parameters.put("NodeState", state.name());
+
+        return dto;
+    }
+
+
+    //------------------------------------------------------------------------
     //  получение краткой информации об узле в виде строки
 
     @Override
     public String toString() {
         String result = String.format("{\"id\":\"%d\",\"label\":\"%s\",\"location\":\"%s\",\"type\":\"%s\"}",
-                getNodeId(),
+                getZId(),
                 getNodeName(),
                 getNodeLocation(),
                 getNodeType()
@@ -305,5 +362,4 @@ public class ZWaveNode extends TreeMap<Integer, ZWaveValue> {
 
         return result;
     }
-
 }

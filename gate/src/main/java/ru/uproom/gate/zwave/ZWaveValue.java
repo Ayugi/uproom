@@ -1,4 +1,4 @@
-package ru.uproom.gate;
+package ru.uproom.gate.zwave;
 
 import org.zwave4j.Manager;
 import org.zwave4j.ValueId;
@@ -83,8 +83,6 @@ public class ZWaveValue {
             event.onCallback(this);
         }
     }
-
-
 
 
     //=============================================================================================================

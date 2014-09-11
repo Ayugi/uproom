@@ -1,4 +1,7 @@
-package ru.uproom.gate;
+package ru.uproom.gate.transport;
+
+import ru.uproom.gate.domain.DelayTimer;
+import ru.uproom.gate.handlers.GateCommander;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,7 +30,7 @@ public class ServerTransportKeeper
     private boolean work = true;
 
     private GateCommander commander = null;
-    private ServerTransportImpl transport = null;
+    private ServerTransport transport = null;
 
 
     //##############################################################################################################
@@ -61,7 +64,7 @@ public class ServerTransportKeeper
 
     private boolean open() {
         try {
-            transport = new ServerTransportImpl(host, port, commander);
+            transport = new ServerTransport(host, port, commander);
             System.out.println("ServerTransportKeeper >>>> transport object created");
             return true;
         } catch (IOException e) {

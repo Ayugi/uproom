@@ -1,7 +1,8 @@
 package ru.uproom.gate.handlers;
 
-import ru.uproom.gate.transport.Command;
-import ru.uproom.gate.transport.HandshakeCommand;
+import ru.uproom.gate.notifications.GateWatcher;
+import ru.uproom.gate.transport.command.Command;
+import ru.uproom.gate.transport.command.HandshakeCommand;
 
 /**
  * Handler for command Handshake
@@ -11,7 +12,7 @@ import ru.uproom.gate.transport.HandshakeCommand;
 public class HandshakeCommandHandler implements CommandHandler {
 
     @Override
-    public boolean execute(Command command) {
+    public boolean execute(Command command, GateWatcher watcher) {
 
         if (command == null || !(command instanceof HandshakeCommand)) return false;
 

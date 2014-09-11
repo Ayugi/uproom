@@ -3,7 +3,7 @@ package ru.uproom.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import ru.uproom.gate.transport.Command;
+import ru.uproom.gate.transport.command.Command;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -39,6 +39,10 @@ public class GateServiceImpl implements GateTransport {
         }
     }
 
+    public GateSocketHandler getHandler(String id) {
+        return activeSockets.get(id);
+    }
+
     private class SocketListener implements Runnable {
 
         private ServerSocket serverSocket;
@@ -72,10 +76,6 @@ public class GateServiceImpl implements GateTransport {
             activeSockets.put(userId, handler);
             handler.startListener();
         }
-    }
-
-    public GateSocketHandler getHandler(String id) {
-        return activeSockets.get(id);
     }
 }
 

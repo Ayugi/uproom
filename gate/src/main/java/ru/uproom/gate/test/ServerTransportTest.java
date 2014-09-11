@@ -1,13 +1,17 @@
-package ru.uproom.gate;
+package ru.uproom.gate.test;
 
-import ru.uproom.gate.transport.Command;
-import ru.uproom.gate.transport.HandshakeCommand;
+import ru.uproom.gate.domain.DelayTimer;
+import ru.uproom.gate.transport.command.Command;
+import ru.uproom.gate.transport.command.HandshakeCommand;
+import ru.uproom.gate.transport.command.SetDeviceParameterCommand;
+import ru.uproom.gate.transport.dto.DeviceDTO;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Map;
 
 /**
  * Class for testing link with server
@@ -148,6 +152,14 @@ public class ServerTransportTest implements AutoCloseable, Runnable {
                     System.out.println("TEST (ServerTransportIn) >>>> command type = " + command.getType().name());
                 if (command != null && command instanceof HandshakeCommand)
                     System.out.println("TEST (ServerTransportIn) >>>> handshake gateId = " + ((HandshakeCommand) command).getGateId());
+                if (command != null && command instanceof SetDeviceParameterCommand) {
+                    for (DeviceDTO device : command.getDevices()) {
+                        System.out.println(String.format("TEST\tdevice = %d", device.getZId()));
+                        for (Map.Entry<String, String> entry : device.getParameters().entrySet()) {
+                            System.out.println("TEST\t\tset parameter = " + entry.getKey() + " value = " + entry.getValue());
+                        }
+                    }
+                }
             }
             stop();
         }

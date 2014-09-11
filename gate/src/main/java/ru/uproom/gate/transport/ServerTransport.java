@@ -1,6 +1,7 @@
-package ru.uproom.gate;
+package ru.uproom.gate.transport;
 
-import ru.uproom.gate.transport.Command;
+import ru.uproom.gate.handlers.GateCommander;
+import ru.uproom.gate.transport.command.Command;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -12,7 +13,7 @@ import java.net.Socket;
  * <p/>
  * Created by osipenko on 08.08.14.
  */
-public class ServerTransportImpl implements ServerTransport, AutoCloseable, Runnable {
+public class ServerTransport implements ServerTransportMarker, AutoCloseable, Runnable {
 
 
     //##############################################################################################################
@@ -35,12 +36,12 @@ public class ServerTransportImpl implements ServerTransport, AutoCloseable, Runn
     //######    constructors
 
 
-    public ServerTransportImpl() throws IOException {
+    public ServerTransport() throws IOException {
         this("localhost", 6009, null);
     }
 
 
-    public ServerTransportImpl(String host, int port, GateCommander commander) throws IOException {
+    public ServerTransport(String host, int port, GateCommander commander) throws IOException {
         // save connection parameters
         this.host = host;
         this.port = port;
@@ -83,19 +84,19 @@ public class ServerTransportImpl implements ServerTransport, AutoCloseable, Runn
         try {
             if (input != null) input.close();
         } catch (IOException e) {
-            System.out.println("[ERR] - ServerTransportImpl - close - " + e.getLocalizedMessage());
+            System.out.println("[ERR] - ServerTransport - close - " + e.getLocalizedMessage());
         }
 
         try {
             if (output != null) output.close();
         } catch (IOException e) {
-            System.out.println("[ERR] - ServerTransportImpl - close - " + e.getLocalizedMessage());
+            System.out.println("[ERR] - ServerTransport - close - " + e.getLocalizedMessage());
         }
 
         try {
             if (socket != null) socket.close();
         } catch (IOException e) {
-            System.out.println("[ERR] - ServerTransportImpl - close - " + e.getLocalizedMessage());
+            System.out.println("[ERR] - ServerTransport - close - " + e.getLocalizedMessage());
         }
 
         socket = null;
@@ -135,21 +136,21 @@ public class ServerTransportImpl implements ServerTransport, AutoCloseable, Runn
     public Command receiveCommand() {
 
         Command command = null;
-        System.out.println("[INF] - ServerTransportImpl - receiveCommand - waiting for next command...");
+        System.out.println("[INF] - ServerTransport - receiveCommand - waiting for next command...");
 
         // get next command
         try {
             command = (Command) input.readObject();
         } catch (IOException e) {
             command = null;
-            System.out.println("[ERR] - ServerTransportImpl - receiveCommand - " + e.getMessage());
+            System.out.println("[ERR] - ServerTransport - receiveCommand - " + e.getMessage());
         } catch (ClassNotFoundException e) {
             command = null;
-            System.out.println("[ERR] - ServerTransportImpl - receiveCommand - " + e.getMessage());
+            System.out.println("[ERR] - ServerTransport - receiveCommand - " + e.getMessage());
         }
 
         if (command != null)
-            System.out.println("[INF] - ServerTransportImpl - receiveCommand - have command : " + command.getType().name());
+            System.out.println("[INF] - ServerTransport - receiveCommand - have command : " + command.getType().name());
         return command;
     }
 

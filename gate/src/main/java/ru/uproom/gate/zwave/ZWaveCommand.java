@@ -1,8 +1,8 @@
-package ru.uproom.gate;
+package ru.uproom.gate.zwave;
 
 /**
  * Реализация класса,содержащего команду управления узлом сети Z-Wave
- *
+ * <p/>
  * Created by osipenko on 05.08.14.
  */
 public class ZWaveCommand {
@@ -120,8 +120,6 @@ public class ZWaveCommand {
     public void setLevel(short level) {
         this.level = level;
     }
-
-
 
 
     //##############################################################################################################

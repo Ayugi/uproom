@@ -1,6 +1,6 @@
 package ru.uproom.service;
 
-import ru.uproom.gate.transport.HandshakeCommand;
+import ru.uproom.gate.transport.command.HandshakeCommand;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -51,7 +51,7 @@ public class GateSocketHandler {
         }
     }
 
-    public void startListener(){
+    public void startListener() {
 
     }
 

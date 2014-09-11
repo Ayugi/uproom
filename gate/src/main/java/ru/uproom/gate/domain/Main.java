@@ -1,9 +1,14 @@
-package ru.uproom.gate;
+package ru.uproom.gate.domain;
 
 import org.zwave4j.Manager;
 import org.zwave4j.NativeLibraryLoader;
 import org.zwave4j.Options;
 import org.zwave4j.ZWave4j;
+import ru.uproom.gate.handlers.MainCommander;
+import ru.uproom.gate.notifications.MainWatcher;
+import ru.uproom.gate.test.ServerTransportTest;
+import ru.uproom.gate.transport.ServerTransportKeeper;
+import ru.uproom.gate.zwave.ZWaveHome;
 
 /**
  * Created by osipenko on 27.07.14.

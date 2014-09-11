@@ -1,4 +1,4 @@
-package ru.uproom.gate;
+package ru.uproom.gate.zwave;
 
 /**
  * Created by osipenko on 14.08.14.

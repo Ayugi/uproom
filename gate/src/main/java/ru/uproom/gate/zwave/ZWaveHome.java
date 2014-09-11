@@ -1,27 +1,33 @@
-package ru.uproom.gate;
+package ru.uproom.gate.zwave;
 
+import ru.uproom.gate.transport.dto.DeviceDTO;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
 /**
+ * inner class which contain list of Z-Wave devices
+ * <p/>
  * Created by osipenko on 10.08.14.
  */
 public class ZWaveHome extends TreeMap<Short, ZWaveNode> {
 
 
     //##############################################################################################################
-    //######    параметры класса
+    //######    fields
 
 
     private long homeId;
 
 
     //##############################################################################################################
-    //######    обработка параметров класса
+    //######    getters and setters
 
 
     //------------------------------------------------------------------------
-    //  Идентификатор совокупности помещений (дома) ассоциированного с сетью
+    //  home ID
 
     public long getHomeId() {
         return homeId;
@@ -33,11 +39,11 @@ public class ZWaveHome extends TreeMap<Short, ZWaveNode> {
 
 
     //##############################################################################################################
-    //######    методы класса-
+    //######    methods
 
 
     //------------------------------------------------------------------------
-    //  Идентификатор совокупности помещений (дома) ассоциированного с сетью
+    //  create device list as string
 
     public String getNodeList() {
         String result = "[";
@@ -51,6 +57,18 @@ public class ZWaveHome extends TreeMap<Short, ZWaveNode> {
         result += "]";
 
         return result;
+    }
+
+
+    //------------------------------------------------------------------------
+    //  create device list as list of serializable objects
+
+    public List<DeviceDTO> getDeviceList() {
+        List<DeviceDTO> devices = new ArrayList<DeviceDTO>();
+        for (Map.Entry<Short, ZWaveNode> entry : this.entrySet()) {
+            devices.add(entry.getValue().getDeviceInfo());
+        }
+        return devices;
     }
 
 

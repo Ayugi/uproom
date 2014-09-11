@@ -1,4 +1,4 @@
-package ru.uproom.gate;
+package ru.uproom.gate.domain;
 
 /**
  * Created by osipenko on 02.09.14.
