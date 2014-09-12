@@ -3,7 +3,7 @@ package ru.uproom.gate.zwave;
 import org.zwave4j.Manager;
 import org.zwave4j.Notification;
 import ru.uproom.gate.transport.dto.DeviceDTO;
-import ru.uproom.gate.transport.dto.DeviceState;
+import ru.uproom.gate.transport.dto.parameters.DeviceState;
 import ru.uproom.gate.transport.dto.DeviceType;
 
 import java.util.ArrayList;

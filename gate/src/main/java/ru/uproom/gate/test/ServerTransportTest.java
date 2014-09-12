@@ -153,11 +153,11 @@ public class ServerTransportTest implements AutoCloseable, Runnable {
                 if (command != null && command instanceof HandshakeCommand)
                     System.out.println("TEST (ServerTransportIn) >>>> handshake gateId = " + ((HandshakeCommand) command).getGateId());
                 if (command != null && command instanceof SetDeviceParameterCommand) {
-                    for (DeviceDTO device : command.getDevices()) {
-                        System.out.println(String.format("TEST\tdevice = %d", device.getZId()));
-                        for (Map.Entry<String, String> entry : device.getParameters().entrySet()) {
-                            System.out.println("TEST\t\tset parameter = " + entry.getKey() + " value = " + entry.getValue());
-                        }
+                    SetDeviceParameterCommand deviceParameterCommand = (SetDeviceParameterCommand) command;
+                    DeviceDTO device = deviceParameterCommand.getDevice();
+                    System.out.println(String.format("TEST\tdevice = %d", device.getZId()));
+                    for (Map.Entry<String, String> entry : device.getParameters().entrySet()) {
+                        System.out.println("TEST\t\tset parameter = " + entry.getKey() + " value = " + entry.getValue());
                     }
                 }
             }
