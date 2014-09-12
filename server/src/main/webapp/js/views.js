@@ -1,6 +1,6 @@
 define([
 	'exports', 'backbone', 'hbs!/templates/device-item', 'hbs!/templates/account-menu',
-	'hbs!/templates/auth', 'hbs!/templates/devices-list', 'hbs!/templates/sidebar', 'handlebars'
+	'hbs!templates/auth', 'hbs!/templates/devices-list', 'hbs!/templates/sidebar', 'handlebars'
 ], function(exports, Backbone, DeviceTpl, AccountMenuTpl, AuthTpl, DevicesListTpl, SidebarTpl) {
 	var BaseView = Backbone.View.extend({
 		initialize: function(options) {
