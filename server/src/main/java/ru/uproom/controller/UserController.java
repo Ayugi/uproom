@@ -26,7 +26,6 @@ public class UserController {
     @Autowired
     private UserDao userDao;
 
-    //@Autowired
     private SessionHolder sessionHolder = SessionHolderImpl.getInstance();
 
     @RequestMapping(method = RequestMethod.GET, value = "list")
