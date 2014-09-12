@@ -10,6 +10,7 @@
     <modules>
         <module>server</module>
         <module>gateApi</module>
+        <module>gate</module>
     </modules>
 
     <build>

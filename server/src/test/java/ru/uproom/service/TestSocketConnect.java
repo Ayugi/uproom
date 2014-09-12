@@ -12,7 +12,7 @@ import java.net.Socket;
 /**
  * Created by hedin on 30.08.2014.
  */
-@Ignore
+//@Ignore
 public class TestSocketConnect {
 
     public static final String TEST_GATE_NAME = "testGate";
@@ -25,7 +25,7 @@ public class TestSocketConnect {
         Socket socket = new Socket("localhost", 8282);
         ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
         objectOutputStream.writeObject(new HandshakeCommand(TEST_GATE_NAME));
-        wait(10);
+        wait(100);
         GateSocketHandler handler = service.getHandler(TEST_GATE_NAME);
         Assert.assertNotNull(handler);
     }

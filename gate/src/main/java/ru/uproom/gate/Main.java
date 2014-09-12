@@ -1,5 +1,6 @@
-package ru.uproom.gate.domain;
+package ru.uproom.gate;
 
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.zwave4j.Manager;
 import org.zwave4j.NativeLibraryLoader;
 import org.zwave4j.Options;
@@ -19,6 +20,10 @@ public class Main {
     private static String ADDRESS_SERVER_NAME = "http://";
 
     public static void main(String[] args) {
+
+        // spring initialization
+        ClassPathXmlApplicationContext ctx =
+                new ClassPathXmlApplicationContext("applicationContext.xml");
 
         // loading openZWave library
         System.out.println("---- program started ----");
