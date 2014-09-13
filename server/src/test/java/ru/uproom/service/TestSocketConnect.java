@@ -2,6 +2,7 @@ package ru.uproom.service;
 
 import junit.framework.Assert;
 import org.junit.Test;
+import org.junit.Ignore;
 import ru.uproom.gate.transport.command.HandshakeCommand;
 
 import java.io.IOException;
@@ -11,7 +12,7 @@ import java.net.Socket;
 /**
  * Created by hedin on 30.08.2014.
  */
-//@Ignore
+@Ignore
 public class TestSocketConnect {
 
     public static final String TEST_GATE_NAME = "testGate";
