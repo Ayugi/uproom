@@ -1,5 +1,6 @@
 package ru.uproom.gate.transport;
 
+import org.springframework.stereotype.Service;
 import ru.uproom.gate.handlers.GateCommander;
 import ru.uproom.gate.transport.command.Command;
 
@@ -13,6 +14,7 @@ import java.net.Socket;
  * <p/>
  * Created by osipenko on 08.08.14.
  */
+@Service
 public class ServerTransport implements ServerTransportMarker, AutoCloseable, Runnable {
 
 

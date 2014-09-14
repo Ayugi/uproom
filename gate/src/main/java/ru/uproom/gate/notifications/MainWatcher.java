@@ -1,5 +1,9 @@
 package ru.uproom.gate.notifications;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.zwave4j.Manager;
 import org.zwave4j.Notification;
 import org.zwave4j.NotificationType;
@@ -11,6 +15,8 @@ import ru.uproom.gate.zwave.ZWaveNode;
 import ru.uproom.gate.zwave.ZWaveValue;
 import ru.uproom.gate.zwave.ZWaveValueIndexFactory;
 
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.TreeMap;
 
 
@@ -19,8 +25,14 @@ import java.util.TreeMap;
  * <p/>
  * Created by osipenko on 27.07.14.
  */
+@Service
 public class MainWatcher extends TreeMap<String, NotificationHandler>
         implements NotificationWatcher, ServerTransportUser, GateWatcher {
+
+    private static final Logger LOG = LoggerFactory.getLogger(MainWatcher.class);
+
+    private Map<NotificationType, NotificationHandler> notificationHandlers =
+            new EnumMap<NotificationType, NotificationHandler>(NotificationType.class);
 
 
     //##############################################################################################################
@@ -33,43 +45,48 @@ public class MainWatcher extends TreeMap<String, NotificationHandler>
     private ZWaveHome home = null;
 
     private boolean link = false;
+
+    @Autowired
     private ServerTransportMarker transport = null;
 
 
     //##############################################################################################################
     //######    constructors
 
-
     public MainWatcher() {
         super();
-        // filling map with reflection API - Z-Wave notifications
-        for (NotificationType type : NotificationType.values()) {
-            try {
-                String name = nameConverting(type);
-                Class c = Class.forName("ru.uproom.gate.notifications." + name + "NotificationHandler");
-                NotificationHandler handler = (NotificationHandler) c.newInstance();
-                this.put(type.name(), handler);
-            } catch (ClassNotFoundException e) {
-                System.out.println("[ERR CNF] - MainWatcher - constructor - " + e.getMessage());
-            } catch (InstantiationException e) {
-                System.out.println("[ERR INS] - MainWatcher - constructor - " + e.getMessage());
-            } catch (IllegalAccessException e) {
-                System.out.println("[ERR ILA] - MainWatcher - constructor - " + e.getMessage());
-            }
-        }
+        prepareZwaveNotificationHandlers();
+
         // filling map with reflection API - gate notifications
         for (GateNotificationType type : GateNotificationType.values()) {
             try {
                 Class c = Class.forName("ru.uproom.gate.notifications." + type.name() + "NotificationHandler");
-                NotificationHandler handler = (NotificationHandler) c.newInstance();
+                NotificationHandler handler = (NotificationHandler) instantiate(c);
                 this.put(type.name(), handler);
             } catch (ClassNotFoundException e) {
                 System.out.println("[ERR CNF] - MainWatcher - constructor - " + e.getMessage());
-            } catch (InstantiationException e) {
-                System.out.println("[ERR INS] - MainWatcher - constructor - " + e.getMessage());
-            } catch (IllegalAccessException e) {
-                System.out.println("[ERR ILA] - MainWatcher - constructor - " + e.getMessage());
             }
+        }
+    }
+
+    private void prepareZwaveNotificationHandlers() {
+        for (Class<?> handler : ClassesSearcher.findAnnotatedClasses(ZwaveNotificationHandler.class)) {
+            ZwaveNotificationHandler annotation = handler.getAnnotation(ZwaveNotificationHandler.class);
+            notificationHandlers.put(annotation.value(),
+                    (NotificationHandler) instantiate(handler));
+        }
+    }
+
+    // TODO move to some reflection handler
+    private Object instantiate(Class<?> handler) {
+        try {
+            return handler.newInstance();
+        } catch (InstantiationException e) {
+            LOG.error("unexpected InstantiationException instantiating " + handler, e);
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            LOG.error("unexpected IllegalAccessException instantiating " + handler, e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -185,7 +202,7 @@ public class MainWatcher extends TreeMap<String, NotificationHandler>
     public void onNotification(Notification notification, Object o) {
 
         // find handler for notification
-        NotificationHandler handler = this.get(notification.getType().name());
+        NotificationHandler handler = notificationHandlers.get(notification.getType());
         if (handler == null) {
             System.out.println(String.format("[ERR] - MainWatcher - onNotification - handler for notification (%s) not found",
                     notification.getType().name()

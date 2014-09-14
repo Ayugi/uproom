@@ -20,11 +20,21 @@ public class UserDaoImpl implements UserDao{
 
     @Override
     public List<User> listUsers() {
-        return entityManager.createNamedQuery("findAllUsers").getResultList();
+        return entityManager.createNamedQuery("findAllUsers",User.class)
+                .getResultList();
     }
 
     @Override
     public void saveNewUser(User user) {
         entityManager.persist(user);
+    }
+
+    @Override
+    public User authenticate(String login, String password) {
+        User user = entityManager.createNamedQuery("findUserByLogin", User.class)
+                .setParameter("login", login).getSingleResult();
+        return password.equals(user.getPassword())
+                ? user
+                : null;
     }
 }
