@@ -3,12 +3,14 @@ package ru.uproom.gate.handlers;
 import ru.uproom.gate.notifications.GateNotificationType;
 import ru.uproom.gate.notifications.GateWatcher;
 import ru.uproom.gate.transport.command.Command;
+import ru.uproom.gate.transport.command.CommandType;
 
 /**
  * Command for create device list and send it to server
  * <p/>
  * Created by osipenko on 10.09.14.
  */
+@CommandAnnotation(value = CommandType.GetDeviceList)
 public class GetDeviceListCommandHandler implements CommandHandler {
 
     @Override

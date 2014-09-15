@@ -12,14 +12,16 @@ import java.util.TreeMap;
  * <p/>
  * Created by osipenko on 10.08.14.
  */
-public class ZWaveHome extends TreeMap<Short, ZWaveNode> {
+public class ZWaveHome {
 
 
     //##############################################################################################################
     //######    fields
 
 
+    private final Map<Short, ZWaveNode> nodes = new TreeMap<Short, ZWaveNode>();
     private long homeId;
+    private boolean ready;
 
 
     //##############################################################################################################
@@ -38,6 +40,28 @@ public class ZWaveHome extends TreeMap<Short, ZWaveNode> {
     }
 
 
+    //------------------------------------------------------------------------
+    //  z-wave system ready to work
+
+    public boolean isReady() {
+        return ready;
+    }
+
+    public void setReady(boolean ready) {
+        this.ready = ready;
+    }
+
+
+    //------------------------------------------------------------------------
+    // node list
+
+    public Map<Short, ZWaveNode> getNodes() {
+        return nodes;
+    }
+
+
+
+
     //##############################################################################################################
     //######    methods
 
@@ -49,7 +73,7 @@ public class ZWaveHome extends TreeMap<Short, ZWaveNode> {
         String result = "[";
 
         boolean needComma = false;
-        for (Map.Entry<Short, ZWaveNode> entry : this.entrySet()) {
+        for (Map.Entry<Short, ZWaveNode> entry : nodes.entrySet()) {
             if (needComma) result += ",";
             else needComma = true;
             result += entry.getValue().toString();
@@ -65,7 +89,7 @@ public class ZWaveHome extends TreeMap<Short, ZWaveNode> {
 
     public List<DeviceDTO> getDeviceList() {
         List<DeviceDTO> devices = new ArrayList<DeviceDTO>();
-        for (Map.Entry<Short, ZWaveNode> entry : this.entrySet()) {
+        for (Map.Entry<Short, ZWaveNode> entry : nodes.entrySet()) {
             devices.add(entry.getValue().getDeviceInfo());
         }
         return devices;

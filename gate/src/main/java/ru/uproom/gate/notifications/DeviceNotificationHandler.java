@@ -1,6 +1,7 @@
 package ru.uproom.gate.notifications;
 
 import org.zwave4j.Manager;
+import org.zwave4j.Notification;
 import ru.uproom.gate.transport.ServerTransportMarker;
 import ru.uproom.gate.transport.command.SetDeviceParameterCommand;
 import ru.uproom.gate.transport.dto.DeviceDTO;
@@ -15,7 +16,7 @@ import ru.uproom.gate.zwave.ZWaveNode;
 public abstract class DeviceNotificationHandler implements NotificationHandler {
 
     @Override
-    public boolean execute(ZWaveHome home, ServerTransportMarker transport) {
+    public boolean execute(ZWaveHome home, ServerTransportMarker transport, Notification notification) {
 
         // find controller node
         short controllerId = Manager.get().getControllerNodeId(home.getHomeId());

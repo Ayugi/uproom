@@ -1,12 +1,16 @@
 package ru.uproom.gate.handlers;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.zwave4j.*;
+import ru.uproom.gate.domain.ClassesSearcher;
 import ru.uproom.gate.notifications.MainWatcher;
 import ru.uproom.gate.transport.command.Command;
 import ru.uproom.gate.transport.command.CommandType;
 import ru.uproom.gate.zwave.*;
 
-import java.util.TreeMap;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 // todo : move all command handlers into different classes
@@ -16,12 +20,17 @@ import java.util.concurrent.atomic.AtomicReference;
  * </p>
  * Created by osipenko on 05.08.14.
  */
-public class MainCommander extends TreeMap<CommandType, CommandHandler> implements GateCommander {
+public class MainCommander implements GateCommander {
 
 
     //##############################################################################################################
     //######    fields
 
+
+    private static final Logger LOG = LoggerFactory.getLogger(MainWatcher.class);
+
+    private Map<CommandType, CommandHandler> commandHandlers =
+            new EnumMap<CommandType, CommandHandler>(CommandType.class);
 
     private MainWatcher watcher = null;
     private boolean exit = false;
@@ -34,20 +43,7 @@ public class MainCommander extends TreeMap<CommandType, CommandHandler> implemen
 
     public MainCommander() {
         super();
-        // filling map with reflection API
-        for (CommandType type : CommandType.values()) {
-            try {
-                Class c = Class.forName("ru.uproom.gate.handlers." + type.name() + "CommandHandler");
-                CommandHandler handler = (CommandHandler) c.newInstance();
-                this.put(type, handler);
-            } catch (ClassNotFoundException e) {
-                System.out.println("[ERR CNF] - MainCommander - constructor - " + e.getMessage());
-            } catch (InstantiationException e) {
-                System.out.println("[ERR INS] - MainCommander - constructor - " + e.getMessage());
-            } catch (IllegalAccessException e) {
-                System.out.println("[ERR ILA] - MainCommander - constructor - " + e.getMessage());
-            }
-        }
+        prepareCommandHandlers();
     }
 
 
@@ -97,12 +93,23 @@ public class MainCommander extends TreeMap<CommandType, CommandHandler> implemen
 
 
     //------------------------------------------------------------------------
+    //  command handlers
+
+    private void prepareCommandHandlers() {
+        for (Class<?> handler : ClassesSearcher.findAnnotatedClasses(CommandHandler.class)) {
+            CommandAnnotation annotation = handler.getAnnotation(CommandAnnotation.class);
+            commandHandlers.put(annotation.value(), (CommandHandler) ClassesSearcher.instantiate(handler));
+        }
+    }
+
+
+    //------------------------------------------------------------------------
     //  executioner of commands from server
 
     public boolean execute(Command command) {
 
         // find handler for command
-        CommandHandler handler = this.get(command.getType());
+        CommandHandler handler = commandHandlers.get(command.getType());
         if (handler == null) {
             System.out.println(String.format("[ERR] - MainCommander - execute - handler for command (%s) not found",
                     command.getType().name()
@@ -417,7 +424,7 @@ public class MainCommander extends TreeMap<CommandType, CommandHandler> implemen
         ZWaveFeedback feedback = new ZWaveFeedback();
 
         // Проверка корректности данных команды
-        ZWaveNode node = home.get(command.getNodeId());
+        ZWaveNode node = home.getNodes().get(command.getNodeId());
         if (node == null) {
             feedback.setFeedback(String.format("{\"errorPoint\":\"getNode\",\"errorCode\":\"1\",\"errorMessage\":\"undefined node %d\" }",
                     command.getNodeId()
@@ -438,7 +445,7 @@ public class MainCommander extends TreeMap<CommandType, CommandHandler> implemen
         ZWaveFeedback feedback = new ZWaveFeedback();
 
         // Проверка корректности данных команды
-        ZWaveNode node = home.get(command.getNodeId());
+        ZWaveNode node = home.getNodes().get(command.getNodeId());
         if (node == null) {
             feedback.setFeedback(String.format("{\"errorPoint\":\"getNode\",\"errorCode\":\"1\",\"errorMessage\":\"undefined node %d\" }",
                     command.getNodeId()
@@ -460,7 +467,7 @@ public class MainCommander extends TreeMap<CommandType, CommandHandler> implemen
         final ZWaveFeedback feedback = new ZWaveFeedback();
 
         // Проверка корректности данных команды
-        ZWaveNode node = home.get(command.getNodeId());
+        ZWaveNode node = home.getNodes().get(command.getNodeId());
         if (node == null) {
             feedback.setFeedback(String.format("{\"errorPoint\":\"getNode\",\"errorCode\":\"1\",\"errorMessage\":\"undefined node %d\" }",
                     command.getNodeId()
@@ -486,7 +493,7 @@ public class MainCommander extends TreeMap<CommandType, CommandHandler> implemen
         final ZWaveFeedback feedback = new ZWaveFeedback();
 
         // Проверка корректности данных команды
-        ZWaveNode node = home.get(command.getNodeId());
+        ZWaveNode node = home.getNodes().get(command.getNodeId());
         if (node == null) {
             feedback.setFeedback(String.format("{\"errorPoint\":\"requestNodeState\",\"errorCode\":\"1\",\"errorMessage\":\"undefined node %d\" }",
                     command.getNodeId()
@@ -561,7 +568,7 @@ public class MainCommander extends TreeMap<CommandType, CommandHandler> implemen
         ZWaveFeedback feedback = new ZWaveFeedback();
 
         // Проверка корректности данных команды
-        ZWaveNode node = home.get(command.getNodeId());
+        ZWaveNode node = home.getNodes().get(command.getNodeId());
         if (node == null) {
             feedback.setFeedback(String.format("{\"errorPoint\":\"setNodeOn\",\"errorCode\":\"1\",\"errorMessage\":\"undefined node %d\" }",
                     command.getNodeId()
@@ -583,7 +590,7 @@ public class MainCommander extends TreeMap<CommandType, CommandHandler> implemen
         ZWaveFeedback feedback = new ZWaveFeedback();
 
         // Проверка корректности данных команды
-        ZWaveNode node = home.get(command.getNodeId());
+        ZWaveNode node = home.getNodes().get(command.getNodeId());
         if (node == null) {
             feedback.setFeedback(String.format("{\"errorPoint\":\"setNodeOff\",\"errorCode\":\"1\",\"errorMessage\":\"undefined node %d\" }",
                     command.getNodeId()
@@ -605,7 +612,7 @@ public class MainCommander extends TreeMap<CommandType, CommandHandler> implemen
         ZWaveFeedback feedback = new ZWaveFeedback();
 
         // Проверка корректности данных команды
-        ZWaveNode node = home.get(command.getNodeId());
+        ZWaveNode node = home.getNodes().get(command.getNodeId());
         if (node == null) {
             feedback.setFeedback(String.format("{\"errorPoint\":\"setNodeLevel\",\"errorCode\":\"1\",\"errorMessage\":\"undefined node %d\" }",
                     command.getNodeId()
@@ -629,7 +636,7 @@ public class MainCommander extends TreeMap<CommandType, CommandHandler> implemen
     public ZWaveFeedback commandGetValueList(ZWaveCommand command) {
         ZWaveFeedback feedback = new ZWaveFeedback();
 
-        feedback.setFeedback(home.get(command.getNodeId()).getValueList());
+        feedback.setFeedback(home.getNodes().get(command.getNodeId()).getValueList());
 
         return feedback;
     }
@@ -640,14 +647,14 @@ public class MainCommander extends TreeMap<CommandType, CommandHandler> implemen
     public ZWaveFeedback commandGetValue(ZWaveCommand command) {
         ZWaveFeedback feedback = new ZWaveFeedback();
 
-        ZWaveNode node = home.get(command.getNodeId());
+        ZWaveNode node = home.getNodes().get(command.getNodeId());
         if (node == null) {
             feedback.setFeedback(String.format("{\"errorPoint\":\"getValue\",\"errorCode\":\"1\",\"errorMessage\":\"undefined node %d\" }",
                     command.getNodeId()
             ));
             return feedback;
         }
-        ZWaveValue value = node.get(command.getValueIndex());
+        ZWaveValue value = node.getValues().get(command.getValueIndex());
         if (value == null) {
             feedback.setFeedback(String.format("{\"errorPoint\":\"getValue\",\"errorCode\":\"2\",\"errorMessage\":\"undefined value %d in node %d\" }",
                     command.getValueIndex(),
@@ -655,7 +662,7 @@ public class MainCommander extends TreeMap<CommandType, CommandHandler> implemen
             ));
             return feedback;
         }
-        feedback.setFeedback(node.get(command.getValueIndex()).toString());
+        feedback.setFeedback(node.getValues().get(command.getValueIndex()).toString());
 
         return feedback;
     }
@@ -667,14 +674,14 @@ public class MainCommander extends TreeMap<CommandType, CommandHandler> implemen
         final ZWaveFeedback feedback = new ZWaveFeedback();
 
         // проверка корректности параметров команды
-        ZWaveNode node = home.get(command.getNodeId());
+        ZWaveNode node = home.getNodes().get(command.getNodeId());
         if (node == null) {
             feedback.setFeedback(String.format("{\"errorPoint\":\"setValue\",\"errorCode\":\"1\",\"errorMessage\":\"undefined node %d\" }",
                     command.getNodeId()
             ));
             return feedback;
         }
-        ZWaveValue value = node.get(command.getValueIndex());
+        ZWaveValue value = node.getValues().get(command.getValueIndex());
         if (value == null) {
             feedback.setFeedback(String.format("{\"errorPoint\":\"getValue\",\"errorCode\":\"2\",\"errorMessage\":\"undefined value %d in node %d\" }",
                     command.getValueIndex(),
@@ -725,19 +732,19 @@ public class MainCommander extends TreeMap<CommandType, CommandHandler> implemen
         ZWaveFeedback feedback = new ZWaveFeedback();
 
         // Проверка корректности данных команды
-        if (home.get(command.getNodeId()) == null) {
+        if (home.getNodes().get(command.getNodeId()) == null) {
             feedback.setFeedback(String.format("{\"errorPoint\":\"addAssociation\",\"errorCode\":\"1\",\"errorMessage\":\"undefined node %d\" }",
                     command.getNodeId()
             ));
             return feedback;
         }
-        if (home.get(command.getTargetId()) == null) {
+        if (home.getNodes().get(command.getTargetId()) == null) {
             feedback.setFeedback(String.format("{\"errorPoint\":\"addAssociation\",\"errorCode\":\"1\",\"errorMessage\":\"undefined target node %d\" }",
                     command.getTargetId()
             ));
             return feedback;
         }
-        if (!getHome().get(command.getNodeId()).existGroup(command.getGroupId())) {
+        if (!getHome().getNodes().get(command.getNodeId()).existGroup(command.getGroupId())) {
             feedback.setFeedback(String.format("{\"errorPoint\":\"addAssociation\",\"errorCode\":\"4\",\"errorMessage\":\"node %d not have a group %d\" }",
                     command.getTargetId(),
                     command.getGroupId()
@@ -759,19 +766,19 @@ public class MainCommander extends TreeMap<CommandType, CommandHandler> implemen
         ZWaveFeedback feedback = new ZWaveFeedback();
 
         // Проверка корректности данных команды
-        if (home.get(command.getNodeId()) == null) {
+        if (home.getNodes().get(command.getNodeId()) == null) {
             feedback.setFeedback(String.format("{\"errorPoint\":\"removeAssociation\",\"errorCode\":\"1\",\"errorMessage\":\"undefined node %d\" }",
                     command.getNodeId()
             ));
             return feedback;
         }
-        if (home.get(command.getTargetId()) == null) {
+        if (home.getNodes().get(command.getTargetId()) == null) {
             feedback.setFeedback(String.format("{\"errorPoint\":\"removeAssociation\",\"errorCode\":\"1\",\"errorMessage\":\"undefined target node %d\" }",
                     command.getTargetId()
             ));
             return feedback;
         }
-        if (!getHome().get(command.getNodeId()).existGroup(command.getGroupId())) {
+        if (!getHome().getNodes().get(command.getNodeId()).existGroup(command.getGroupId())) {
             feedback.setFeedback(String.format("{\"errorPoint\":\"removeAssociation\",\"errorCode\":\"4\",\"errorMessage\":\"node %d not have a group %d\" }",
                     command.getTargetId(),
                     command.getGroupId()
@@ -793,13 +800,13 @@ public class MainCommander extends TreeMap<CommandType, CommandHandler> implemen
         ZWaveFeedback feedback = new ZWaveFeedback();
 
         // Проверка корректности данных команды
-        if (home.get(command.getNodeId()) == null) {
+        if (home.getNodes().get(command.getNodeId()) == null) {
             feedback.setFeedback(String.format("{\"errorPoint\":\"getAssociations\",\"errorCode\":\"1\",\"errorMessage\":\"undefined node %d\" }",
                     command.getNodeId()
             ));
             return feedback;
         }
-        if (!getHome().get(command.getNodeId()).existGroup(command.getGroupId())) {
+        if (!getHome().getNodes().get(command.getNodeId()).existGroup(command.getGroupId())) {
             feedback.setFeedback(String.format("{\"errorPoint\":\"removeAssociation\",\"errorCode\":\"4\",\"errorMessage\":\"node %d not have a group %d\" }",
                     command.getTargetId(),
                     command.getGroupId()
@@ -832,13 +839,13 @@ public class MainCommander extends TreeMap<CommandType, CommandHandler> implemen
         ZWaveFeedback feedback = new ZWaveFeedback();
 
         // Проверка корректности данных команды
-        if (home.get(command.getNodeId()) == null) {
+        if (home.getNodes().get(command.getNodeId()) == null) {
             feedback.setFeedback(String.format("{\"errorPoint\":\"getMaxAssociation\",\"errorCode\":\"1\",\"errorMessage\":\"undefined node %d\" }",
                     command.getNodeId()
             ));
             return feedback;
         }
-        if (!getHome().get(command.getNodeId()).existGroup(command.getGroupId())) {
+        if (!getHome().getNodes().get(command.getNodeId()).existGroup(command.getGroupId())) {
             feedback.setFeedback(String.format("{\"errorPoint\":\"removeAssociation\",\"errorCode\":\"4\",\"errorMessage\":\"node %d not have a group %d\" }",
                     command.getTargetId(),
                     command.getGroupId()
@@ -864,7 +871,7 @@ public class MainCommander extends TreeMap<CommandType, CommandHandler> implemen
         ZWaveFeedback feedback = new ZWaveFeedback();
 
         // Проверка корректности данных команды
-        if (home.get(command.getNodeId()) == null) {
+        if (home.getNodes().get(command.getNodeId()) == null) {
             feedback.setFeedback(String.format("{\"errorPoint\":\"getNumGroups\",\"errorCode\":\"1\",\"errorMessage\":\"undefined node %d\" }",
                     command.getNodeId()
             ));

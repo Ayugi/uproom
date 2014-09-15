@@ -3,8 +3,8 @@ package ru.uproom.gate.zwave;
 import org.zwave4j.Manager;
 import org.zwave4j.Notification;
 import ru.uproom.gate.transport.dto.DeviceDTO;
-import ru.uproom.gate.transport.dto.parameters.DeviceState;
 import ru.uproom.gate.transport.dto.DeviceType;
+import ru.uproom.gate.transport.dto.parameters.DeviceState;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -15,7 +15,7 @@ import java.util.TreeMap;
  * <p/>
  * Created by osipenko on 31.07.14.
  */
-public class ZWaveNode extends TreeMap<Integer, ZWaveValue> {
+public class ZWaveNode {
 
 
     //=============================================================================================================
@@ -24,6 +24,7 @@ public class ZWaveNode extends TreeMap<Integer, ZWaveValue> {
 
     // device type
     DeviceType type;
+    private Map<Integer, ZWaveValue> values = new TreeMap<Integer, ZWaveValue>();
     private ZWaveHome home = null;
     private boolean polled = false;
     private short nodeId = 0;
@@ -44,7 +45,6 @@ public class ZWaveNode extends TreeMap<Integer, ZWaveValue> {
     private short zId = 0;
     // device state
     private DeviceState state;
-
 
 
     //=============================================================================================================
@@ -267,6 +267,14 @@ public class ZWaveNode extends TreeMap<Integer, ZWaveValue> {
 
 
     //------------------------------------------------------------------------
+    //  node values
+
+    public Map<Integer, ZWaveValue> getValues() {
+        return values;
+    }
+
+
+    //------------------------------------------------------------------------
     //  events handling
 
     public DeviceState getState() {
@@ -289,7 +297,7 @@ public class ZWaveNode extends TreeMap<Integer, ZWaveValue> {
         String result = "[";
 
         boolean needComma = false;
-        for (Map.Entry<Integer, ZWaveValue> entry : this.entrySet()) {
+        for (Map.Entry<Integer, ZWaveValue> entry : values.entrySet()) {
             if (needComma) result += ",";
             else needComma = true;
             result += entry.getValue().toString();
@@ -337,7 +345,7 @@ public class ZWaveNode extends TreeMap<Integer, ZWaveValue> {
 
         Map<String, String> parameters = dto.getParameters();
         // add to map all values
-        for (Map.Entry<Integer, ZWaveValue> entry : this.entrySet()) {
+        for (Map.Entry<Integer, ZWaveValue> entry : values.entrySet()) {
             parameters.put(entry.getValue().getValueLabel(), entry.getValue().getValueAsString());
         }
         // add to map needed fields

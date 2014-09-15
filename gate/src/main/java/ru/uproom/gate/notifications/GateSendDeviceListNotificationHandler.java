@@ -1,5 +1,6 @@
 package ru.uproom.gate.notifications;
 
+import org.zwave4j.Notification;
 import ru.uproom.gate.transport.ServerTransportMarker;
 import ru.uproom.gate.transport.command.SendDeviceListCommand;
 import ru.uproom.gate.transport.dto.DeviceDTO;
@@ -12,9 +13,10 @@ import java.util.List;
  * <p/>
  * Created by osipenko on 10.09.14.
  */
+@GateNotificationHandler(value = GateNotificationType.GateSendDeviceList)
 public class GateSendDeviceListNotificationHandler implements NotificationHandler {
     @Override
-    public boolean execute(ZWaveHome home, ServerTransportMarker transport) {
+    public boolean execute(ZWaveHome home, ServerTransportMarker transport, Notification notification) {
         if (transport == null) return false;
 
         // create device list

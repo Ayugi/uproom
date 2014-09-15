@@ -8,6 +8,7 @@ import org.zwave4j.Manager;
 import org.zwave4j.Notification;
 import org.zwave4j.NotificationType;
 import org.zwave4j.NotificationWatcher;
+import ru.uproom.gate.domain.ClassesSearcher;
 import ru.uproom.gate.transport.ServerTransportMarker;
 import ru.uproom.gate.transport.ServerTransportUser;
 import ru.uproom.gate.zwave.ZWaveHome;
@@ -17,27 +18,30 @@ import ru.uproom.gate.zwave.ZWaveValueIndexFactory;
 
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 
 /**
- * Z-Wave events watcher
+ * Z-Wave & gate events watcher
  * <p/>
  * Created by osipenko on 27.07.14.
  */
 @Service
-public class MainWatcher extends TreeMap<String, NotificationHandler>
-        implements NotificationWatcher, ServerTransportUser, GateWatcher {
+public class MainWatcher implements NotificationWatcher, ServerTransportUser, GateWatcher {
+
+
+
+
+    //##############################################################################################################
+    //######    fields
+
 
     private static final Logger LOG = LoggerFactory.getLogger(MainWatcher.class);
 
     private Map<NotificationType, NotificationHandler> notificationHandlers =
             new EnumMap<NotificationType, NotificationHandler>(NotificationType.class);
 
-
-    //##############################################################################################################
-    //######    fields
-
+    private Map<GateNotificationType, NotificationHandler> gateNotificationHandlers =
+            new EnumMap<GateNotificationType, NotificationHandler>(GateNotificationType.class);
 
     private boolean PRINT_DEBUG_MESSAGES = true;
     private boolean ready = false;
@@ -56,39 +60,10 @@ public class MainWatcher extends TreeMap<String, NotificationHandler>
     public MainWatcher() {
         super();
         prepareZwaveNotificationHandlers();
-
-        // filling map with reflection API - gate notifications
-        for (GateNotificationType type : GateNotificationType.values()) {
-            try {
-                Class c = Class.forName("ru.uproom.gate.notifications." + type.name() + "NotificationHandler");
-                NotificationHandler handler = (NotificationHandler) instantiate(c);
-                this.put(type.name(), handler);
-            } catch (ClassNotFoundException e) {
-                System.out.println("[ERR CNF] - MainWatcher - constructor - " + e.getMessage());
-            }
-        }
+        prepareGateNotificationHandlers();
     }
 
-    private void prepareZwaveNotificationHandlers() {
-        for (Class<?> handler : ClassesSearcher.findAnnotatedClasses(ZwaveNotificationHandler.class)) {
-            ZwaveNotificationHandler annotation = handler.getAnnotation(ZwaveNotificationHandler.class);
-            notificationHandlers.put(annotation.value(),
-                    (NotificationHandler) instantiate(handler));
-        }
-    }
 
-    // TODO move to some reflection handler
-    private Object instantiate(Class<?> handler) {
-        try {
-            return handler.newInstance();
-        } catch (InstantiationException e) {
-            LOG.error("unexpected InstantiationException instantiating " + handler, e);
-            throw new RuntimeException(e);
-        } catch (IllegalAccessException e) {
-            LOG.error("unexpected IllegalAccessException instantiating " + handler, e);
-            throw new RuntimeException(e);
-        }
-    }
 
 
     //##############################################################################################################
@@ -160,18 +135,20 @@ public class MainWatcher extends TreeMap<String, NotificationHandler>
 
 
     //------------------------------------------------------------------------
-    //  conversion names of z-wave lib notification type
+    //  notification handlers
 
-    public String nameConverting(NotificationType type) {
-        String result = "";
-
-        String[] words = type.name().split("_");
-        for (String word : words) {
-            String newWord = word.toLowerCase();
-            result += newWord.substring(0, 1).toUpperCase() + newWord.substring(1);
+    private void prepareZwaveNotificationHandlers() {
+        for (Class<?> handler : ClassesSearcher.findAnnotatedClasses(ZwaveNotificationHandler.class)) {
+            ZwaveNotificationHandler annotation = handler.getAnnotation(ZwaveNotificationHandler.class);
+            notificationHandlers.put(annotation.value(), (NotificationHandler) ClassesSearcher.instantiate(handler));
         }
+    }
 
-        return result;
+    private void prepareGateNotificationHandlers() {
+        for (Class<?> handler : ClassesSearcher.findAnnotatedClasses(GateNotificationHandler.class)) {
+            GateNotificationHandler annotation = handler.getAnnotation(GateNotificationHandler.class);
+            gateNotificationHandlers.put(annotation.value(), (NotificationHandler) ClassesSearcher.instantiate(handler));
+        }
     }
 
 
@@ -182,16 +159,16 @@ public class MainWatcher extends TreeMap<String, NotificationHandler>
     public boolean onGateEvent(GateNotificationType type) {
 
         // find handler for notification
-        NotificationHandler handler = this.get(type);
+        NotificationHandler handler = gateNotificationHandlers.get(type);
         if (handler == null) {
-            System.out.println(String.format("[ERR] - MainWatcher - onGateEvent - handler for notification (%s) not found",
+            LOG.debug("[ERR] - MainWatcher - onGateEvent - handler for notification (%s) not found",
                     type.name()
-            ));
+            );
             return false;
         }
 
         // execution notification
-        return handler.execute(home, link ? transport : null);
+        return handler.execute(home, link ? transport : null, null);
     }
 
 
@@ -204,128 +181,19 @@ public class MainWatcher extends TreeMap<String, NotificationHandler>
         // find handler for notification
         NotificationHandler handler = notificationHandlers.get(notification.getType());
         if (handler == null) {
-            System.out.println(String.format("[ERR] - MainWatcher - onNotification - handler for notification (%s) not found",
+            LOG.debug("[ERR] - MainWatcher - onNotification - handler for notification (%s) not found",
                     notification.getType().name()
-            ));
+            );
+            return;
         }
 
         // execution notification
-        handler.execute(home, link ? transport : null);
-
-        // Список событий
-//        switch (notification.getType()) {
-//            case DRIVER_READY:
-//                onNotificationDriverReady(notification, o);
-//                break;
-//            case DRIVER_FAILED:
-//                onNotificationDriverFailed(notification, o);
-//                break;
-//            case DRIVER_RESET:
-//                onNotificationDriverReset(notification, o);
-//                break;
-//            case AWAKE_NODES_QUERIED:
-//                onNotificationAwakeNodesQueried(notification, o);
-//                break;
-//            case ALL_NODES_QUERIED:
-//                onNotificationAllNodesQueried(notification, o);
-//                break;
-//            case ALL_NODES_QUERIED_SOME_DEAD:
-//                onNotificationAllNodesQueriedSomeDead(notification, o);
-//                break;
-//            case POLLING_ENABLED:
-//                onNotificationPollingEnabled(notification, o);
-//                break;
-//            case POLLING_DISABLED:
-//                onNotificationPollingDisabled(notification, o);
-//                break;
-//            case NODE_NEW:
-//                onNotificationNodeNew(notification, o);
-//                break;
-//            case NODE_ADDED:
-//                onNotificationNodeAdded(notification, o);
-//                break;
-//            case NODE_REMOVED:
-//                onNotificationNodeRemoved(notification, o);
-//                break;
-//            case ESSENTIAL_NODE_QUERIES_COMPLETE:
-//                onNotificationEssentialNodeQueriesComplete(notification, o);
-//                break;
-//            case NODE_QUERIES_COMPLETE:
-//                onNotificationNodeQueriesComplete(notification, o);
-//                break;
-//            case NODE_EVENT:
-//                onNotificationNodeEvent(notification, o);
-//                break;
-//            case NODE_NAMING:
-//                onNotificationNodeNaming(notification, o);
-//                break;
-//            case NODE_PROTOCOL_INFO:
-//                onNotificationNodeProtocolInfo(notification, o);
-//                break;
-//            case VALUE_ADDED:
-//                onNotificationValueAdded(notification, o);
-//                break;
-//            case VALUE_REMOVED:
-//                onNotificationValueRemoved(notification, o);
-//                break;
-//            case VALUE_CHANGED:
-//                onNotificationValueChanged(notification, o);
-//                break;
-//            case VALUE_REFRESHED:
-//                onNotificationValueRefreshed(notification, o);
-//                break;
-//            case GROUP:
-//                onNotificationGroup(notification, o);
-//                break;
-//            case SCENE_EVENT:
-//                onNotificationSceneEvent(notification, o);
-//                break;
-//            case CREATE_BUTTON:
-//                onNotificationCreateButton(notification, o);
-//                break;
-//            case DELETE_BUTTON:
-//                onNotificationDeleteButton(notification, o);
-//                break;
-//            case BUTTON_ON:
-//                onNotificationButtonOn(notification, o);
-//                break;
-//            case BUTTON_OFF:
-//                onNotificationButtonOff(notification, o);
-//                break;
-//            case NOTIFICATION:
-//                onNotificationError(notification, o);
-//                break;
-//            default:
-//                onNotificationUnknown(notification, o);
-//                break;
-//        }
+        handler.execute(home, link ? transport : null, notification);
     }
 
 
     //------------------------------------------------------------------------
     //  Z-Wave library event handlers
-
-
-    // ======  driver set up successfully
-
-    public void onNotificationDriverReady(Notification notification, Object o) {
-
-        // HomeID in Z-Wave notation - our GateID
-        getHome().setHomeId(notification.getHomeId());
-
-        // send message to server
-//        if (link) transport.sendCommand(new ChangeDeviceStateCommand(
-//                String.format("%d", getHome().getHomeId()),
-//                Manager.get().getControllerNodeId(getHome().getHomeId()),
-//                "READY"
-//        ));
-
-        // вывод отладочной информации
-        if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("Driver ready\n" +
-                        "\thome id: %d",
-                notification.getHomeId()
-        ));
-    }
 
 
     // ======  запуск драйвера произведен неудачно
@@ -415,7 +283,7 @@ public class MainWatcher extends TreeMap<String, NotificationHandler>
 
         // Определение идентификатора узла и добавление его в список известных узлов
         ZWaveNode node = new ZWaveNode(getHome(), notification.getNodeId());
-        getHome().put(node.getZId(), node);
+        getHome().getNodes().put(node.getZId(), node);
 
         // вывод отладочной информации
         if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("Node new\n" +
@@ -431,7 +299,7 @@ public class MainWatcher extends TreeMap<String, NotificationHandler>
 
         // Определение идентификатора узла и добавление его в список известных узлов
         ZWaveNode node = new ZWaveNode(getHome(), notification.getNodeId());
-        getHome().put(node.getZId(), node);
+        getHome().getNodes().put(node.getZId(), node);
 
         // вывод отладочной информации
         if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("Node added\n" +
@@ -449,7 +317,7 @@ public class MainWatcher extends TreeMap<String, NotificationHandler>
 
         // Определение идентификатора узла и удаление его из списка известных узлов
         short nodeId = notification.getNodeId();
-        getHome().remove(nodeId);
+        getHome().getNodes().remove(nodeId);
 
         // вывод отладочной информации
         if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("Node removed\n" +
@@ -478,7 +346,7 @@ public class MainWatcher extends TreeMap<String, NotificationHandler>
     public void onNotificationNodeQueriesComplete(Notification notification, Object o) {
 
         // вызов обработчиков событий для данного узла
-        ZWaveNode node = getHome().get(notification.getNodeId());
+        ZWaveNode node = getHome().getNodes().get(notification.getNodeId());
         if (node == null) return;
         node.callEvents(notification);
 
@@ -538,18 +406,17 @@ public class MainWatcher extends TreeMap<String, NotificationHandler>
     public void onNotificationValueAdded(Notification notification, Object o) {
 
         // находим узел в который добавляется параметр
-        ZWaveNode node = getHome().get(notification.getNodeId());
+        ZWaveNode node = getHome().getNodes().get(notification.getNodeId());
         if (node == null) return;
 
         // добавляем параметр
-        ZWaveValue value = new ZWaveValue();
-        value.setValueId(notification.getValueId());
+        ZWaveValue value = new ZWaveValue(notification.getValueId());
         Integer index = ZWaveValueIndexFactory.createIndex(
                 value.getValueCommandClass(),
                 value.getValueInstance(),
                 value.getValueIndex()
         );
-        node.put(index, value);
+        node.getValues().put(index, value);
 
         // вывод отладочной информации
         if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("Value added\n" +
@@ -578,7 +445,7 @@ public class MainWatcher extends TreeMap<String, NotificationHandler>
     public void onNotificationValueRemoved(Notification notification, Object o) {
 
         // находим узел из которого удаляется параметр
-        ZWaveNode node = home.get(notification.getNodeId());
+        ZWaveNode node = home.getNodes().get(notification.getNodeId());
         if (node == null) return;
 
         // удаляем параметр
@@ -587,7 +454,7 @@ public class MainWatcher extends TreeMap<String, NotificationHandler>
                 notification.getValueId().getInstance(),
                 notification.getValueId().getIndex()
         );
-        node.remove(index);
+        node.getValues().remove(index);
 
         // вывод отладочной информации
         if (PRINT_DEBUG_MESSAGES) System.out.println(String.format("Value removed\n" +
@@ -608,7 +475,7 @@ public class MainWatcher extends TreeMap<String, NotificationHandler>
     public void onNotificationValueChanged(Notification notification, Object o) {
 
         // находим узел параметр которого обновился
-        ZWaveNode node = getHome().get(notification.getNodeId());
+        ZWaveNode node = getHome().getNodes().get(notification.getNodeId());
         if (node == null) return;
 
         // находим параметр
@@ -617,7 +484,7 @@ public class MainWatcher extends TreeMap<String, NotificationHandler>
                 notification.getValueId().getInstance(),
                 notification.getValueId().getIndex()
         );
-        ZWaveValue value = node.get(index);
+        ZWaveValue value = node.getValues().get(index);
         if (value == null) return;
 
         // если есть подписчики, оповещаем их
@@ -646,7 +513,7 @@ public class MainWatcher extends TreeMap<String, NotificationHandler>
     public void onNotificationValueRefreshed(Notification notification, Object o) {
 
         // находим узел параметр которого обновился
-        ZWaveNode node = getHome().get(notification.getNodeId());
+        ZWaveNode node = getHome().getNodes().get(notification.getNodeId());
         if (node == null) return;
 
         // находим параметр
@@ -655,7 +522,7 @@ public class MainWatcher extends TreeMap<String, NotificationHandler>
                 notification.getValueId().getInstance(),
                 notification.getValueId().getIndex()
         );
-        ZWaveValue value = node.get(index);
+        ZWaveValue value = node.getValues().get(index);
         if (value == null) return;
 
         // вывод отладочной информации
@@ -679,7 +546,7 @@ public class MainWatcher extends TreeMap<String, NotificationHandler>
     public void onNotificationGroup(Notification notification, Object o) {
 
         // узел связанный с группой
-        ZWaveNode node = getHome().get(notification.getNodeId());
+        ZWaveNode node = getHome().getNodes().get(notification.getNodeId());
         if (node == null) return;
 
         // Если такой группы еще не было, добавляем ее
@@ -762,7 +629,7 @@ public class MainWatcher extends TreeMap<String, NotificationHandler>
         String notificationCode = "";
 
         // вызвавший событие узел
-        ZWaveNode node = getHome().get(notification.getNodeId());
+        ZWaveNode node = getHome().getNodes().get(notification.getNodeId());
         if (node == null) return;
 
         // вызов обработчиков событий для данного узла

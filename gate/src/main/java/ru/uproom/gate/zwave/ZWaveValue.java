@@ -2,6 +2,7 @@ package ru.uproom.gate.zwave;
 
 import org.zwave4j.Manager;
 import org.zwave4j.ValueId;
+import ru.uproom.gate.transport.dto.parameters.ZWaveParamNames2ServerNames;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
@@ -13,18 +14,31 @@ public class ZWaveValue {
 
 
     //=============================================================================================================
-    //======    параметры класса
+    //======    fields
+
 
     private ValueId valueId = null;
+    private String valueName;
     private ArrayList<ZWaveValueCallback> events = new ArrayList<ZWaveValueCallback>();
 
 
     //=============================================================================================================
-    //======    обработка параметров класса
+    //======    constructors
+
+
+    public ZWaveValue(ValueId valueId) {
+        this.valueId = valueId;
+        String label = Manager.get().getValueLabel(valueId);
+        this.valueName = ZWaveParamNames2ServerNames.getServerName(label);
+    }
+
+
+    //=============================================================================================================
+    //======    getters & setters
 
 
     //------------------------------------------------------------------------
-    //  идентификатор параметра узла
+    //  z-wave value ID
 
     public ValueId getValueId() {
         return valueId;
@@ -36,7 +50,7 @@ public class ZWaveValue {
 
 
     //------------------------------------------------------------------------
-    //  получение названия параметра
+    //  z-wave value label
 
     public String getValueLabel() {
         return Manager.get().getValueLabel(valueId);
@@ -44,7 +58,7 @@ public class ZWaveValue {
 
 
     //------------------------------------------------------------------------
-    //  получение индекса параметра
+    //  z-wave value index
 
     public Short getValueIndex() {
         return valueId.getIndex();
@@ -52,7 +66,7 @@ public class ZWaveValue {
 
 
     //------------------------------------------------------------------------
-    //  получение класса команд
+    //  z-wave value command class
 
     public Short getValueCommandClass() {
         return valueId.getCommandClassId();
@@ -60,7 +74,7 @@ public class ZWaveValue {
 
 
     //------------------------------------------------------------------------
-    //  получение индекса экземпляра класса команд
+    //  z-wave value instance index
 
     public Short getValueInstance() {
         return valueId.getInstance();
@@ -68,7 +82,7 @@ public class ZWaveValue {
 
 
     //------------------------------------------------------------------------
-    //  события, связанные с данным параметром
+    //  events associated with value
 
     public boolean addEvent(ZWaveValueCallback event) {
         return events.add(event);
@@ -82,6 +96,14 @@ public class ZWaveValue {
         for (ZWaveValueCallback event : events) {
             event.onCallback(this);
         }
+    }
+
+
+    //------------------------------------------------------------------------
+    //  server value name
+
+    public String getValueName() {
+        return valueName;
     }
 
 
@@ -162,5 +184,4 @@ public class ZWaveValue {
 
         return result;
     }
-
 }
