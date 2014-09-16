@@ -7,6 +7,7 @@ import ru.uproom.gate.transport.dto.DeviceType;
 import ru.uproom.gate.transport.dto.parameters.DeviceState;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -37,8 +38,8 @@ public class ZWaveNode {
     private String nodeManufacturerId = "";
     private String nodeManufacturerName = "";
     private short nodeVersion = 0;
-    private ArrayList<Short> groups = new ArrayList<Short>();
-    private ArrayList<ZWaveNodeCallback> events = new ArrayList<ZWaveNodeCallback>();
+    private List<Short> groups = new ArrayList<Short>();
+    private List<ZWaveNodeCallback> events = new ArrayList<ZWaveNodeCallback>();
     // device ID in server database
     private int id;
     // device ID in Z-Wave net
@@ -235,12 +236,8 @@ public class ZWaveNode {
     //------------------------------------------------------------------------
     //  node groups
 
-    public boolean addGroup(Short group) {
-        return groups.add(group);
-    }
-
-    public boolean removeGroup(Short group) {
-        return groups.remove(group);
+    public List<Short> getGroups() {
+        return groups;
     }
 
     public boolean existGroup(Short group) {
