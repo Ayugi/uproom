@@ -210,7 +210,7 @@ public class ServerTransportTest implements AutoCloseable, Runnable {
             while (running) {
                 // write objects to client
                 try {
-                    output.writeObject(new HandshakeCommand(String.format("gate-%06d", gateId)));
+                    output.writeObject(new HandshakeCommand(1));
                 } catch (IOException e) {
                     System.out.println("TEST (ServerTransportOut) >>>> ERROR >>>> " + e.getMessage());
                 }

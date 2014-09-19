@@ -1,11 +1,19 @@
 package ru.uproom.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import ru.uproom.domain.Device;
+import ru.uproom.gate.transport.command.Command;
 import ru.uproom.gate.transport.command.HandshakeCommand;
+import ru.uproom.gate.transport.command.SendDeviceListCommand;
+import ru.uproom.gate.transport.dto.DeviceDTO;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by hedin on 30.08.2014.
@@ -14,9 +22,16 @@ public class GateSocketHandler {
     private Socket socket;
     private ObjectInputStream input;
     private ObjectOutputStream output;
+    private int userId;
+    private boolean stopped;
 
-    public GateSocketHandler(Socket socket) {
+    private DeviceStorageService deviceStorage;
+
+    private static final Logger LOG = LoggerFactory.getLogger(GateSocketHandler.class);
+
+    public GateSocketHandler(Socket socket, DeviceStorageService deviceStorage) {
         this.socket = socket;
+        this.deviceStorage = deviceStorage;
         prepareReaderStream();
         prepareWriterStream();
     }
@@ -37,13 +52,16 @@ public class GateSocketHandler {
         }
     }
 
-    public String handshake() {
+    public int handshake() {
+        LOG.info("handshake");
         try {
             Object handshakeObj = input.readObject();
             if (!(handshakeObj instanceof HandshakeCommand))
                 throw new RuntimeException("Invalid handshake received " + handshakeObj);
             HandshakeCommand handshake = (HandshakeCommand) handshakeObj;
-            return handshake.getGateId();
+            userId = handshake.getGateId();
+            LOG.info("handshake successful userId " + userId);
+            return userId;
         } catch (IOException e) {
             throw new RuntimeException("Failed to receive handshake ", e);
         } catch (ClassNotFoundException e) {
@@ -51,9 +69,42 @@ public class GateSocketHandler {
         }
     }
 
-    public void startListener() {
-
+    public void sendCommand(Command command){
+        LOG.info("sendCommand command " + command.getType());
+        try {
+            output.writeObject(command);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
+    public void listen() {
+        LOG.info("listen ");
+        while (! stopped){
+            try {
+                Command command = (Command) input.readObject();
+                LOG.info("listen command " + command.getType());
+                // TODO handles map
+                if (command instanceof SendDeviceListCommand)
+                    deviceStorage.addDevices(userId ,
+                            transformDtosToDevices((SendDeviceListCommand) command));
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
+    private List<Device> transformDtosToDevices(SendDeviceListCommand listCommand) {
+        List<Device> devices = new ArrayList<>();
+        for (DeviceDTO dto : listCommand.getDevices()){
+            devices.add(new Device(dto));
+        }
+        return devices;
+    }
+
+    public void stop(){
+        stopped = true;
+    }
 }
