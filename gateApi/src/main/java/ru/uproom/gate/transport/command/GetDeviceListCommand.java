@@ -6,7 +6,12 @@ package ru.uproom.gate.transport.command;
  * Created by osipenko on 10.09.14.
  */
 public class GetDeviceListCommand extends Command {
+
     private String gateId;
+
+    public GetDeviceListCommand() {
+        super(CommandType.GetDeviceList);
+    }
 
     public GetDeviceListCommand(String gateId) {
         super(CommandType.GetDeviceList);

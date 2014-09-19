@@ -1,6 +1,7 @@
 package ru.uproom.service;
 
 import junit.framework.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.Ignore;
 import ru.uproom.gate.transport.command.HandshakeCommand;
@@ -15,8 +16,6 @@ import java.net.Socket;
 @Ignore
 public class TestSocketConnect {
 
-    public static final String TEST_GATE_NAME = "testGate";
-
     @Test
     public synchronized void testSocketHandshake() throws IOException, InterruptedException {
         GateServiceImpl service = new GateServiceImpl();
@@ -24,9 +23,9 @@ public class TestSocketConnect {
 
         Socket socket = new Socket("localhost", 8282);
         ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
-        objectOutputStream.writeObject(new HandshakeCommand(TEST_GATE_NAME));
+        objectOutputStream.writeObject(new HandshakeCommand(1));
         wait(100);
-        GateSocketHandler handler = service.getHandler(TEST_GATE_NAME);
+        GateSocketHandler handler = service.getHandler(1);
         Assert.assertNotNull(handler);
     }
 }

@@ -2,8 +2,10 @@ package ru.uproom.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.uproom.gate.transport.command.Command;
+import ru.uproom.gate.transport.command.GetDeviceListCommand;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -20,7 +22,10 @@ public class GateServiceImpl implements GateTransport {
 
     private static final Logger LOG = LoggerFactory.getLogger(GateServiceImpl.class);
 
-    private Map<String, GateSocketHandler> activeSockets = new HashMap<>();
+    private Map<Integer, GateSocketHandler> activeSockets = new HashMap<>();
+
+    @Autowired
+    private DeviceStorageService deviceStorage;
 
     @Override
     public void sendCommand(Command command, String userId) {
@@ -39,8 +44,8 @@ public class GateServiceImpl implements GateTransport {
         }
     }
 
-    public GateSocketHandler getHandler(String id) {
-        return activeSockets.get(id);
+    public GateSocketHandler getHandler(int userId) {
+        return activeSockets.get(userId);
     }
 
     private class SocketListener implements Runnable {
@@ -71,10 +76,11 @@ public class GateServiceImpl implements GateTransport {
         }
 
         private void handleConnection(Socket accept) throws IOException {
-            GateSocketHandler handler = new GateSocketHandler(accept);
-            String userId = handler.handshake();
+            GateSocketHandler handler = new GateSocketHandler(accept, deviceStorage);
+            int userId = handler.handshake();
             activeSockets.put(userId, handler);
-            handler.startListener();
+            handler.sendCommand(new GetDeviceListCommand());
+            handler.listen();
         }
     }
 }

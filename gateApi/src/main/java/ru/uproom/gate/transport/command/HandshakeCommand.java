@@ -7,14 +7,14 @@ package ru.uproom.gate.transport.command;
  * Time: 12:48 PM
  */
 public class HandshakeCommand extends Command {
-    private String gateId;
+    private int gateId;
 
-    public HandshakeCommand(String gateId) {
+    public HandshakeCommand(int gateId) {
         super(CommandType.Handshake);
         this.gateId = gateId;
     }
 
-    public String getGateId() {
+    public int getGateId() {
         return gateId;
     }
 }
