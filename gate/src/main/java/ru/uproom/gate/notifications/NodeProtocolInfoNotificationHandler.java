@@ -11,7 +11,7 @@ import ru.uproom.gate.zwave.ZWaveHome;
  * Created by osipenko on 15.09.14.
  */
 
-@ZwaveNotificationHandler(value = NotificationType.NODE_PROTOCOL_INFO)
+@ZwaveNotificationHandlerAnnotation(value = NotificationType.NODE_PROTOCOL_INFO)
 public class NodeProtocolInfoNotificationHandler implements NotificationHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(NodeProtocolInfoNotificationHandler.class);

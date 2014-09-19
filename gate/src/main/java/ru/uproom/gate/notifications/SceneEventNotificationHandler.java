@@ -11,7 +11,7 @@ import ru.uproom.gate.zwave.ZWaveHome;
  * Created by osipenko on 15.09.14.
  */
 
-@ZwaveNotificationHandler(value = NotificationType.SCENE_EVENT)
+@ZwaveNotificationHandlerAnnotation(value = NotificationType.SCENE_EVENT)
 public class SceneEventNotificationHandler implements NotificationHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(SceneEventNotificationHandler.class);

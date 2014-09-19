@@ -5,13 +5,14 @@ import org.slf4j.LoggerFactory;
 import org.zwave4j.Notification;
 import org.zwave4j.NotificationType;
 import ru.uproom.gate.transport.ServerTransportMarker;
+import ru.uproom.gate.transport.command.NetworkControllerStateCommand;
 import ru.uproom.gate.zwave.ZWaveHome;
 
 /**
  * Created by osipenko on 15.09.14.
  */
 
-@ZwaveNotificationHandler(value = NotificationType.DRIVER_FAILED)
+@ZwaveNotificationHandlerAnnotation(value = NotificationType.DRIVER_FAILED)
 public class DriverFailedNotificationHandler implements NotificationHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(DriverFailedNotificationHandler.class);
@@ -26,7 +27,9 @@ public class DriverFailedNotificationHandler implements NotificationHandler {
 
         LOG.debug("z-wave notification : DRIVER_FAILED");
 
-        return true;
+        // send message to server
+        return transport.sendCommand(new NetworkControllerStateCommand(home.getHomeIdAsString(), "off"));
+
     }
 
 }

@@ -2,14 +2,13 @@ package ru.uproom.gate.notifications;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.zwave4j.Notification;
 import org.zwave4j.NotificationType;
 import org.zwave4j.NotificationWatcher;
 import ru.uproom.gate.domain.ClassesSearcher;
 import ru.uproom.gate.transport.ServerTransportMarker;
 import ru.uproom.gate.transport.ServerTransportUser;
+import ru.uproom.gate.transport.dto.DeviceDTO;
 import ru.uproom.gate.zwave.ZWaveHome;
 
 import java.util.EnumMap;
@@ -21,7 +20,7 @@ import java.util.Map;
  * <p/>
  * Created by osipenko on 27.07.14.
  */
-@Service
+//@Service
 public class MainWatcher implements NotificationWatcher, ServerTransportUser, GateWatcher {
 
 
@@ -38,13 +37,12 @@ public class MainWatcher implements NotificationWatcher, ServerTransportUser, Ga
             new EnumMap<GateNotificationType, NotificationHandler>(GateNotificationType.class);
 
     private boolean PRINT_DEBUG_MESSAGES = true;
-    private boolean ready = false;
-    private boolean failed = false;
-    private ZWaveHome home = null;
+    private ZWaveHome home;
 
     private boolean link = false;
+    private boolean doExit;
 
-    @Autowired
+    //@Autowired
     private ServerTransportMarker transport = null;
 
 
@@ -63,40 +61,9 @@ public class MainWatcher implements NotificationWatcher, ServerTransportUser, Ga
 
 
     //------------------------------------------------------------------------
-    //  Z-Wave driver is ready for work
-
-    public boolean isReady() {
-        return ready;
-    }
-
-    public void setReady(boolean _ready) {
-        if (_ready) {
-            System.out.println("---- zwave network ready ----");
-            setFailed(false);
-        }
-        ready = _ready;
-    }
-
-
-    //------------------------------------------------------------------------
-    //  Z-Wave driver fault
-
-    public boolean isFailed() {
-        return failed;
-    }
-
-    public void setFailed(boolean failed) {
-        if (failed) {
-            System.out.println("---- zwave network failed ----");
-            setReady(false);
-        }
-        this.failed = failed;
-    }
-
-
-    //------------------------------------------------------------------------
     //  main object containing node list
 
+    @Override // GateWatcher
     public ZWaveHome getHome() {
         return home;
     }
@@ -113,12 +80,27 @@ public class MainWatcher implements NotificationWatcher, ServerTransportUser, Ga
         return transport;
     }
 
+    @Override // ServerTransportUser
     public void setTransport(ServerTransportMarker transport) {
         if (transport == null) link = false;
         else {
             this.transport = transport;
             link = true;
+            // send handshake every time when link with server established
+            onGateEvent(GateNotificationType.Handshake, null);
         }
+    }
+
+
+    //------------------------------------------------------------------------
+    //  flag of shutdown
+
+    public boolean isDoExit() {
+        return doExit;
+    }
+
+    public void setDoExit(boolean doExit) {
+        this.doExit = doExit;
     }
 
 
@@ -130,16 +112,32 @@ public class MainWatcher implements NotificationWatcher, ServerTransportUser, Ga
     //  notification handlers
 
     private void prepareZwaveNotificationHandlers() {
-        for (Class<?> handler : ClassesSearcher.findAnnotatedClasses(ZwaveNotificationHandler.class)) {
-            ZwaveNotificationHandler annotation = handler.getAnnotation(ZwaveNotificationHandler.class);
-            notificationHandlers.put(annotation.value(), (NotificationHandler) ClassesSearcher.instantiate(handler));
+        for (Class<?> handler : ClassesSearcher.getAnnotatedClasses(
+                "ru.uproom.gate.notifications",
+                ZwaveNotificationHandlerAnnotation.class
+        )) {
+            ZwaveNotificationHandlerAnnotation annotation =
+                    handler.getAnnotation(ZwaveNotificationHandlerAnnotation.class);
+            if (annotation == null) continue;
+            notificationHandlers.put(
+                    annotation.value(),
+                    (NotificationHandler) ClassesSearcher.instantiate(handler)
+            );
         }
     }
 
     private void prepareGateNotificationHandlers() {
-        for (Class<?> handler : ClassesSearcher.findAnnotatedClasses(GateNotificationHandler.class)) {
-            GateNotificationHandler annotation = handler.getAnnotation(GateNotificationHandler.class);
-            gateNotificationHandlers.put(annotation.value(), (NotificationHandler) ClassesSearcher.instantiate(handler));
+        for (Class<?> handler : ClassesSearcher.getAnnotatedClasses(
+                "ru.uproom.gate.notifications",
+                GateNotificationHandlerAnnotation.class
+        )) {
+            GateNotificationHandlerAnnotation annotation =
+                    handler.getAnnotation(GateNotificationHandlerAnnotation.class);
+            if (annotation == null) continue;
+            gateNotificationHandlers.put(
+                    annotation.value(),
+                    (NotificationHandler) ClassesSearcher.instantiate(handler)
+            );
         }
     }
 
@@ -148,7 +146,10 @@ public class MainWatcher implements NotificationWatcher, ServerTransportUser, Ga
     //  handling inline gate events
 
     @Override
-    public boolean onGateEvent(GateNotificationType type) {
+    public boolean onGateEvent(GateNotificationType type, DeviceDTO device) {
+
+        // shutdown gate
+        if (type == GateNotificationType.Shutdown) setDoExit(true);
 
         // find handler for notification
         NotificationHandler handler = gateNotificationHandlers.get(type);
@@ -182,5 +183,4 @@ public class MainWatcher implements NotificationWatcher, ServerTransportUser, Ga
         // execution notification
         handler.execute(home, link ? transport : null, notification);
     }
-
 }

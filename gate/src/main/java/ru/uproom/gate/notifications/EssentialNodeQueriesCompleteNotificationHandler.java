@@ -11,7 +11,7 @@ import ru.uproom.gate.zwave.ZWaveHome;
  * Created by osipenko on 15.09.14.
  */
 
-@ZwaveNotificationHandler(value = NotificationType.ESSENTIAL_NODE_QUERIES_COMPLETE)
+@ZwaveNotificationHandlerAnnotation(value = NotificationType.ESSENTIAL_NODE_QUERIES_COMPLETE)
 public class EssentialNodeQueriesCompleteNotificationHandler implements NotificationHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(EssentialNodeQueriesCompleteNotificationHandler.class);

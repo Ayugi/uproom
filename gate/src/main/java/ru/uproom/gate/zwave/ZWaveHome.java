@@ -22,6 +22,7 @@ public class ZWaveHome {
     private final Map<Short, ZWaveNode> nodes = new TreeMap<Short, ZWaveNode>();
     private long homeId;
     private boolean ready;
+    private boolean failed;
 
 
     //##############################################################################################################
@@ -39,6 +40,10 @@ public class ZWaveHome {
         this.homeId = homeId;
     }
 
+    public String getHomeIdAsString() {
+        return String.format("%d", homeId);
+    }
+
 
     //------------------------------------------------------------------------
     //  z-wave system ready to work
@@ -51,6 +56,16 @@ public class ZWaveHome {
         this.ready = ready;
     }
 
+    public boolean isFailed() {
+        boolean temp = failed;
+        failed = false;
+        return temp;
+    }
+
+    public void setFailed(boolean ready) {
+        this.ready = ready;
+    }
+
 
     //------------------------------------------------------------------------
     // node list
@@ -58,8 +73,6 @@ public class ZWaveHome {
     public Map<Short, ZWaveNode> getNodes() {
         return nodes;
     }
-
-
 
 
     //##############################################################################################################
@@ -100,4 +113,18 @@ public class ZWaveHome {
     public String toString() {
         return String.format("{\"id\":\"%d\"", homeId);
     }
+
+
+    //------------------------------------------------------------------------
+    //  set any values of any node
+
+    public boolean setValuesOfNodes(List<DeviceDTO> devices) {
+        for (DeviceDTO device : devices) {
+            ZWaveNode node = nodes.get(device.getZId());
+            if (node == null) continue;
+            node.setParams(device);
+        }
+        return true;
+    }
+
 }

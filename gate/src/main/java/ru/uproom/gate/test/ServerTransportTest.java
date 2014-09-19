@@ -1,10 +1,10 @@
 package ru.uproom.gate.test;
 
 import ru.uproom.gate.domain.DelayTimer;
-import ru.uproom.gate.transport.command.Command;
-import ru.uproom.gate.transport.command.HandshakeCommand;
-import ru.uproom.gate.transport.command.SetDeviceParameterCommand;
+import ru.uproom.gate.transport.command.*;
 import ru.uproom.gate.transport.dto.DeviceDTO;
+import ru.uproom.gate.transport.dto.DeviceType;
+import ru.uproom.gate.transport.dto.parameters.DeviceParametersNames;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -137,7 +137,6 @@ public class ServerTransportTest implements AutoCloseable, Runnable {
         @Override
         public void run() {
             while (running) {
-                // todo : read objects from client
                 Command command = null;
                 try {
                     command = (Command) input.readObject();
@@ -152,11 +151,15 @@ public class ServerTransportTest implements AutoCloseable, Runnable {
                     System.out.println("TEST (ServerTransportIn) >>>> command type = " + command.getType().name());
                 if (command != null && command instanceof HandshakeCommand)
                     System.out.println("TEST (ServerTransportIn) >>>> handshake gateId = " + ((HandshakeCommand) command).getGateId());
+                if (command != null && command instanceof NetworkControllerStateCommand)
+                    System.out.println("TEST (ServerTransportIn) >>>> controller state = " +
+                                    ((NetworkControllerStateCommand) command).getState()
+                    );
                 if (command != null && command instanceof SetDeviceParameterCommand) {
                     SetDeviceParameterCommand deviceParameterCommand = (SetDeviceParameterCommand) command;
                     DeviceDTO device = deviceParameterCommand.getDevice();
                     System.out.println(String.format("TEST\tdevice = %d", device.getZId()));
-                    for (Map.Entry<String, String> entry : device.getParameters().entrySet()) {
+                    for (Map.Entry<DeviceParametersNames, String> entry : device.getParameters().entrySet()) {
                         System.out.println("TEST\t\tset parameter = " + entry.getKey() + " value = " + entry.getValue());
                     }
                 }
@@ -207,17 +210,35 @@ public class ServerTransportTest implements AutoCloseable, Runnable {
         @Override
         public void run() {
             int gateId = 0;
+            Boolean switchOn = true;
             while (running) {
                 // write objects to client
                 try {
-                    output.writeObject(new HandshakeCommand(String.format("gate-%06d", gateId)));
+                    // number of requests limited (~ 2 min)
+                    if (gateId <= 60) {
+                        //System.out.println("TEST (ServerTransportOut) >>>> send Handshake command");
+                        //output.writeObject(new HandshakeCommand(String.format("gate-%06d", gateId)));
+                        //System.out.println("TEST (ServerTransportOut) >>>> send GetDeviceList command");
+                        //output.writeObject(new GetDeviceListCommand(String.format("gate-%06d", gateId)));
+                        System.out.println("TEST (ServerTransportOut) >>>> send SetDeviceParameters command");
+                        DeviceDTO device = new DeviceDTO(0, 0, (short) 2, DeviceType.BinaryPowerSwitch);
+                        device.getParameters().put(DeviceParametersNames.Switch, switchOn.toString());
+                        output.writeObject(new SetDeviceParameterCommand(device));
+                    }
+                    // request to shutdown
+                    else {
+                        System.out.println("TEST (ServerTransportOut) >>>> send Shutdown command");
+                        output.writeObject(new ShutdownCommand(String.format("gate-%06d", gateId)));
+                    }
                 } catch (IOException e) {
                     System.out.println("TEST (ServerTransportOut) >>>> ERROR >>>> " + e.getMessage());
                 }
+
                 // slowdown ~ 1 sec
-                DelayTimer.sleep(1000);
+                DelayTimer.sleep(5000);
                 // next command
                 gateId++;
+                switchOn = !switchOn;
             }
             stop();
         }

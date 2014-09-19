@@ -13,15 +13,16 @@ import java.util.List;
  * <p/>
  * Created by osipenko on 10.09.14.
  */
-@GateNotificationHandler(value = GateNotificationType.GateSendDeviceList)
-public class GateSendDeviceListNotificationHandler implements NotificationHandler {
+@GateNotificationHandlerAnnotation(value = GateNotificationType.SendDeviceList)
+public class SendDeviceListGateNotificationHandler implements NotificationHandler {
     @Override
     public boolean execute(ZWaveHome home, ServerTransportMarker transport, Notification notification) {
         if (transport == null) return false;
 
         // create device list
         List<DeviceDTO> devices = home.getDeviceList();
-        // send device list
+        // send device list if z-wave network ready to use
+        if (!home.isReady()) return false;
         return transport.sendCommand(new SendDeviceListCommand(
                 String.format("%d", home.getHomeId()),
                 devices

@@ -12,7 +12,7 @@ import ru.uproom.gate.zwave.ZWaveNode;
  * Created by osipenko on 15.09.14.
  */
 
-@ZwaveNotificationHandler(value = NotificationType.GROUP)
+@ZwaveNotificationHandlerAnnotation(value = NotificationType.GROUP)
 public class GroupNotificationHandler implements NotificationHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(GroupNotificationHandler.class);

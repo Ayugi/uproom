@@ -11,7 +11,7 @@ import ru.uproom.gate.zwave.ZWaveHome;
  * Created by osipenko on 15.09.14.
  */
 
-@ZwaveNotificationHandler(value = NotificationType.AWAKE_NODES_QUERIED)
+@ZwaveNotificationHandlerAnnotation(value = NotificationType.AWAKE_NODES_QUERIED)
 public class AwakeNodesQueriedNotificationHandler implements NotificationHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(AwakeNodesQueriedNotificationHandler.class);

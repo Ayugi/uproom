@@ -10,7 +10,7 @@ import ru.uproom.gate.transport.command.HandshakeCommand;
  * </p>
  * Created by osipenko on 09.09.14.
  */
-@CommandAnnotation(value = CommandType.Handshake)
+@CommandHandlerAnnotation(value = CommandType.Handshake)
 public class HandshakeCommandHandler implements CommandHandler {
 
     @Override

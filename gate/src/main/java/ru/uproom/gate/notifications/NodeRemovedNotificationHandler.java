@@ -5,13 +5,15 @@ import org.slf4j.LoggerFactory;
 import org.zwave4j.Notification;
 import org.zwave4j.NotificationType;
 import ru.uproom.gate.transport.ServerTransportMarker;
+import ru.uproom.gate.transport.command.SetDeviceParameterCommand;
 import ru.uproom.gate.zwave.ZWaveHome;
+import ru.uproom.gate.zwave.ZWaveNode;
 
 /**
  * Created by osipenko on 15.09.14.
  */
 
-@ZwaveNotificationHandler(value = NotificationType.NODE_REMOVED)
+@ZwaveNotificationHandlerAnnotation(value = NotificationType.NODE_REMOVED)
 public class NodeRemovedNotificationHandler implements NotificationHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(NodeRemovedNotificationHandler.class);
@@ -21,9 +23,13 @@ public class NodeRemovedNotificationHandler implements NotificationHandler {
 
         // Определение идентификатора узла и удаление его из списка известных узлов
         short nodeId = notification.getNodeId();
-        home.getNodes().remove(nodeId);
+        ZWaveNode node = home.getNodes().remove(nodeId);
 
         LOG.debug("z-wave notification : NODE_REMOVED; node ID : {}", nodeId);
-        return false;
+
+        // send information about node to server
+        if (!home.isReady()) return false;
+        node.setZId((short) 0);
+        return transport.sendCommand(new SetDeviceParameterCommand(node.getDeviceInfo()));
     }
 }

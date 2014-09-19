@@ -5,6 +5,9 @@ import org.slf4j.LoggerFactory;
 import org.zwave4j.Notification;
 import org.zwave4j.NotificationType;
 import ru.uproom.gate.transport.ServerTransportMarker;
+import ru.uproom.gate.transport.command.SetDeviceParameterCommand;
+import ru.uproom.gate.transport.dto.parameters.DeviceParametersNames;
+import ru.uproom.gate.transport.dto.parameters.ZWaveParamId2ServerParamId;
 import ru.uproom.gate.zwave.ZWaveHome;
 import ru.uproom.gate.zwave.ZWaveNode;
 import ru.uproom.gate.zwave.ZWaveValue;
@@ -14,7 +17,7 @@ import ru.uproom.gate.zwave.ZWaveValueIndexFactory;
  * Created by osipenko on 15.09.14.
  */
 
-@ZwaveNotificationHandler(value = NotificationType.VALUE_CHANGED)
+@ZwaveNotificationHandlerAnnotation(value = NotificationType.VALUE_CHANGED)
 public class ValueChangedNotificationHandler implements NotificationHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(ValueChangedNotificationHandler.class);
@@ -27,21 +30,27 @@ public class ValueChangedNotificationHandler implements NotificationHandler {
         if (node == null) return false;
 
         // find value
-        Integer index = ZWaveValueIndexFactory.createIndex(
-                notification.getValueId().getCommandClassId(),
-                notification.getValueId().getInstance(),
-                notification.getValueId().getIndex()
-        );
-        ZWaveValue value = node.getValues().get(index);
+        Integer index = ZWaveValueIndexFactory.createIndex(notification.getValueId());
+        DeviceParametersNames name = ZWaveParamId2ServerParamId.getServerParamId(index);
+        ZWaveValue value = (ZWaveValue) node.getParams().get(name);
         if (value == null) return false;
 
         // call listeners
         value.callEvents();
 
+        System.out.println(String.format("VALUE CHANGED : node=%d, label='%s', id=%d",
+                node.getZId(),
+                value.getValueLabel(),
+                value.getId()
+        ));
         LOG.debug("z-wave notification : VALUE_CHANGED; node ID : {}; value label : {}",
                 node.getZId(),
                 value.getValueLabel()
         );
-        return true;
+
+        // send message
+        return transport.sendCommand(new SetDeviceParameterCommand(
+                node.getDeviceParameters(new DeviceParametersNames[]{value.getValueName()})
+        ));
     }
 }

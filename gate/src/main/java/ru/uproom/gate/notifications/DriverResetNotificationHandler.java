@@ -11,7 +11,7 @@ import ru.uproom.gate.zwave.ZWaveHome;
  * Created by osipenko on 15.09.14.
  */
 
-@ZwaveNotificationHandler(value = NotificationType.DRIVER_RESET)
+@ZwaveNotificationHandlerAnnotation(value = NotificationType.DRIVER_RESET)
 public class DriverResetNotificationHandler implements NotificationHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(DriverResetNotificationHandler.class);

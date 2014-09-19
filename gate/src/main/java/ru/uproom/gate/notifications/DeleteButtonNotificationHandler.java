@@ -11,7 +11,7 @@ import ru.uproom.gate.zwave.ZWaveHome;
  * Created by osipenko on 15.09.14.
  */
 
-@ZwaveNotificationHandler(value = NotificationType.DELETE_BUTTON)
+@ZwaveNotificationHandlerAnnotation(value = NotificationType.DELETE_BUTTON)
 public class DeleteButtonNotificationHandler implements NotificationHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(DeleteButtonNotificationHandler.class);

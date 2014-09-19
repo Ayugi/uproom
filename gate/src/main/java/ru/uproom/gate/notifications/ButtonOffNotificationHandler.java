@@ -11,7 +11,7 @@ import ru.uproom.gate.zwave.ZWaveHome;
  * Created by osipenko on 15.09.14.
  */
 
-@ZwaveNotificationHandler(value = NotificationType.BUTTON_OFF)
+@ZwaveNotificationHandlerAnnotation(value = NotificationType.BUTTON_OFF)
 public class ButtonOffNotificationHandler implements NotificationHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(ButtonOffNotificationHandler.class);

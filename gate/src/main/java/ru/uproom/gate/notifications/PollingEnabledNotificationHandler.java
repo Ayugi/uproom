@@ -11,7 +11,7 @@ import ru.uproom.gate.zwave.ZWaveHome;
  * Created by osipenko on 15.09.14.
  */
 
-@ZwaveNotificationHandler(value = NotificationType.POLLING_ENABLED)
+@ZwaveNotificationHandlerAnnotation(value = NotificationType.POLLING_ENABLED)
 public class PollingEnabledNotificationHandler implements NotificationHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(PollingEnabledNotificationHandler.class);

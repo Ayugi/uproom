@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.zwave4j.Notification;
 import org.zwave4j.NotificationType;
 import ru.uproom.gate.transport.ServerTransportMarker;
+import ru.uproom.gate.transport.command.SetDeviceParameterCommand;
 import ru.uproom.gate.zwave.ZWaveHome;
 import ru.uproom.gate.zwave.ZWaveNode;
 
@@ -12,7 +13,7 @@ import ru.uproom.gate.zwave.ZWaveNode;
  * Created by osipenko on 15.09.14.
  */
 
-@ZwaveNotificationHandler(value = NotificationType.NODE_ADDED)
+@ZwaveNotificationHandlerAnnotation(value = NotificationType.NODE_ADDED)
 public class NodeAddedNotificationHandler implements NotificationHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(NodeAddedNotificationHandler.class);
@@ -20,11 +21,14 @@ public class NodeAddedNotificationHandler implements NotificationHandler {
     @Override
     public boolean execute(ZWaveHome home, ServerTransportMarker transport, Notification notification) {
 
-        // Определение идентификатора узла и добавление его в список известных узлов
+        // add node in gate node list
         ZWaveNode node = new ZWaveNode(home, notification.getNodeId());
         home.getNodes().put(node.getZId(), node);
 
         LOG.debug("z-wave notification : NODE_ADDED; node ID : {}", node.getZId());
-        return true;
+
+        // send information about node to server
+        if (!home.isReady()) return false;
+        return transport.sendCommand(new SetDeviceParameterCommand(node.getDeviceInfo()));
     }
 }
