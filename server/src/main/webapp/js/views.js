@@ -33,9 +33,10 @@ define([
 					$.get(AUTH_URL, {
 						password: this.$('[data-id=password]').val(),
 						username: this.$('[data-id=username]').val()
-					}, (function(data) { this.callback[data.success ? 'success' : 'fail'](data) }).bind(this), 'json');
-
-					return false;
+					}, (function(data) {
+        //                    this.callback[data.success ? 'success' : 'fail'](data) }).bind(this), 'json');
+                            this.callback[data.id > 0 ? 'success' : 'fail' ](data) }).bind(this), 'json');
+                    		return false;
 				}
 			},
 			
