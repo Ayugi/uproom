@@ -1,11 +1,16 @@
 package ru.uproom.controller;
 
+import java.util.Collection;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import ru.uproom.domain.Device;
 import ru.uproom.domain.DeviceState;
+import ru.uproom.service.DeviceStorageService;
+import ru.uproom.service.SessionHolder;
+import ru.uproom.service.SessionHolderImpl;
 
 import java.util.ArrayList;
 
@@ -15,20 +20,15 @@ import java.util.ArrayList;
 @Controller
 @RequestMapping(value = "devices")
 public class DevicesController {
+    @Autowired
+    private DeviceStorageService storageService;
+
+    private SessionHolder sessionHolder= SessionHolderImpl.getInstance();
+
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public List<Device> listDevices() {
-        Device device1 = deviceStub();
-
-        Device device2 = new Device();
-        device2.setId(43);
-        device2.setName("on");
-        device2.setState(DeviceState.Off);
-
-        List<Device> deviceList = new ArrayList<>();
-        deviceList.add(device1);
-        deviceList.add(device2);
-        return deviceList;
+    public Collection<Device> listDevices() {
+        return storageService.fetchDevices(sessionHolder.currentUser().getId());
     }
 
     @RequestMapping(method = RequestMethod.POST)
