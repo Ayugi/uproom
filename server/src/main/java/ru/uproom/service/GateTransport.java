@@ -1,6 +1,6 @@
 package ru.uproom.service;
 
-import ru.uproom.gate.transport.Command;
+import ru.uproom.gate.transport.command.Command;
 
 /**
  * Created by HEDIN on 28.08.2014.

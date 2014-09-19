@@ -7,9 +7,10 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "user")
-@NamedQueries(
-        @NamedQuery(name = "findAllUsers", query = "select u from User u")
-)
+@NamedQueries({
+        @NamedQuery(name = "findAllUsers", query = "select u from User u"),
+        @NamedQuery(name = "findUserByLogin", query = "select u from User u where u.login = :login")
+})
 public class User {
     @Id
     @Column(name = "id")
