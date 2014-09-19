@@ -1,8 +1,5 @@
 package ru.uproom.controller;
 
-import java.util.Collection;
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -12,7 +9,7 @@ import ru.uproom.service.DeviceStorageService;
 import ru.uproom.service.SessionHolder;
 import ru.uproom.service.SessionHolderImpl;
 
-import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * Created by hedin on 13.07.2014.
@@ -23,7 +20,7 @@ public class DevicesController {
     @Autowired
     private DeviceStorageService storageService;
 
-    private SessionHolder sessionHolder= SessionHolderImpl.getInstance();
+    private SessionHolder sessionHolder = SessionHolderImpl.getInstance();
 
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody

@@ -31,6 +31,12 @@ public class Device {
     public Device() {
     }
 
+    public Device(DeviceDTO dto) {
+        id = dto.getId();
+        zid = dto.getZId();
+        parameters = dto.getParameters();
+    }
+
     public int getId() {
         return id;
     }
@@ -79,17 +85,11 @@ public class Device {
         this.parameters = parameters;
     }
 
-    public void mergeById(Device device){
+    public void mergeById(Device device) {
         if (0 != device.getZid())
             zid = device.getZid();
         if (null != device.getState())
             state = device.getState();
         parameters.putAll(device.getParameters());
-    }
-
-    public Device(DeviceDTO dto) {
-        id = dto.getId();
-        zid = dto.getZId();
-        parameters = dto.getParameters();
     }
 }

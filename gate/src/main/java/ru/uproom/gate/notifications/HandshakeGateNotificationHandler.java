@@ -17,7 +17,7 @@ public class HandshakeGateNotificationHandler implements NotificationHandler {
         if (transport == null) return false;
 
         return transport.sendCommand(new HandshakeCommand(
-                String.format("%d", home.getHomeId())
+                (int) home.getHomeId()
         ));
 
     }

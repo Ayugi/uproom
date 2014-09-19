@@ -3,7 +3,6 @@ package ru.uproom.service;
 import junit.framework.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.Ignore;
 import ru.uproom.gate.transport.command.HandshakeCommand;
 
 import java.io.IOException;
