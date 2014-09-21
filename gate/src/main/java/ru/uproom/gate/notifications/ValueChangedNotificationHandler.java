@@ -7,7 +7,6 @@ import org.zwave4j.NotificationType;
 import ru.uproom.gate.transport.ServerTransportMarker;
 import ru.uproom.gate.transport.command.SetDeviceParameterCommand;
 import ru.uproom.gate.transport.dto.parameters.DeviceParametersNames;
-import ru.uproom.gate.transport.dto.parameters.ZWaveParamId2ServerParamId;
 import ru.uproom.gate.zwave.ZWaveHome;
 import ru.uproom.gate.zwave.ZWaveNode;
 import ru.uproom.gate.zwave.ZWaveValue;
@@ -31,7 +30,7 @@ public class ValueChangedNotificationHandler implements NotificationHandler {
 
         // find value
         Integer index = ZWaveValueIndexFactory.createIndex(notification.getValueId());
-        DeviceParametersNames name = ZWaveParamId2ServerParamId.getServerParamId(index);
+        DeviceParametersNames name = DeviceParametersNames.byZWaveCode(index);
         ZWaveValue value = (ZWaveValue) node.getParams().get(name);
         if (value == null) return false;
 

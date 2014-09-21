@@ -3,7 +3,6 @@ package ru.uproom.gate.zwave;
 import org.zwave4j.Manager;
 import org.zwave4j.ValueId;
 import ru.uproom.gate.transport.dto.parameters.DeviceParametersNames;
-import ru.uproom.gate.transport.dto.parameters.ZWaveParamId2ServerParamId;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
@@ -32,7 +31,7 @@ public class ZWaveValue {
         this.valueId = valueId;
         String label = Manager.get().getValueLabel(valueId);
         this.id = ZWaveValueIndexFactory.createIndex(valueId);
-        this.valueName = ZWaveParamId2ServerParamId.getServerParamId(id);
+        this.valueName = DeviceParametersNames.byZWaveCode(id);
     }
 
 

@@ -6,13 +6,30 @@ package ru.uproom.gate.transport.dto.parameters;
  * Created by osipenko on 18.09.14.
  */
 public enum DeviceParametersNames {
-    Unknown,
-    State,
-    ApplicationVersion,
-    ProtocolVersion,
-    Switch,
-    Level,
-    StartLevel,
-    Energy,
-    Power
+    Unknown(0),
+    State(1),
+    ApplicationVersion(8782082),
+    ProtocolVersion(8782081),
+    Switch(2425088),
+    Level(2490624),
+    StartLevel(2490628),
+    Energy(3277056),
+    Power(3277064);
+
+    private int zwaveCode;
+
+    DeviceParametersNames(int zwaveCode) {
+        this.zwaveCode = zwaveCode;
+    }
+
+    public static DeviceParametersNames byZWaveCode(int zwaveCode) {
+        for (DeviceParametersNames name : values()) {
+            if (zwaveCode == name.getZwaveCode()) return name;
+        }
+        return Unknown;
+    }
+
+    public int getZwaveCode() {
+        return zwaveCode;
+    }
 }
