@@ -10,5 +10,7 @@ public enum CommandType {
     GetDeviceList,
     SendDeviceList,
     Handshake,
-    SetDeviceParameter
+    SetDeviceParameter,
+    NetworkControllerState,
+    Shutdown
 }

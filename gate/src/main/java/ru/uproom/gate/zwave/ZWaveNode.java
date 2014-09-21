@@ -3,19 +3,20 @@ package ru.uproom.gate.zwave;
 import org.zwave4j.Manager;
 import org.zwave4j.Notification;
 import ru.uproom.gate.transport.dto.DeviceDTO;
-import ru.uproom.gate.transport.dto.parameters.DeviceState;
 import ru.uproom.gate.transport.dto.DeviceType;
+import ru.uproom.gate.transport.dto.parameters.DeviceParametersNames;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * device in Z-Wave net
  * <p/>
  * Created by osipenko on 31.07.14.
  */
-public class ZWaveNode extends TreeMap<Integer, ZWaveValue> {
+public class ZWaveNode {
 
 
     //=============================================================================================================
@@ -36,15 +37,15 @@ public class ZWaveNode extends TreeMap<Integer, ZWaveValue> {
     private String nodeManufacturerId = "";
     private String nodeManufacturerName = "";
     private short nodeVersion = 0;
-    private ArrayList<Short> groups = new ArrayList<Short>();
-    private ArrayList<ZWaveNodeCallback> events = new ArrayList<ZWaveNodeCallback>();
+    private List<Short> groups = new ArrayList<Short>();
+    private List<ZWaveNodeCallback> events = new ArrayList<ZWaveNodeCallback>();
     // device ID in server database
     private int id;
     // device ID in Z-Wave net
     private short zId = 0;
-    // device state
-    private DeviceState state;
-
+    // device parameters
+    private Map<DeviceParametersNames, Object> params =
+            new EnumMap<DeviceParametersNames, Object>(DeviceParametersNames.class);
 
 
     //=============================================================================================================
@@ -235,12 +236,8 @@ public class ZWaveNode extends TreeMap<Integer, ZWaveValue> {
     //------------------------------------------------------------------------
     //  node groups
 
-    public boolean addGroup(Short group) {
-        return groups.add(group);
-    }
-
-    public boolean removeGroup(Short group) {
-        return groups.remove(group);
+    public List<Short> getGroups() {
+        return groups;
     }
 
     public boolean existGroup(Short group) {
@@ -269,12 +266,8 @@ public class ZWaveNode extends TreeMap<Integer, ZWaveValue> {
     //------------------------------------------------------------------------
     //  events handling
 
-    public DeviceState getState() {
-        return state;
-    }
-
-    public void setState(DeviceState state) {
-        this.state = state;
+    public Map<DeviceParametersNames, Object> getParams() {
+        return params;
     }
 
 
@@ -289,7 +282,7 @@ public class ZWaveNode extends TreeMap<Integer, ZWaveValue> {
         String result = "[";
 
         boolean needComma = false;
-        for (Map.Entry<Integer, ZWaveValue> entry : this.entrySet()) {
+        for (Map.Entry<DeviceParametersNames, Object> entry : params.entrySet()) {
             if (needComma) result += ",";
             else needComma = true;
             result += entry.getValue().toString();
@@ -333,16 +326,33 @@ public class ZWaveNode extends TreeMap<Integer, ZWaveValue> {
     //  get node information as DTO
 
     public DeviceDTO getDeviceInfo() {
-        DeviceDTO dto = new DeviceDTO(id, home.getHomeId(), zId, DeviceType.None);
+        DeviceDTO dto = new DeviceDTO(id, home.getHomeId(), zId, type);
 
-        Map<String, String> parameters = dto.getParameters();
+        Map<DeviceParametersNames, String> parameters = dto.getParameters();
         // add to map all values
-        for (Map.Entry<Integer, ZWaveValue> entry : this.entrySet()) {
-            parameters.put(entry.getValue().getValueLabel(), entry.getValue().getValueAsString());
+        for (Map.Entry<DeviceParametersNames, Object> entry : params.entrySet()) {
+            if (entry.getValue() instanceof ZWaveValue)
+                parameters.put(entry.getKey(), ((ZWaveValue) entry.getValue()).getValueAsString());
+            else
+                parameters.put(entry.getKey(), entry.getValue().toString());
         }
-        // add to map needed fields
-        // todo : discuss with Hedin about this conception
-        parameters.put("NodeState", state.name());
+
+        return dto;
+    }
+
+    public DeviceDTO getDeviceParameters(DeviceParametersNames[] paramNames) {
+        DeviceDTO dto = new DeviceDTO(id, home.getHomeId(), zId, type);
+
+        Map<DeviceParametersNames, String> parameters = dto.getParameters();
+        // add to map all values
+        for (DeviceParametersNames paramName : paramNames) {
+            Object param = params.get(paramName);
+            if (param == null) continue;
+            if (param instanceof ZWaveValue)
+                parameters.put(paramName, ((ZWaveValue) param).getValueAsString());
+            else
+                parameters.put(paramName, param.toString());
+        }
 
         return dto;
     }
@@ -362,4 +372,22 @@ public class ZWaveNode extends TreeMap<Integer, ZWaveValue> {
 
         return result;
     }
+
+
+    //------------------------------------------------------------------------
+    //  set node any values
+
+    public boolean setParams(DeviceDTO device) {
+        for (Map.Entry<DeviceParametersNames, String> entry : device.getParameters().entrySet()) {
+            Object param = params.get(entry.getKey());
+            if (param == null) continue;
+            if (param instanceof ZWaveValue)
+                ((ZWaveValue) param).setValue(entry.getValue());
+            else
+                params.put(entry.getKey(), entry.getValue());
+        }
+        return true;
+    }
+
+
 }

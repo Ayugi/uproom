@@ -169,7 +169,10 @@ public class ServerTransport implements ServerTransportMarker, AutoCloseable, Ru
             // get next command
             command = receiveCommand();
             // if command not received - close connection
-            if (command == null) close();
+            if (command == null) {
+                close();
+                continue;
+            }
             // execute command
             commander.execute(command);
         }

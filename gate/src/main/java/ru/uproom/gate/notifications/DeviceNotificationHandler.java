@@ -1,6 +1,7 @@
 package ru.uproom.gate.notifications;
 
 import org.zwave4j.Manager;
+import org.zwave4j.Notification;
 import ru.uproom.gate.transport.ServerTransportMarker;
 import ru.uproom.gate.transport.command.SetDeviceParameterCommand;
 import ru.uproom.gate.transport.dto.DeviceDTO;
@@ -15,13 +16,13 @@ import ru.uproom.gate.zwave.ZWaveNode;
 public abstract class DeviceNotificationHandler implements NotificationHandler {
 
     @Override
-    public boolean execute(ZWaveHome home, ServerTransportMarker transport) {
+    public boolean execute(ZWaveHome home, ServerTransportMarker transport, Notification notification) {
 
         // find controller node
         short controllerId = Manager.get().getControllerNodeId(home.getHomeId());
-        ZWaveNode controller = home.get(controllerId);
+        ZWaveNode controller = home.getNodes().get(controllerId);
         // set controller state
-        if (controller != null) controller.setState(getEvent());
+        //if (controller != null) controller.setState(getEvent());
         // create message about this
 
         // send message to server
@@ -36,7 +37,7 @@ public abstract class DeviceNotificationHandler implements NotificationHandler {
             return new SetDeviceParameterCommand(controller.getDeviceInfo());
         else {
             DeviceDTO device = new DeviceDTO(0, home.getHomeId(), (short) 0, DeviceType.Controller);
-            device.getParameters().put("NodeState", getEvent().name());
+            //device.getParameters().put("NodeState", getEvent().name());
             return new SetDeviceParameterCommand(device);
         }
     }

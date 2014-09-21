@@ -1,5 +1,7 @@
 package ru.uproom.gate.transport.dto;
 
+import ru.uproom.gate.transport.dto.parameters.DeviceParametersNames;
+
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,6 +17,7 @@ public class DeviceDTO implements Serializable {
     //##############################################################################################################
     //######    fields
 
+    // todo : discuss with Hedin about moving all parameters to map
 
     // device ID in server database
     private int id;
@@ -25,7 +28,8 @@ public class DeviceDTO implements Serializable {
     // device type in server database
     private DeviceType type = DeviceType.None;
     // parameters of device
-    private Map<String, String> parameters = new HashMap<>();
+    private Map<DeviceParametersNames, String> parameters =
+            new HashMap<DeviceParametersNames, String>();
 
 
     //##############################################################################################################
@@ -60,7 +64,7 @@ public class DeviceDTO implements Serializable {
         return type;
     }
 
-    public Map<String, String> getParameters() {
+    public Map<DeviceParametersNames, String> getParameters() {
         return parameters;
     }
 

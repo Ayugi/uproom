@@ -8,7 +8,7 @@ import ru.uproom.gate.transport.dto.parameters.DeviceState;
  * <p/>
  * Created by osipenko on 11.09.14.
  */
-@ZwaveNotificationHandler(value = NotificationType.DRIVER_FAILED)
+@ZwaveNotificationHandlerAnnotation(value = NotificationType.DRIVER_FAILED)
 public class DeviceFailedNotificationHandler extends DeviceNotificationHandler {
 
     @Override

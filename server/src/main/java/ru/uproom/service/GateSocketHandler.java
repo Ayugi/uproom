@@ -19,15 +19,13 @@ import java.util.List;
  * Created by hedin on 30.08.2014.
  */
 public class GateSocketHandler {
+    private static final Logger LOG = LoggerFactory.getLogger(GateSocketHandler.class);
     private Socket socket;
     private ObjectInputStream input;
     private ObjectOutputStream output;
     private int userId;
     private boolean stopped;
-
     private DeviceStorageService deviceStorage;
-
-    private static final Logger LOG = LoggerFactory.getLogger(GateSocketHandler.class);
 
     public GateSocketHandler(Socket socket, DeviceStorageService deviceStorage) {
         this.socket = socket;
@@ -69,7 +67,7 @@ public class GateSocketHandler {
         }
     }
 
-    public void sendCommand(Command command){
+    public void sendCommand(Command command) {
         LOG.info("sendCommand command " + command.getType());
         try {
             output.writeObject(command);
@@ -80,13 +78,13 @@ public class GateSocketHandler {
 
     public void listen() {
         LOG.info("listen ");
-        while (! stopped){
+        while (!stopped) {
             try {
                 Command command = (Command) input.readObject();
                 LOG.info("listen command " + command.getType());
                 // TODO handles map
                 if (command instanceof SendDeviceListCommand)
-                    deviceStorage.addDevices(userId ,
+                    deviceStorage.addDevices(userId,
                             transformDtosToDevices((SendDeviceListCommand) command));
             } catch (IOException e) {
                 e.printStackTrace();
@@ -98,13 +96,13 @@ public class GateSocketHandler {
 
     private List<Device> transformDtosToDevices(SendDeviceListCommand listCommand) {
         List<Device> devices = new ArrayList<>();
-        for (DeviceDTO dto : listCommand.getDevices()){
+        for (DeviceDTO dto : listCommand.getDevices()) {
             devices.add(new Device(dto));
         }
         return devices;
     }
 
-    public void stop(){
+    public void stop() {
         stopped = true;
     }
 }

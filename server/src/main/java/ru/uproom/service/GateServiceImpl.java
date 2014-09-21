@@ -20,8 +20,8 @@ import java.util.Map;
 @Service
 public class GateServiceImpl implements GateTransport {
 
+    public static final int PORT = 8282;
     private static final Logger LOG = LoggerFactory.getLogger(GateServiceImpl.class);
-
     private Map<Integer, GateSocketHandler> activeSockets = new HashMap<>();
 
     @Autowired
@@ -36,7 +36,7 @@ public class GateServiceImpl implements GateTransport {
     public void init() {
         LOG.info("INIT");
         try {
-            ServerSocket serverSocket = new ServerSocket(8282);
+            ServerSocket serverSocket = new ServerSocket(PORT);
             Thread listener = new Thread(new SocketListener(serverSocket));
             listener.start();
         } catch (IOException e) {

@@ -1,7 +1,6 @@
 package ru.uproom.service;
 
 import ru.uproom.domain.Device;
-import ru.uproom.domain.User;
 
 import java.util.List;
 
