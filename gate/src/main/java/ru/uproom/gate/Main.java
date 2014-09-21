@@ -8,7 +8,6 @@ import org.zwave4j.Options;
 import org.zwave4j.ZWave4j;
 import ru.uproom.gate.handlers.MainCommander;
 import ru.uproom.gate.notifications.MainWatcher;
-import ru.uproom.gate.test.ServerTransportTest;
 import ru.uproom.gate.transport.ServerTransportKeeper;
 import ru.uproom.gate.zwave.ZWaveHome;
 
@@ -24,8 +23,9 @@ public class Main {
 
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
 
-    private static String ZWAVE_DRIVER_NAME = "/dev/ttyUSB0";
-    private static String ADDRESS_SERVER_NAME = "http://";
+    private static final String ZWAVE_DRIVER_NAME = "/dev/ttyUSB0";
+    private static final String ADDRESS_SERVER_NAME = "54.191.89.147";
+    private static final int ADDRESS_SERVER_PORT = 8282;
 
 
     //##############################################################################################################
@@ -34,14 +34,16 @@ public class Main {
 
     public static void main(String[] args) {
 
-        System.out.println(">>> loading");
+        LOG.info(" >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  ");
+        LOG.info(" >>>> GATE STARTING ... ");
         // spring initialization
 //        ClassPathXmlApplicationContext ctx =
 //                new ClassPathXmlApplicationContext("applicationContext.xml");
 
         // loading openZWave library
-        LOG.info("GATE STARTED");
+        LOG.info(" >>>> Load libraries ...");
         NativeLibraryLoader.loadLibrary(ZWave4j.LIBRARY_NAME, ZWave4j.class);
+        LOG.info(" >>>> Libraries loaded.");
 
         // reading current librarian options
         final Options options = Options.create(
@@ -72,15 +74,16 @@ public class Main {
         manager.addDriver(ZWAVE_DRIVER_NAME);
 
         // creating test object for server transport system
-        System.out.println(">>> test link");
-        LOG.debug("CREATE TEST LINK OBJECT");
-        ServerTransportTest serverTransportTest = new ServerTransportTest(6009);
-        Thread threadServerTransportTest = new Thread(serverTransportTest);
-        threadServerTransportTest.start();
+//        System.out.println(">>> test link");
+//        LOG.debug("CREATE TEST LINK OBJECT");
+//        ServerTransportTest serverTransportTest = new ServerTransportTest(6009);
+//        Thread threadServerTransportTest = new Thread(serverTransportTest);
+//        threadServerTransportTest.start();
         // creating link with server
         System.out.println(">>> link");
         LOG.debug("CREATING LINK WITH CLOUD SERVER...");
-        ServerTransportKeeper link = new ServerTransportKeeper("localhost", 6009, 3, 500, 5000, commander);
+        ServerTransportKeeper link = new ServerTransportKeeper(
+                ADDRESS_SERVER_NAME, ADDRESS_SERVER_PORT, 3, 500, 5000, commander);
         LOG.debug("LINK WITH CLOUD SERVER CREATED");
         // add subscriber for set/break link with server
         link.add(watcher);
@@ -107,7 +110,7 @@ public class Main {
         // exit from program
         LOG.debug("STOPPING GATE...");
 
-        serverTransportTest.close();
+        //serverTransportTest.close();
         link.close();
         manager.removeWatcher(watcher, null);
         manager.removeDriver(ZWAVE_DRIVER_NAME);

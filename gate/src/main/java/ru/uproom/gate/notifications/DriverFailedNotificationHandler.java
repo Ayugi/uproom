@@ -28,8 +28,8 @@ public class DriverFailedNotificationHandler implements NotificationHandler {
         LOG.debug("z-wave notification : DRIVER_FAILED");
 
         // send message to server
-        return transport.sendCommand(new NetworkControllerStateCommand(home.getHomeIdAsString(), "off"));
-
+        return (transport == null) ||
+                transport.sendCommand(new NetworkControllerStateCommand(home.getHomeIdAsString(), "off"));
     }
 
 }

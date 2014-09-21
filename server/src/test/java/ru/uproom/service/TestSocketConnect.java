@@ -1,6 +1,7 @@
 package ru.uproom.service;
 
 import junit.framework.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import ru.uproom.gate.transport.command.HandshakeCommand;
 
@@ -11,7 +12,7 @@ import java.net.Socket;
 /**
  * Created by hedin on 30.08.2014.
  */
-//@Ignore
+@Ignore
 public class TestSocketConnect {
 
     @Test
