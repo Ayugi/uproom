@@ -104,7 +104,7 @@ public class ServerTransportKeeper
     //  close transport
 
     private void stop() {
-        transport.close();
+        if (transport != null) transport.close();
     }
 
 
@@ -118,6 +118,10 @@ public class ServerTransportKeeper
 
             // open connection
             boolean running = repeat();
+            if (!running) {
+                DelayTimer.sleep(periodCheck);
+                continue;
+            }
             // call subscribers - link set
             for (ServerTransportUser user : this) {
                 user.setTransport(transport);
