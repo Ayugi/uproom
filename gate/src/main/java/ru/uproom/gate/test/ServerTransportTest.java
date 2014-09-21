@@ -237,6 +237,7 @@ public class ServerTransportTest implements AutoCloseable, Runnable {
                 DelayTimer.sleep(5000);
                 // next command
                 gateId++;
+                switchOn = !switchOn;
             }
             stop();
         }

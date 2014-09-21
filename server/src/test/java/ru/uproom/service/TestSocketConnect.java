@@ -1,7 +1,6 @@
 package ru.uproom.service;
 
 import junit.framework.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import ru.uproom.gate.transport.command.HandshakeCommand;
 
@@ -12,7 +11,7 @@ import java.net.Socket;
 /**
  * Created by hedin on 30.08.2014.
  */
-@Ignore
+//@Ignore
 public class TestSocketConnect {
 
     @Test
@@ -20,7 +19,7 @@ public class TestSocketConnect {
         GateServiceImpl service = new GateServiceImpl();
         service.init();
 
-        Socket socket = new Socket("localhost", 8282);
+        Socket socket = new Socket("localhost", GateServiceImpl.PORT);
         ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
         objectOutputStream.writeObject(new HandshakeCommand(1));
         wait(100);
