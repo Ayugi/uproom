@@ -19,7 +19,7 @@ public class AllNodesQueriedSomeDeadNotificationHandler implements NotificationH
     private static final Logger LOG = LoggerFactory.getLogger(AllNodesQueriedSomeDeadNotificationHandler.class);
 
     @Override
-    public boolean execute(ZWaveHome home, ServerTransportMarker transport, Notification notification) {
+    public boolean execute(int gateId, ZWaveHome home, ServerTransportMarker transport, Notification notification) {
 
         if (home == null || notification == null) return false;
         // Z-Wave Network ready
@@ -29,6 +29,6 @@ public class AllNodesQueriedSomeDeadNotificationHandler implements NotificationH
         LOG.debug("z-wave notification : ALL_NODES_QUERIED_SOME_DEAD, z-wave network : READY");
 
         // send message to server
-        return transport.sendCommand(new NetworkControllerStateCommand(home.getHomeIdAsString(), "on"));
+        return transport.sendCommand(new NetworkControllerStateCommand(gateId, "on"));
     }
 }

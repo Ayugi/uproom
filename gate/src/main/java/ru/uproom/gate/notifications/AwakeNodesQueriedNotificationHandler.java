@@ -17,7 +17,7 @@ public class AwakeNodesQueriedNotificationHandler implements NotificationHandler
     private static final Logger LOG = LoggerFactory.getLogger(AwakeNodesQueriedNotificationHandler.class);
 
     @Override
-    public boolean execute(ZWaveHome home, ServerTransportMarker transport, Notification notification) {
+    public boolean execute(int gateId, ZWaveHome home, ServerTransportMarker transport, Notification notification) {
 
         LOG.debug("z-wave notification : AWAKE_NODES_QUERIED");
 

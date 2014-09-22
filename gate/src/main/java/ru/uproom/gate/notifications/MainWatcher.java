@@ -38,6 +38,7 @@ public class MainWatcher implements NotificationWatcher, ServerTransportUser, Ga
 
     private boolean PRINT_DEBUG_MESSAGES = true;
     private ZWaveHome home;
+    private int gateId;
 
     private boolean link = false;
     private boolean doExit;
@@ -49,8 +50,8 @@ public class MainWatcher implements NotificationWatcher, ServerTransportUser, Ga
     //##############################################################################################################
     //######    constructors
 
-    public MainWatcher() {
-        super();
+    public MainWatcher(int gateId) {
+        this.gateId = gateId;
         prepareZwaveNotificationHandlers();
         prepareGateNotificationHandlers();
     }
@@ -74,6 +75,18 @@ public class MainWatcher implements NotificationWatcher, ServerTransportUser, Ga
 
 
     //------------------------------------------------------------------------
+    //  gate ID in server database
+
+    public int getGateId() {
+        return gateId;
+    }
+
+    public void setGateId(int gateId) {
+        this.gateId = gateId;
+    }
+
+
+    //------------------------------------------------------------------------
     //  object which send messages to server
 
     public ServerTransportMarker getTransport() {
@@ -87,7 +100,7 @@ public class MainWatcher implements NotificationWatcher, ServerTransportUser, Ga
             this.transport = transport;
             link = true;
             // send handshake every time when link with server established
-            onGateEvent(GateNotificationType.Handshake, null);
+            //onGateEvent(GateNotificationType.Handshake, null);
         }
     }
 
@@ -154,14 +167,12 @@ public class MainWatcher implements NotificationWatcher, ServerTransportUser, Ga
         // find handler for notification
         NotificationHandler handler = gateNotificationHandlers.get(type);
         if (handler == null) {
-            LOG.debug("[ERR] - MainWatcher - onGateEvent - handler for notification (%s) not found",
-                    type.name()
-            );
+            LOG.debug("handler for notification {} not found", type.name());
             return false;
         }
 
         // execution notification
-        return handler.execute(home, link ? transport : null, null);
+        return handler.execute(gateId, home, link ? transport : null, null);
     }
 
 
@@ -174,13 +185,11 @@ public class MainWatcher implements NotificationWatcher, ServerTransportUser, Ga
         // find handler for notification
         NotificationHandler handler = notificationHandlers.get(notification.getType());
         if (handler == null) {
-            LOG.debug("[ERR] - MainWatcher - onNotification - handler for notification (%s) not found",
-                    notification.getType().name()
-            );
+            LOG.debug("handler for notification {} not found", notification.getType().name());
             return;
         }
 
         // execution notification
-        handler.execute(home, link ? transport : null, notification);
+        handler.execute(gateId, home, link ? transport : null, notification);
     }
 }

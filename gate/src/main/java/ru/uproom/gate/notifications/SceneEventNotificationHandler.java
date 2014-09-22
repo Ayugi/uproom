@@ -17,7 +17,7 @@ public class SceneEventNotificationHandler implements NotificationHandler {
     private static final Logger LOG = LoggerFactory.getLogger(SceneEventNotificationHandler.class);
 
     @Override
-    public boolean execute(ZWaveHome home, ServerTransportMarker transport, Notification notification) {
+    public boolean execute(int gateId, ZWaveHome home, ServerTransportMarker transport, Notification notification) {
 
         LOG.debug("z-wave notification : SCENE_EVENT;");
         return false;

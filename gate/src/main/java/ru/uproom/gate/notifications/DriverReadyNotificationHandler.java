@@ -17,7 +17,7 @@ public class DriverReadyNotificationHandler implements NotificationHandler {
     private static final Logger LOG = LoggerFactory.getLogger(DriverReadyNotificationHandler.class);
 
     @Override
-    public boolean execute(ZWaveHome home, ServerTransportMarker transport, Notification notification) {
+    public boolean execute(int gateId, ZWaveHome home, ServerTransportMarker transport, Notification notification) {
 
         if (home == null || notification == null) return false;
         // HomeID in Z-Wave notation - our GateID

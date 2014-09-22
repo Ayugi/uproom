@@ -17,7 +17,7 @@ public class EssentialNodeQueriesCompleteNotificationHandler implements Notifica
     private static final Logger LOG = LoggerFactory.getLogger(EssentialNodeQueriesCompleteNotificationHandler.class);
 
     @Override
-    public boolean execute(ZWaveHome home, ServerTransportMarker transport, Notification notification) {
+    public boolean execute(int gateId, ZWaveHome home, ServerTransportMarker transport, Notification notification) {
 
         LOG.debug("z-wave notification : ESSENTIAL_NODE_QUERIES_COMPLETE; node ID : {}", notification.getNodeId());
         return false;

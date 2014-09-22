@@ -6,14 +6,14 @@ package ru.uproom.gate.transport.command;
  * Created by osipenko on 10.09.14.
  */
 public class ShutdownCommand extends Command {
-    private String gateId;
+    private int gateId;
 
-    public ShutdownCommand(String gateId) {
+    public ShutdownCommand(int gateId) {
         super(CommandType.Shutdown);
         this.gateId = gateId;
     }
 
-    public String getGateId() {
+    public int getGateId() {
         return gateId;
     }
 }
