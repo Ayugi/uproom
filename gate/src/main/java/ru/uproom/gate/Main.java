@@ -27,6 +27,8 @@ public class Main {
     private static final String ADDRESS_SERVER_NAME = "54.191.89.147";
     private static final int ADDRESS_SERVER_PORT = 8282;
 
+    private static final int GATE_ID = 1;
+
 
     //##############################################################################################################
     //######    entry point
@@ -34,18 +36,19 @@ public class Main {
 
     public static void main(String[] args) {
 
-        LOG.info(" >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  ");
-        LOG.info(" >>>> GATE STARTING ... ");
+        LOG.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        LOG.info("Gate starting ... ");
         // spring initialization
 //        ClassPathXmlApplicationContext ctx =
 //                new ClassPathXmlApplicationContext("applicationContext.xml");
 
         // loading openZWave library
-        LOG.info(" >>>> Load libraries ...");
+        LOG.info("Libraries loading ...");
         NativeLibraryLoader.loadLibrary(ZWave4j.LIBRARY_NAME, ZWave4j.class);
-        LOG.info(" >>>> Libraries loaded.");
+        LOG.info("Libraries loaded");
 
         // reading current librarian options
+        LOG.info("Options loading ...");
         final Options options = Options.create(
                 "/home/osipenko/.uproom21/zwave",
                 "/home/osipenko/.uproom21/config",
@@ -53,7 +56,9 @@ public class Main {
         );
         options.addOptionBool("ConsoleOutput", false);
         options.lock();
+        LOG.info("Options loaded");
 
+        LOG.info("Z-Wave subsystem starting ...");
         // creating main Z-Wave object
         Manager manager = Manager.create();
 
@@ -61,7 +66,7 @@ public class Main {
         ZWaveHome home = new ZWaveHome();
 
         // add main class of Z-Wave notifications
-        MainWatcher watcher = new MainWatcher();
+        MainWatcher watcher = new MainWatcher(GATE_ID);
         watcher.setHome(home);
         manager.addWatcher(watcher, null);
 
@@ -72,6 +77,7 @@ public class Main {
 
         // activating Z-Wave controller driver
         manager.addDriver(ZWAVE_DRIVER_NAME);
+        LOG.info("Z-Wave subsystem started");
 
         // creating test object for server transport system
 //        System.out.println(">>> test link");
@@ -80,22 +86,26 @@ public class Main {
 //        Thread threadServerTransportTest = new Thread(serverTransportTest);
 //        threadServerTransportTest.start();
         // creating link with server
-        System.out.println(">>> link");
-        LOG.debug("CREATING LINK WITH CLOUD SERVER...");
+        LOG.info("Link with cloud server creating...");
         ServerTransportKeeper link = new ServerTransportKeeper(
-                ADDRESS_SERVER_NAME, ADDRESS_SERVER_PORT, 3, 500, 5000, commander);
-        LOG.debug("LINK WITH CLOUD SERVER CREATED");
+                ADDRESS_SERVER_NAME, ADDRESS_SERVER_PORT, 3, 500, 5000, commander, watcher);
+        Thread threadLink = new Thread(link);
+        threadLink.start();
         // add subscriber for set/break link with server
-        link.add(watcher);
+        link.getTransportUsers().add(watcher);
+        LOG.info("Link with cloud server created");
 
+        LOG.info("Gate started");
+        LOG.info("---------------------------------------------------------------------------------------");
         // event control loop
-        System.out.println(">>> work");
         do {
 
             // if Z-Wave driver not ready, restart it
             if (home.isFailed()) {
+                LOG.info("Gate restarting ... ");
                 manager.removeDriver(ZWAVE_DRIVER_NAME);
                 manager.addDriver(ZWAVE_DRIVER_NAME);
+                LOG.info("Gate restarted");
             }
 
             // Decimation signal to avoid overloading of the processor
@@ -108,7 +118,8 @@ public class Main {
         } while (!watcher.isDoExit());
 
         // exit from program
-        LOG.debug("STOPPING GATE...");
+        LOG.info("---------------------------------------------------------------------------------------");
+        LOG.info("Gate stopping ... ");
 
         //serverTransportTest.close();
         link.close();
@@ -117,6 +128,6 @@ public class Main {
         Manager.destroy();
         Options.destroy();
 
-        LOG.debug("GATE STOPPED");
+        LOG.info("Gate stopped");
     }
 }

@@ -16,7 +16,7 @@ import ru.uproom.gate.zwave.ZWaveNode;
 public abstract class DeviceNotificationHandler implements NotificationHandler {
 
     @Override
-    public boolean execute(ZWaveHome home, ServerTransportMarker transport, Notification notification) {
+    public boolean execute(int gateId, ZWaveHome home, ServerTransportMarker transport, Notification notification) {
 
         // find controller node
         short controllerId = Manager.get().getControllerNodeId(home.getHomeId());

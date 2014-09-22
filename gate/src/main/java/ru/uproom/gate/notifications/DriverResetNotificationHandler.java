@@ -17,7 +17,7 @@ public class DriverResetNotificationHandler implements NotificationHandler {
     private static final Logger LOG = LoggerFactory.getLogger(DriverResetNotificationHandler.class);
 
     @Override
-    public boolean execute(ZWaveHome home, ServerTransportMarker transport, Notification notification) {
+    public boolean execute(int gateId, ZWaveHome home, ServerTransportMarker transport, Notification notification) {
 
         LOG.debug("z-wave notification : DRIVER_RESET");
 

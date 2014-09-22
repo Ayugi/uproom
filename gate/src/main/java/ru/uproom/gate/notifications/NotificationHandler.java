@@ -10,5 +10,5 @@ import ru.uproom.gate.zwave.ZWaveHome;
  * Created by osipenko on 10.09.14.
  */
 public interface NotificationHandler {
-    public boolean execute(ZWaveHome home, ServerTransportMarker transport, Notification notification);
+    public boolean execute(int gateId, ZWaveHome home, ServerTransportMarker transport, Notification notification);
 }

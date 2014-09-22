@@ -1,24 +1,26 @@
 package ru.uproom.gate.transport;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.uproom.gate.domain.DelayTimer;
 import ru.uproom.gate.handlers.GateCommander;
+import ru.uproom.gate.notifications.GateWatcher;
 
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Class for set, keep and break connection with server
  * <p/>
  * Created by osipenko on 06.09.14.
  */
-public class ServerTransportKeeper
-        extends ArrayList<ServerTransportUser>
-        implements Runnable, AutoCloseable {
+public class ServerTransportKeeper implements Runnable, AutoCloseable {
 
 
     //##############################################################################################################
     //######    fields
 
+    private static final Logger LOG = LoggerFactory.getLogger(ServerTransport.class);
 
     private int times = 0;
     private long periodTimes = 0;
@@ -26,15 +28,17 @@ public class ServerTransportKeeper
     private String host = "localhost";
     private int port = 6009;
 
-    private Thread thread = null;
     private boolean work = true;
 
     private GateCommander commander = null;
+    private GateWatcher watcher = null;
     private ServerTransport transport = null;
+    private Thread thread;
+    private List<ServerTransportUser> transportUsers = new ArrayList<>();
 
 
     //##############################################################################################################
-    //######    constructors
+    //######    getters and setters
 
 
     public ServerTransportKeeper(String host,
@@ -42,16 +46,24 @@ public class ServerTransportKeeper
                                  int times,
                                  long periodTimes,
                                  long periodCheck,
-                                 GateCommander commander) {
+                                 GateCommander commander,
+                                 GateWatcher watcher
+    ) {
         this.host = host;
         this.port = port;
         this.times = times;
         this.periodTimes = periodTimes;
         this.periodCheck = periodCheck;
         this.commander = commander;
-        // start thread of keeping
-        thread = new Thread(this);
-        thread.start();
+        this.watcher = watcher;
+    }
+
+
+    //##############################################################################################################
+    //######    constructors
+
+    public List<ServerTransportUser> getTransportUsers() {
+        return transportUsers;
     }
 
 
@@ -63,14 +75,11 @@ public class ServerTransportKeeper
     //  open connection
 
     private boolean open() {
-        try {
-            transport = new ServerTransport(host, port, commander);
-            System.out.println("ServerTransportKeeper >>>> transport object created");
-            return true;
-        } catch (IOException e) {
-            System.out.println("[ERR] - ServerTransportKeeper - open - " + e.getLocalizedMessage());
-        }
-        return false;
+        transport = new ServerTransport(host, port, commander, watcher);
+        thread = new Thread(transport);
+        thread.start();
+        LOG.debug("transport implementing object created");
+        return true;
     }
 
 
@@ -82,6 +91,7 @@ public class ServerTransportKeeper
         while (work && (counter < times || times <= 0)) {
             // open connection
             if (open()) return true;
+            else stop();
             // delay for new attempt
             DelayTimer.sleep(periodTimes);
             // next attempt
@@ -105,6 +115,7 @@ public class ServerTransportKeeper
 
     private void stop() {
         if (transport != null) transport.close();
+        thread = null;
     }
 
 
@@ -123,7 +134,7 @@ public class ServerTransportKeeper
                 continue;
             }
             // call subscribers - link set
-            for (ServerTransportUser user : this) {
+            for (ServerTransportUser user : transportUsers) {
                 user.setTransport(transport);
             }
             // check connection
@@ -134,7 +145,7 @@ public class ServerTransportKeeper
                 running = transport.isRunning();
             }
             // call subscribers - link break
-            for (ServerTransportUser user : this) {
+            for (ServerTransportUser user : transportUsers) {
                 user.setTransport(null);
             }
             // close connection

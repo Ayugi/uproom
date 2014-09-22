@@ -62,8 +62,8 @@ public class ZWaveHome {
         return temp;
     }
 
-    public void setFailed(boolean ready) {
-        this.ready = ready;
+    public void setFailed(boolean failed) {
+        this.failed = failed;
     }
 
 

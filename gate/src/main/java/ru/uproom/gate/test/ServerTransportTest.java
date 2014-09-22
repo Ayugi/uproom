@@ -228,7 +228,7 @@ public class ServerTransportTest implements AutoCloseable, Runnable {
                     // request to shutdown
                     else {
                         System.out.println("TEST (ServerTransportOut) >>>> send Shutdown command");
-                        output.writeObject(new ShutdownCommand(String.format("gate-%06d", gateId)));
+                        output.writeObject(new ShutdownCommand(gateId));
                     }
                 } catch (IOException e) {
                     System.out.println("TEST (ServerTransportOut) >>>> ERROR >>>> " + e.getMessage());

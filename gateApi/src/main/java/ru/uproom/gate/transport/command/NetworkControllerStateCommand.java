@@ -6,16 +6,16 @@ package ru.uproom.gate.transport.command;
  * Time: 16:10
  */
 public class NetworkControllerStateCommand extends Command {
-    private String gateId;
+    private int gateId;
     private String state;
 
-    public NetworkControllerStateCommand(String gateId, String state) {
+    public NetworkControllerStateCommand(int gateId, String state) {
         super(CommandType.NetworkControllerState);
         this.gateId = gateId;
         this.state = state;
     }
 
-    public String getGateId() {
+    public int getGateId() {
         return gateId;
     }
 

@@ -13,7 +13,7 @@ import ru.uproom.gate.zwave.ZWaveHome;
 @GateNotificationHandlerAnnotation(value = GateNotificationType.Handshake)
 public class HandshakeGateNotificationHandler implements NotificationHandler {
     @Override
-    public boolean execute(ZWaveHome home, ServerTransportMarker transport, Notification notification) {
+    public boolean execute(int gateId, ZWaveHome home, ServerTransportMarker transport, Notification notification) {
         if (transport == null) return false;
 
         return transport.sendCommand(new HandshakeCommand(

@@ -7,18 +7,18 @@ package ru.uproom.gate.transport.command;
  */
 public class GetDeviceListCommand extends Command {
 
-    private String gateId;
+    private int gateId;
 
     public GetDeviceListCommand() {
         super(CommandType.GetDeviceList);
     }
 
-    public GetDeviceListCommand(String gateId) {
+    public GetDeviceListCommand(int gateId) {
         super(CommandType.GetDeviceList);
         this.gateId = gateId;
     }
 
-    public String getGateId() {
+    public int getGateId() {
         return gateId;
     }
 }

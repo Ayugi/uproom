@@ -18,7 +18,7 @@ public class NodeNewNotificationHandler implements NotificationHandler {
     private static final Logger LOG = LoggerFactory.getLogger(NodeNewNotificationHandler.class);
 
     @Override
-    public boolean execute(ZWaveHome home, ServerTransportMarker transport, Notification notification) {
+    public boolean execute(int gateId, ZWaveHome home, ServerTransportMarker transport, Notification notification) {
 
         // Определение идентификатора узла и добавление его в список известных узлов
         ZWaveNode node = new ZWaveNode(home, notification.getNodeId());

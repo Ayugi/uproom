@@ -20,7 +20,7 @@ public class ValueAddedNotificationHandler implements NotificationHandler {
     private static final Logger LOG = LoggerFactory.getLogger(ValueAddedNotificationHandler.class);
 
     @Override
-    public boolean execute(ZWaveHome home, ServerTransportMarker transport, Notification notification) {
+    public boolean execute(int gateId, ZWaveHome home, ServerTransportMarker transport, Notification notification) {
 
         // find node in home
         ZWaveNode node = home.getNodes().get(notification.getNodeId());

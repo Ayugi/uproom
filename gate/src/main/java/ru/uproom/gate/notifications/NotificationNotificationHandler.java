@@ -18,7 +18,7 @@ public class NotificationNotificationHandler implements NotificationHandler {
     private static final Logger LOG = LoggerFactory.getLogger(NotificationNotificationHandler.class);
 
     @Override
-    public boolean execute(ZWaveHome home, ServerTransportMarker transport, Notification notification) {
+    public boolean execute(int gateId, ZWaveHome home, ServerTransportMarker transport, Notification notification) {
 
         String notificationCode = "";
 

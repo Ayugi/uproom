@@ -19,7 +19,7 @@ public class NodeRemovedNotificationHandler implements NotificationHandler {
     private static final Logger LOG = LoggerFactory.getLogger(NodeRemovedNotificationHandler.class);
 
     @Override
-    public boolean execute(ZWaveHome home, ServerTransportMarker transport, Notification notification) {
+    public boolean execute(int gateId, ZWaveHome home, ServerTransportMarker transport, Notification notification) {
 
         // Определение идентификатора узла и удаление его из списка известных узлов
         short nodeId = notification.getNodeId();

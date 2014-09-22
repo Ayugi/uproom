@@ -18,7 +18,7 @@ public class GroupNotificationHandler implements NotificationHandler {
     private static final Logger LOG = LoggerFactory.getLogger(GroupNotificationHandler.class);
 
     @Override
-    public boolean execute(ZWaveHome home, ServerTransportMarker transport, Notification notification) {
+    public boolean execute(int gateId, ZWaveHome home, ServerTransportMarker transport, Notification notification) {
 
         // node associated with groups
         ZWaveNode node = home.getNodes().get(notification.getNodeId());

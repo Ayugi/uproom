@@ -18,7 +18,7 @@ public class NodeQueriesCompleteNotificationHandler implements NotificationHandl
     private static final Logger LOG = LoggerFactory.getLogger(NodeQueriesCompleteNotificationHandler.class);
 
     @Override
-    public boolean execute(ZWaveHome home, ServerTransportMarker transport, Notification notification) {
+    public boolean execute(int gateId, ZWaveHome home, ServerTransportMarker transport, Notification notification) {
 
         // call listeners for this node
         ZWaveNode node = home.getNodes().get(notification.getNodeId());

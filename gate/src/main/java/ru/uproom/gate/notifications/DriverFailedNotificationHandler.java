@@ -18,18 +18,19 @@ public class DriverFailedNotificationHandler implements NotificationHandler {
     private static final Logger LOG = LoggerFactory.getLogger(DriverFailedNotificationHandler.class);
 
     @Override
-    public boolean execute(ZWaveHome home, ServerTransportMarker transport, Notification notification) {
+    public boolean execute(int gateId, ZWaveHome home, ServerTransportMarker transport, Notification notification) {
 
         if (home == null || notification == null) return false;
         // reset HomeID
         home.setHomeId(0);
         home.setReady(false);
+        home.setFailed(true);
 
         LOG.debug("z-wave notification : DRIVER_FAILED");
 
         // send message to server
         return (transport == null) ||
-                transport.sendCommand(new NetworkControllerStateCommand(home.getHomeIdAsString(), "off"));
+                transport.sendCommand(new NetworkControllerStateCommand(gateId, "off"));
     }
 
 }

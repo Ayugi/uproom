@@ -21,7 +21,7 @@ public class ValueRemovedNotificationHandler implements NotificationHandler {
     private static final Logger LOG = LoggerFactory.getLogger(ValueRemovedNotificationHandler.class);
 
     @Override
-    public boolean execute(ZWaveHome home, ServerTransportMarker transport, Notification notification) {
+    public boolean execute(int gateId, ZWaveHome home, ServerTransportMarker transport, Notification notification) {
 
         // находим узел из которого удаляется параметр
         ZWaveNode node = home.getNodes().get(notification.getNodeId());
