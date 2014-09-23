@@ -36,19 +36,18 @@ public class UserController {
 
     @RequestMapping(method = RequestMethod.GET, value = "register")
     @ResponseBody
-    public String register(@RequestParam String login,
-                           @RequestParam String password,
-                           @RequestParam String name) {
-        userDao.saveNewUser(new User(login, password));
+    public String register(@RequestParam String username,
+                           @RequestParam String password) {
+        userDao.saveNewUser(new User(username, password));
         return "ok";
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "login")
     @ResponseBody
-    public User login(@RequestParam String login,
+    public User login(@RequestParam String username,
                       @RequestParam String password,
                       HttpServletRequest request) {
-        User user = userDao.authenticate(login, password);
+        User user = userDao.authenticate(username, password);
         if (null == user)
             return null;
         String sid = request.getRemoteHost() + System.currentTimeMillis() + Math.random();

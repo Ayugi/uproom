@@ -1,7 +1,6 @@
 package ru.uproom.prsistence;
 
 import ru.uproom.domain.Device;
-import ru.uproom.domain.User;
 
 import java.util.List;
 
@@ -10,5 +9,6 @@ import java.util.List;
  */
 public interface DeviceDao {
     Device saveDevice(Device device);
+
     List<Device> fetchUserDevices(Integer userId);
 }

@@ -1,7 +1,11 @@
 package ru.uproom.gate.transport;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import ru.uproom.gate.handlers.GateCommander;
+import ru.uproom.gate.notifications.GateNotificationType;
+import ru.uproom.gate.notifications.GateWatcher;
 import ru.uproom.gate.transport.command.Command;
 
 import java.io.IOException;
@@ -22,16 +26,18 @@ public class ServerTransport implements ServerTransportMarker, AutoCloseable, Ru
     //######    fields
 
 
+    private static final Logger LOG = LoggerFactory.getLogger(ServerTransport.class);
+
     private String host = "localhost";
     private int port = 6009;
-    private Socket socket = null;
-    private ObjectInputStream input = null;
-    private ObjectOutputStream output = null;
+    private Socket socket;
+    private ObjectInputStream input;
+    private ObjectOutputStream output;
 
-    private Thread thread = null;
     private boolean running = false;
 
-    private GateCommander commander = null;
+    private GateCommander commander;
+    private GateWatcher watcher;
 
 
     //##############################################################################################################
@@ -39,26 +45,16 @@ public class ServerTransport implements ServerTransportMarker, AutoCloseable, Ru
 
 
     public ServerTransport() throws IOException {
-        this("localhost", 6009, null);
+        this("localhost", 6009, null, null);
     }
 
 
-    public ServerTransport(String host, int port, GateCommander commander) throws IOException {
+    public ServerTransport(String host, int port, GateCommander commander, GateWatcher watcher) {
         // save connection parameters
         this.host = host;
         this.port = port;
         this.commander = commander;
-        // create connection
-        this.socket = new Socket(this.host, this.port);
-        // get stream for commands from server
-        this.input = new ObjectInputStream(socket.getInputStream());
-        // get stream for messages to server
-        this.output = new ObjectOutputStream(socket.getOutputStream());
-        // run new thread
-        thread = new Thread(this);
-        thread.start();
-        // we are running
-        this.running = true;
+        this.watcher = watcher;
     }
 
 
@@ -85,25 +81,52 @@ public class ServerTransport implements ServerTransportMarker, AutoCloseable, Ru
 
         try {
             if (input != null) input.close();
-        } catch (IOException e) {
-            System.out.println("[ERR] - ServerTransport - close - " + e.getLocalizedMessage());
-        }
-
-        try {
             if (output != null) output.close();
-        } catch (IOException e) {
-            System.out.println("[ERR] - ServerTransport - close - " + e.getLocalizedMessage());
-        }
-
-        try {
             if (socket != null) socket.close();
         } catch (IOException e) {
-            System.out.println("[ERR] - ServerTransport - close - " + e.getLocalizedMessage());
+            LOG.error(e.getMessage());
         }
 
         socket = null;
         input = null;
         output = null;
+    }
+
+
+    //------------------------------------------------------------------------
+    //  open connections
+
+    public boolean sendHandshake() {
+        return watcher.onGateEvent(GateNotificationType.Handshake, null);
+    }
+
+
+    //------------------------------------------------------------------------
+    //  create input stream
+
+    public boolean getInputStream() {
+        try {
+            input = new ObjectInputStream(socket.getInputStream());
+            return true;
+        } catch (IOException e) {
+            LOG.error(e.getMessage());
+            return false;
+        }
+    }
+
+
+    //------------------------------------------------------------------------
+    //  open connections
+
+    public boolean open() {
+        try {
+            socket = new Socket(this.host, this.port);
+            output = new ObjectOutputStream(socket.getOutputStream());
+            return true;
+        } catch (IOException e) {
+            LOG.error(e.getMessage());
+            return false;
+        }
     }
 
 
@@ -124,7 +147,7 @@ public class ServerTransport implements ServerTransportMarker, AutoCloseable, Ru
         try {
             output.writeObject(command);
         } catch (IOException e) {
-            System.out.println("[ERR] - RequestToServer - sendCommand - " + e.getLocalizedMessage());
+            LOG.error(e.getMessage());
             return false;
         }
 
@@ -138,21 +161,21 @@ public class ServerTransport implements ServerTransportMarker, AutoCloseable, Ru
     public Command receiveCommand() {
 
         Command command = null;
-        System.out.println("[INF] - ServerTransport - receiveCommand - waiting for next command...");
+        LOG.debug("Waiting for next command from server");
 
         // get next command
         try {
             command = (Command) input.readObject();
         } catch (IOException e) {
             command = null;
-            System.out.println("[ERR] - ServerTransport - receiveCommand - " + e.getMessage());
+            LOG.error(e.getMessage());
         } catch (ClassNotFoundException e) {
             command = null;
-            System.out.println("[ERR] - ServerTransport - receiveCommand - " + e.getMessage());
+            LOG.error(e.getMessage());
         }
 
         if (command != null)
-            System.out.println("[INF] - ServerTransport - receiveCommand - have command : " + command.getType().name());
+            LOG.debug("receive command : {}", command.getType().name());
         return command;
     }
 
@@ -163,13 +186,22 @@ public class ServerTransport implements ServerTransportMarker, AutoCloseable, Ru
     @Override
     public void run() {
 
+        running = open();
+        if (running) {
+            sendHandshake();
+            running = getInputStream();
+        }
+
         Command command = null;
         while (running) {
 
             // get next command
             command = receiveCommand();
             // if command not received - close connection
-            if (command == null) close();
+            if (command == null) {
+                close();
+                continue;
+            }
             // execute command
             commander.execute(command);
         }

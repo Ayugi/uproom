@@ -17,8 +17,4 @@ public class SetDeviceParameterCommand extends Command {
     public DeviceDTO getDevice() {
         return device;
     }
-
-    public void setDevice(DeviceDTO device) {
-        this.device = device;
-    }
 }

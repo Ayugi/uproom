@@ -1,6 +1,7 @@
 package ru.uproom.domain;
 
 import ru.uproom.gate.transport.dto.DeviceDTO;
+import ru.uproom.gate.transport.dto.parameters.DeviceParametersNames;
 
 import javax.persistence.*;
 import java.util.HashMap;
@@ -26,9 +27,15 @@ public class Device {
     @Transient
     private DeviceState state;
     @Transient
-    private Map<String, String> parameters = new HashMap<>();
+    private Map<DeviceParametersNames, String> parameters = new HashMap<>();
 
     public Device() {
+    }
+
+    public Device(DeviceDTO dto) {
+        id = dto.getId();
+        zid = dto.getZId();
+        parameters = dto.getParameters();
     }
 
     public int getId() {
@@ -71,25 +78,19 @@ public class Device {
         this.user = user;
     }
 
-    public Map<String, String> getParameters() {
+    public Map<DeviceParametersNames, String> getParameters() {
         return parameters;
     }
 
-    public void setParameters(Map<String, String> parameters) {
+    public void setParameters(Map<DeviceParametersNames, String> parameters) {
         this.parameters = parameters;
     }
 
-    public void mergeById(Device device){
+    public void mergeById(Device device) {
         if (0 != device.getZid())
             zid = device.getZid();
         if (null != device.getState())
             state = device.getState();
         parameters.putAll(device.getParameters());
-    }
-
-    public Device(DeviceDTO dto) {
-        id = dto.getId();
-        zid = dto.getZId();
-        parameters = dto.getParameters();
     }
 }

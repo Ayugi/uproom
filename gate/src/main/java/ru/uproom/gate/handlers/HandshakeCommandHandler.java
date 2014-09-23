@@ -2,6 +2,7 @@ package ru.uproom.gate.handlers;
 
 import ru.uproom.gate.notifications.GateWatcher;
 import ru.uproom.gate.transport.command.Command;
+import ru.uproom.gate.transport.command.CommandType;
 import ru.uproom.gate.transport.command.HandshakeCommand;
 
 /**
@@ -9,6 +10,7 @@ import ru.uproom.gate.transport.command.HandshakeCommand;
  * </p>
  * Created by osipenko on 09.09.14.
  */
+@CommandHandlerAnnotation(value = CommandType.Handshake)
 public class HandshakeCommandHandler implements CommandHandler {
 
     @Override
