@@ -4,11 +4,14 @@ import junit.framework.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import ru.uproom.gate.transport.command.HandshakeCommand;
+import ru.uproom.gate.transport.command.SendDeviceListCommand;
+import ru.uproom.gate.transport.dto.DeviceDTO;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Field;
 import java.net.Socket;
+import java.util.ArrayList;
 
 /**
  * Created by hedin on 30.08.2014.
@@ -24,8 +27,8 @@ public class TestSocketConnect {
         service.init();
 
         Socket socket = new Socket("localhost", testPort);
-        ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
-        objectOutputStream.writeObject(new HandshakeCommand(1));
+        ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
+        outputStream.writeObject(new HandshakeCommand(1));
         wait(100);
         GateSocketHandler handler = service.getHandler(1);
         Assert.assertNotNull(handler);
