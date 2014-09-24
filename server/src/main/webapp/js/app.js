@@ -10,6 +10,8 @@ define(['backbone', 'views', 'models'], function(Backbone, Views, Models) {
 	app.layout.auth.setCallback({success: function(user) {
 		app.user = user;
 
+        console.log("auth failed");
+
 		// In case of successfull authoization — fetch data
 		devicesCollection.fetch();
 		app.layout.accountMenu.reset(user);
@@ -17,5 +19,15 @@ define(['backbone', 'views', 'models'], function(Backbone, Views, Models) {
 		// And prepare UI
 		app.activate();
 	}});
+
+    app.layout.auth.setCallback({fail: function(user) {
+
+        console.log("auth failed");
+
+
+
+        // And prepare UI
+//        app.activate();
+    }});
 })
 				
