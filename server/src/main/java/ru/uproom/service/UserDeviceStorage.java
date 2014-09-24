@@ -1,7 +1,6 @@
 package ru.uproom.service;
 
 import ru.uproom.domain.Device;
-import ru.uproom.domain.User;
 import ru.uproom.prsistence.DeviceDao;
 
 import java.util.Collection;
@@ -21,7 +20,7 @@ public class UserDeviceStorage {
     }
 
     public void addDevices(List<Device> devices) {
-        for (Device device : devices){
+        for (Device device : devices) {
             if (devicesById.containsKey(device.getId())) {
                 Device existing = devicesById.get(device.getId());
                 existing.mergeById(device);
@@ -38,7 +37,7 @@ public class UserDeviceStorage {
         }
     }
 
-    public Collection<Device> fetchDevices(){
+    public Collection<Device> fetchDevices() {
         return devicesById.values();
     }
 }

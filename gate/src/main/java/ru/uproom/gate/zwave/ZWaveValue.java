@@ -2,6 +2,7 @@ package ru.uproom.gate.zwave;
 
 import org.zwave4j.Manager;
 import org.zwave4j.ValueId;
+import ru.uproom.gate.transport.dto.parameters.DeviceParametersNames;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
@@ -13,18 +14,33 @@ public class ZWaveValue {
 
 
     //=============================================================================================================
-    //======    параметры класса
+    //======    fields
 
-    private ValueId valueId = null;
+
+    private int id;
+    private ValueId valueId;
+    private DeviceParametersNames valueName;
     private ArrayList<ZWaveValueCallback> events = new ArrayList<ZWaveValueCallback>();
 
 
     //=============================================================================================================
-    //======    обработка параметров класса
+    //======    constructors
+
+
+    public ZWaveValue(ValueId valueId) {
+        this.valueId = valueId;
+        String label = Manager.get().getValueLabel(valueId);
+        this.id = ZWaveValueIndexFactory.createIndex(valueId);
+        this.valueName = DeviceParametersNames.byZWaveCode(id);
+    }
+
+
+    //=============================================================================================================
+    //======    getters & setters
 
 
     //------------------------------------------------------------------------
-    //  идентификатор параметра узла
+    //  z-wave value ID
 
     public ValueId getValueId() {
         return valueId;
@@ -36,7 +52,7 @@ public class ZWaveValue {
 
 
     //------------------------------------------------------------------------
-    //  получение названия параметра
+    //  z-wave value label
 
     public String getValueLabel() {
         return Manager.get().getValueLabel(valueId);
@@ -44,7 +60,7 @@ public class ZWaveValue {
 
 
     //------------------------------------------------------------------------
-    //  получение индекса параметра
+    //  z-wave value index
 
     public Short getValueIndex() {
         return valueId.getIndex();
@@ -52,7 +68,15 @@ public class ZWaveValue {
 
 
     //------------------------------------------------------------------------
-    //  получение класса команд
+    //  gate value id
+
+    public int getId() {
+        return id;
+    }
+
+
+    //------------------------------------------------------------------------
+    //  z-wave value command class
 
     public Short getValueCommandClass() {
         return valueId.getCommandClassId();
@@ -60,7 +84,7 @@ public class ZWaveValue {
 
 
     //------------------------------------------------------------------------
-    //  получение индекса экземпляра класса команд
+    //  z-wave value instance id
 
     public Short getValueInstance() {
         return valueId.getInstance();
@@ -68,7 +92,7 @@ public class ZWaveValue {
 
 
     //------------------------------------------------------------------------
-    //  события, связанные с данным параметром
+    //  events associated with value
 
     public boolean addEvent(ZWaveValueCallback event) {
         return events.add(event);
@@ -85,12 +109,20 @@ public class ZWaveValue {
     }
 
 
+    //------------------------------------------------------------------------
+    //  server value name
+
+    public DeviceParametersNames getValueName() {
+        return valueName;
+    }
+
+
     //=============================================================================================================
-    //======    методы класса
+    //======    methods
 
 
     //------------------------------------------------------------------------
-    //  получение значения параметра
+    //  get parameter value
 
     private Object getValue() {
         switch (valueId.getType()) {
@@ -135,7 +167,7 @@ public class ZWaveValue {
 
 
     //------------------------------------------------------------------------
-    //  получение значения параметра в виде строки
+    //  get parameter value as string
 
     public String getValueAsString() {
         Object obj = getValue();
@@ -144,18 +176,13 @@ public class ZWaveValue {
 
 
     //------------------------------------------------------------------------
-    //  информация о параметре в виде строки
+    //  parameter information as string
 
     @Override
     public String toString() {
 
-        Integer index = ZWaveValueIndexFactory.createIndex(
-                valueId.getCommandClassId(),
-                valueId.getInstance(),
-                valueId.getIndex()
-        );
         String result = String.format("{\"id\":\"%d\",\"label\":\"%s\",\"value\":\"%s\"}",
-                index,
+                id,
                 getValueLabel(),
                 getValueAsString()
         );
@@ -163,4 +190,11 @@ public class ZWaveValue {
         return result;
     }
 
+
+    //------------------------------------------------------------------------
+    //  set parameter value as string
+
+    public boolean setValue(String value) {
+        return Manager.get().setValueAsString(valueId, value);
+    }
 }

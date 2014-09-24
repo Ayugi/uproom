@@ -3,6 +3,7 @@ package ru.uproom.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.uproom.gate.transport.command.Command;
 import ru.uproom.gate.transport.command.GetDeviceListCommand;
@@ -20,8 +21,9 @@ import java.util.Map;
 @Service
 public class GateServiceImpl implements GateTransport {
 
+    @Value("${port}")
+    private int port = 8282;
     private static final Logger LOG = LoggerFactory.getLogger(GateServiceImpl.class);
-
     private Map<Integer, GateSocketHandler> activeSockets = new HashMap<>();
 
     @Autowired
@@ -36,7 +38,7 @@ public class GateServiceImpl implements GateTransport {
     public void init() {
         LOG.info("INIT");
         try {
-            ServerSocket serverSocket = new ServerSocket(8282);
+            ServerSocket serverSocket = new ServerSocket(port);
             Thread listener = new Thread(new SocketListener(serverSocket));
             listener.start();
         } catch (IOException e) {

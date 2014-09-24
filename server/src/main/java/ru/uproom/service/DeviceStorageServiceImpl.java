@@ -14,8 +14,8 @@ import java.util.Map;
  * Created by HEDIN on 16.09.2014.
  */
 @Service
-public class DeviceStorageServiceImpl implements DeviceStorageService{
-    private Map <Integer, UserDeviceStorage> userStorage = new HashMap<>();
+public class DeviceStorageServiceImpl implements DeviceStorageService {
+    private Map<Integer, UserDeviceStorage> userStorage = new HashMap<>();
 
     @Autowired
     private DeviceDao deviceDao;

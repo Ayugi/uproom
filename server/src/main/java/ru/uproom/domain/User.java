@@ -9,7 +9,7 @@ import javax.persistence.*;
 @Table(name = "user")
 @NamedQueries({
         @NamedQuery(name = "findAllUsers", query = "select u from User u"),
-        @NamedQuery(name = "findUserByLogin", query = "select u from User u where u.login = :login")
+        @NamedQuery(name = "findUserByLoginPassword", query = "select u from User u where u.login = :login and u.password = :pass")
 })
 public class User {
     @Id
