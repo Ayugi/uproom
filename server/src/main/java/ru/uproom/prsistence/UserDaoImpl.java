@@ -31,10 +31,11 @@ public class UserDaoImpl implements UserDao{
 
     @Override
     public User authenticate(String login, String password) {
-        User user = entityManager.createNamedQuery("findUserByLogin", User.class)
-                .setParameter("login", login).getSingleResult();
-        return password.equals(user.getPassword())
-                ? user
-                : null;
+        List<User> resultList = entityManager.createNamedQuery("findUserByLoginPassword", User.class)
+                .setParameter("login", login).setParameter("pass", password)
+                .getResultList();
+        if (resultList.isEmpty())
+            return null;
+        return resultList.get(0);
     }
 }
