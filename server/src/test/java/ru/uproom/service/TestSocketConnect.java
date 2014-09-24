@@ -7,24 +7,40 @@ import ru.uproom.gate.transport.command.HandshakeCommand;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.Field;
 import java.net.Socket;
 
 /**
  * Created by hedin on 30.08.2014.
  */
-@Ignore
+//@Ignore
 public class TestSocketConnect {
+    private static final int testPort = 19999;
 
     @Test
     public synchronized void testSocketHandshake() throws IOException, InterruptedException {
         GateServiceImpl service = new GateServiceImpl();
+        fillPrivateField(service,testPort,"port");
         service.init();
 
-        Socket socket = new Socket("localhost", GateServiceImpl.PORT);
+        Socket socket = new Socket("localhost", testPort);
         ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
         objectOutputStream.writeObject(new HandshakeCommand(1));
         wait(100);
         GateSocketHandler handler = service.getHandler(1);
         Assert.assertNotNull(handler);
+    }
+
+    // TODO move to common helper
+    public static void fillPrivateField(Object target, Object value, String fieldName) {
+        try {
+            Field field = target.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            field.set(target, value);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException("failed to inject fieldName :" + fieldName + " of " + target + " with " + value, e);
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException("failed to inject fieldName :" + fieldName + " of " + target + " with " + value, e);
+        }
     }
 }
