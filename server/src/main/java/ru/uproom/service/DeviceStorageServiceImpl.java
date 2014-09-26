@@ -3,6 +3,7 @@ package ru.uproom.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.uproom.domain.Device;
+import ru.uproom.gate.transport.dto.parameters.DeviceParametersNames;
 import ru.uproom.prsistence.DeviceDao;
 
 import java.util.Collection;
@@ -34,6 +35,17 @@ public class DeviceStorageServiceImpl implements DeviceStorageService {
 
     @Override
     public Collection<Device> fetchDevices(int userId) {
-        return userStorage.get(userId).fetchDevices();
+        Collection<Device> devices = userStorage.get(userId).fetchDevices();
+        if (devices.isEmpty()){
+            Device test = new Device();
+            test.setName("test device");
+            test.getParameters().put(DeviceParametersNames.Unknown,"test");
+            test.getParameters().put(DeviceParametersNames.ApplicationVersion,"on");
+            test.setUser(SessionHolderImpl.getInstance().currentUser());
+            test.setZid(-1);
+            deviceDao.saveDevice(test);
+            devices.add(test);
+        }
+        return devices;
     }
 }
