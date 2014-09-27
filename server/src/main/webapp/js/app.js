@@ -10,12 +10,25 @@ define(['backbone', 'views', 'models'], function(Backbone, Views, Models) {
 	app.layout.auth.setCallback({success: function(user) {
 		app.user = user;
 
-		// In case of successfull authoization — fetch data
-		devicesCollection.fetch();
-		app.layout.accountMenu.reset(user);
-						
-		// And prepare UI
-		app.activate();
+//        if(user.id) {
+            // In case of successfull authoization — fetch data
+        devicesCollection.fetch();
+        app.layout.accountMenu.reset(user);
+
+        // And prepare UI
+        app.activate();
+
+//        } else
+//            console.log("auth failed - user-id = 0");
+
 	}});
+
+    app.layout.auth.setCallback({fail: function(user) {
+
+        console.log("auth failed - no such user");
+        $('#error-msg').text("Неправильное имя пользвателя или пароль");
+        $('#error-msg').show();
+
+    }});
 })
 				
