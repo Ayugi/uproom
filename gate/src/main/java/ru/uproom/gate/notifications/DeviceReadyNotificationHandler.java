@@ -1,6 +1,6 @@
 package ru.uproom.gate.notifications;
 
-import ru.uproom.gate.transport.dto.parameters.DeviceState;
+import ru.uproom.gate.transport.dto.parameters.DeviceStateEnum;
 
 /**
  * Handler for Z-Wave notification DRIVER_READY
@@ -9,7 +9,7 @@ import ru.uproom.gate.transport.dto.parameters.DeviceState;
  */
 public class DeviceReadyNotificationHandler extends DeviceNotificationHandler {
     @Override
-    protected DeviceState getEvent() {
-        return DeviceState.Ready;
+    protected DeviceStateEnum getEvent() {
+        return DeviceStateEnum.Work;
     }
 }

@@ -1,4 +1,4 @@
-package ru.uproom.gate.handlers;
+package ru.uproom.gate.commands;
 
 import ru.uproom.gate.notifications.GateNotificationType;
 import ru.uproom.gate.notifications.GateWatcher;

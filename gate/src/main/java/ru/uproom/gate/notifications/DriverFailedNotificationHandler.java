@@ -6,6 +6,7 @@ import org.zwave4j.Notification;
 import org.zwave4j.NotificationType;
 import ru.uproom.gate.transport.ServerTransportMarker;
 import ru.uproom.gate.transport.command.NetworkControllerStateCommand;
+import ru.uproom.gate.transport.dto.parameters.DeviceStateEnum;
 import ru.uproom.gate.zwave.ZWaveHome;
 
 /**
@@ -25,12 +26,13 @@ public class DriverFailedNotificationHandler implements NotificationHandler {
         home.setHomeId(0);
         home.setReady(false);
         home.setFailed(true);
+        home.setControllerState(DeviceStateEnum.Down);
 
         LOG.debug("z-wave notification : DRIVER_FAILED");
 
         // send message to server
         return (transport == null) ||
-                transport.sendCommand(new NetworkControllerStateCommand(gateId, "off"));
+                transport.sendCommand(new NetworkControllerStateCommand(gateId, home.getControllerState()));
     }
 
 }

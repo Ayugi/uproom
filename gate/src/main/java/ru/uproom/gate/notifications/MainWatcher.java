@@ -95,13 +95,16 @@ public class MainWatcher implements NotificationWatcher, ServerTransportUser, Ga
 
     @Override // ServerTransportUser
     public void setTransport(ServerTransportMarker transport) {
-        if (transport == null) link = false;
-        else {
-            this.transport = transport;
-            link = true;
-            // send handshake every time when link with server established
-            //onGateEvent(GateNotificationType.Handshake, null);
-        }
+        this.transport = transport;
+    }
+
+
+    //------------------------------------------------------------------------
+    //  link between gate and server established/broken
+
+    @Override // ServerTransportUser
+    public void setLink(boolean link) {
+        this.link = link;
     }
 
 
@@ -122,7 +125,7 @@ public class MainWatcher implements NotificationWatcher, ServerTransportUser, Ga
 
 
     //------------------------------------------------------------------------
-    //  notification handlers
+    //  notification commands
 
     private void prepareZwaveNotificationHandlers() {
         for (Class<?> handler : ClassesSearcher.getAnnotatedClasses(
@@ -172,7 +175,8 @@ public class MainWatcher implements NotificationWatcher, ServerTransportUser, Ga
         }
 
         // execution notification
-        return handler.execute(gateId, home, link ? transport : null, null);
+        boolean temp = link || (type == GateNotificationType.Handshake);
+        return handler.execute(gateId, home, temp ? transport : null, null);
     }
 
 

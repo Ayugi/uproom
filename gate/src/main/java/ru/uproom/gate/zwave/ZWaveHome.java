@@ -1,6 +1,16 @@
 package ru.uproom.gate.zwave;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.zwave4j.ControllerCallback;
+import org.zwave4j.ControllerError;
+import org.zwave4j.ControllerState;
+import org.zwave4j.Manager;
+import ru.uproom.gate.notifications.GateNotificationType;
+import ru.uproom.gate.notifications.GateWatcher;
 import ru.uproom.gate.transport.dto.DeviceDTO;
+import ru.uproom.gate.transport.dto.parameters.DeviceParametersNames;
+import ru.uproom.gate.transport.dto.parameters.DeviceStateEnum;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,22 +22,41 @@ import java.util.TreeMap;
  * <p/>
  * Created by osipenko on 10.08.14.
  */
-public class ZWaveHome {
+public class ZWaveHome implements ControllerCallback {
 
 
     //##############################################################################################################
     //######    fields
 
-
+    private static final Logger LOG = LoggerFactory.getLogger(ZWaveHome.class);
     private final Map<Short, ZWaveNode> nodes = new TreeMap<Short, ZWaveNode>();
+    private GateWatcher watcher;
     private long homeId;
     private boolean ready;
     private boolean failed;
+
+    private DeviceStateEnum requestState;
+
+
+    //##############################################################################################################
+    //######    constructors
+
+
+    public ZWaveHome() {
+        this(null);
+    }
+
+    public ZWaveHome(GateWatcher watcher) {
+        this.watcher = watcher;
+    }
 
 
     //##############################################################################################################
     //######    getters and setters
 
+    public void setWatcher(GateWatcher watcher) {
+        this.watcher = watcher;
+    }
 
     //------------------------------------------------------------------------
     //  home ID
@@ -54,6 +83,7 @@ public class ZWaveHome {
 
     public void setReady(boolean ready) {
         this.ready = ready;
+        watcher.onGateEvent(GateNotificationType.SendDeviceList, null);
     }
 
     public boolean isFailed() {
@@ -72,6 +102,38 @@ public class ZWaveHome {
 
     public Map<Short, ZWaveNode> getNodes() {
         return nodes;
+    }
+
+
+    //------------------------------------------------------------------------
+    // state of Z-Wave Network Controller
+
+    public DeviceStateEnum getControllerState() {
+        DeviceStateEnum state = DeviceStateEnum.Down;
+        if (homeId <= 0) return state;
+        short index = Manager.get().getControllerNodeId(homeId);
+        ZWaveNode node = nodes.get(index);
+        if (node != null) {
+            Object o = node.getParams().get(DeviceParametersNames.State);
+            if (o != null && o instanceof DeviceStateEnum) state = (DeviceStateEnum) o;
+        }
+        return state;
+    }
+
+    public void setControllerState(DeviceStateEnum state) {
+        if (homeId <= 0) return;
+        short index = Manager.get().getControllerNodeId(homeId);
+        ZWaveNode node = nodes.get(index);
+        if (node != null)
+            node.getParams().put(DeviceParametersNames.State, state);
+    }
+
+
+    //------------------------------------------------------------------------
+    // request to state of Z-Wave Network Controller from server
+
+    public void setRequestState(DeviceStateEnum requestState) {
+        this.requestState = requestState;
     }
 
 
@@ -127,4 +189,41 @@ public class ZWaveHome {
         return true;
     }
 
+
+    //------------------------------------------------------------------------
+    //  callback for Z-Wave controller commands
+
+    @Override
+    public void onCallback(ControllerState controllerState, ControllerError controllerError, Object o) {
+
+        // cancel current mode
+        //if (o != null && o instanceof DeviceStateEnum && (DeviceStateEnum)o == DeviceStateEnum.Cancel) {
+        if (controllerState == ControllerState.CANCEL) {
+            setControllerState(DeviceStateEnum.Work);
+            watcher.onGateEvent(GateNotificationType.Cancel, null);
+            requestState = DeviceStateEnum.Unknown;
+            return;
+        }
+
+        // set requested mode
+        if (controllerState == ControllerState.WAITING && controllerError == ControllerError.NONE) {
+            switch (requestState) {
+                case Add:
+                    setControllerState(requestState);
+                    watcher.onGateEvent(GateNotificationType.AddModeOn, null);
+                    break;
+                case Remove:
+                    setControllerState(requestState);
+                    watcher.onGateEvent(GateNotificationType.RemoveModeOn, null);
+                    break;
+                default:
+            }
+            requestState = DeviceStateEnum.Unknown;
+        }
+
+        LOG.debug("Z-Wave controller : state={}, error={}", new Object[]{
+                controllerState,
+                controllerError
+        });
+    }
 }

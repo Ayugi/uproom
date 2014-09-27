@@ -1,9 +1,9 @@
-package ru.uproom.gate.handlers;
+package ru.uproom.gate.commands;
 
 import ru.uproom.gate.transport.command.Command;
 
 /**
- * Marker interface for command handlers pool
+ * Marker interface for command commands pool
  * <p/>
  * Created by osipenko on 06.09.14.
  */

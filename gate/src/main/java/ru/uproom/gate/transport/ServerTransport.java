@@ -3,7 +3,7 @@ package ru.uproom.gate.transport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import ru.uproom.gate.handlers.GateCommander;
+import ru.uproom.gate.commands.GateCommander;
 import ru.uproom.gate.notifications.GateNotificationType;
 import ru.uproom.gate.notifications.GateWatcher;
 import ru.uproom.gate.transport.command.Command;
@@ -35,6 +35,7 @@ public class ServerTransport implements ServerTransportMarker, AutoCloseable, Ru
     private ObjectOutputStream output;
 
     private boolean running = false;
+    private boolean failed = false;
 
     private GateCommander commander;
     private GateWatcher watcher;
@@ -67,6 +68,21 @@ public class ServerTransport implements ServerTransportMarker, AutoCloseable, Ru
 
     public boolean isRunning() {
         return running;
+    }
+
+
+    //------------------------------------------------------------------------
+    //  is connection failed ?
+
+    public boolean isFailed() {
+        boolean temp = failed;
+        setFailed(false);
+        return temp;
+    }
+
+    public void setFailed(boolean failed) {
+        this.failed = failed;
+        if (failed) this.running = false;
     }
 
 
@@ -145,7 +161,8 @@ public class ServerTransport implements ServerTransportMarker, AutoCloseable, Ru
     public boolean sendCommand(Command command) {
 
         try {
-            output.writeObject(command);
+            if (output != null) output.writeObject(command);
+            else return false;
         } catch (IOException e) {
             LOG.error(e.getMessage());
             return false;
@@ -186,11 +203,11 @@ public class ServerTransport implements ServerTransportMarker, AutoCloseable, Ru
     @Override
     public void run() {
 
-        running = open();
-        if (running) {
+        if (open()) {
             sendHandshake();
             running = getInputStream();
         }
+        setFailed(!running);
 
         Command command = null;
         while (running) {

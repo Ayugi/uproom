@@ -7,6 +7,7 @@ import org.zwave4j.Notification;
 import org.zwave4j.NotificationType;
 import ru.uproom.gate.transport.ServerTransportMarker;
 import ru.uproom.gate.transport.command.NetworkControllerStateCommand;
+import ru.uproom.gate.transport.dto.parameters.DeviceStateEnum;
 import ru.uproom.gate.zwave.ZWaveHome;
 
 /**
@@ -25,10 +26,11 @@ public class AllNodesQueriedNotificationHandler implements NotificationHandler {
         // Z-Wave Network ready
         Manager.get().writeConfig(home.getHomeId());
         home.setReady(true);
+        home.setControllerState(DeviceStateEnum.Work);
 
         LOG.debug("z-wave notification : ALL_NODES_QUERIED, z-wave network : READY");
 
         // send message to server
-        return transport.sendCommand(new NetworkControllerStateCommand(gateId, "on"));
+        return transport.sendCommand(new NetworkControllerStateCommand(gateId, home.getControllerState()));
     }
 }

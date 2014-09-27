@@ -37,15 +37,11 @@ public class ValueChangedNotificationHandler implements NotificationHandler {
         // call listeners
         value.callEvents();
 
-        System.out.println(String.format("VALUE CHANGED : node=%d, label='%s', id=%d",
+        LOG.debug("z-wave notification : VALUE_ADDED; node={}; label={}; id={}", new Object[]{
                 node.getZId(),
                 value.getValueLabel(),
                 value.getId()
-        ));
-        LOG.debug("z-wave notification : VALUE_CHANGED; node ID : {}; value label : {}",
-                node.getZId(),
-                value.getValueLabel()
-        );
+        });
 
         // send message
         return transport.sendCommand(new SetDeviceParameterCommand(

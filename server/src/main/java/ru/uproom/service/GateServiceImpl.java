@@ -78,9 +78,11 @@ public class GateServiceImpl implements GateTransport {
         private void handleConnection(Socket accept) throws IOException {
             GateSocketHandler handler = new GateSocketHandler(accept, deviceStorage);
             int userId = handler.handshake();
+            if (userId < 0) return;
             activeSockets.put(userId, handler);
             handler.sendCommand(new GetDeviceListCommand());
-            handler.listen();
+            Thread thread = new Thread(handler);
+            thread.start();
         }
     }
 }

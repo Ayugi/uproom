@@ -1,5 +1,7 @@
-package ru.uproom.gate.handlers;
+package ru.uproom.gate.commands;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.uproom.gate.notifications.GateWatcher;
 import ru.uproom.gate.transport.command.Command;
 import ru.uproom.gate.transport.command.CommandType;
@@ -13,12 +15,14 @@ import ru.uproom.gate.transport.command.HandshakeCommand;
 @CommandHandlerAnnotation(value = CommandType.Handshake)
 public class HandshakeCommandHandler implements CommandHandler {
 
+    private static final Logger LOG = LoggerFactory.getLogger(HandshakeCommandHandler.class);
+
     @Override
     public boolean execute(Command command, GateWatcher watcher) {
 
         if (command == null || !(command instanceof HandshakeCommand)) return false;
 
-        System.out.println("HandshakeCommandHandler >>>> handshake gateId = " + ((HandshakeCommand) command).getGateId());
+        LOG.debug("Handshake from gate with ID = {}", ((HandshakeCommand) command).getGateId());
 
         return true;
     }

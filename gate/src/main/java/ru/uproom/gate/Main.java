@@ -6,7 +6,7 @@ import org.zwave4j.Manager;
 import org.zwave4j.NativeLibraryLoader;
 import org.zwave4j.Options;
 import org.zwave4j.ZWave4j;
-import ru.uproom.gate.handlers.MainCommander;
+import ru.uproom.gate.commands.MainCommander;
 import ru.uproom.gate.notifications.MainWatcher;
 import ru.uproom.gate.transport.ServerTransportKeeper;
 import ru.uproom.gate.zwave.ZWaveHome;
@@ -24,7 +24,8 @@ public class Main {
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
 
     private static final String ZWAVE_DRIVER_NAME = "/dev/ttyUSB0";
-    private static final String ADDRESS_SERVER_NAME = "54.191.89.147";
+    //private static final String ADDRESS_SERVER_NAME = "54.191.89.147";
+    private static final String ADDRESS_SERVER_NAME = "localhost";
     private static final int ADDRESS_SERVER_PORT = 8282;
 
     private static final int GATE_ID = 1;
@@ -68,6 +69,7 @@ public class Main {
         // add main class of Z-Wave notifications
         MainWatcher watcher = new MainWatcher(GATE_ID);
         watcher.setHome(home);
+        home.setWatcher(watcher);
         manager.addWatcher(watcher, null);
 
         // add a command handler controller Z-Wave network
@@ -79,16 +81,16 @@ public class Main {
         manager.addDriver(ZWAVE_DRIVER_NAME);
         LOG.info("Z-Wave subsystem started");
 
+        LOG.info("Link with cloud server creating...");
         // creating test object for server transport system
-//        System.out.println(">>> test link");
-//        LOG.debug("CREATE TEST LINK OBJECT");
+//        LOG.info("\tTest link object creating ...");
 //        ServerTransportTest serverTransportTest = new ServerTransportTest(6009);
 //        Thread threadServerTransportTest = new Thread(serverTransportTest);
 //        threadServerTransportTest.start();
+//        LOG.info("\tTest link object created");
         // creating link with server
-        LOG.info("Link with cloud server creating...");
         ServerTransportKeeper link = new ServerTransportKeeper(
-                ADDRESS_SERVER_NAME, ADDRESS_SERVER_PORT, 3, 500, 5000, commander, watcher);
+                ADDRESS_SERVER_NAME, ADDRESS_SERVER_PORT, 3, 500, 5000, 60000, commander, watcher);
         Thread threadLink = new Thread(link);
         threadLink.start();
         // add subscriber for set/break link with server

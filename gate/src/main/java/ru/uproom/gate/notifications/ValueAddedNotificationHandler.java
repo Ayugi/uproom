@@ -30,15 +30,11 @@ public class ValueAddedNotificationHandler implements NotificationHandler {
         ZWaveValue value = new ZWaveValue(notification.getValueId());
         node.getParams().put(value.getValueName(), value);
 
-        System.out.println(String.format("VALUE ADDED : node=%d, label='%s', id=%d",
+        LOG.debug("z-wave notification : VALUE_ADDED; node={}; label={}; id={}", new Object[]{
                 node.getZId(),
                 value.getValueLabel(),
                 value.getId()
-        ));
-        LOG.debug("z-wave notification : VALUE_ADDED; node ID : {}; value label : {}",
-                node.getZId(),
-                value.getValueLabel()
-        );
+        });
 
         // send information about node to server
         if (!home.isReady()) return false;

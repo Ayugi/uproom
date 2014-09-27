@@ -2,8 +2,8 @@ package ru.uproom.gate.transport;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.uproom.gate.commands.GateCommander;
 import ru.uproom.gate.domain.DelayTimer;
-import ru.uproom.gate.handlers.GateCommander;
 import ru.uproom.gate.notifications.GateWatcher;
 
 import java.util.ArrayList;
@@ -25,6 +25,7 @@ public class ServerTransportKeeper implements Runnable, AutoCloseable {
     private int times = 0;
     private long periodTimes = 0;
     private long periodCheck = 0;
+    private long periodWait = 0;
     private String host = "localhost";
     private int port = 6009;
 
@@ -46,6 +47,7 @@ public class ServerTransportKeeper implements Runnable, AutoCloseable {
                                  int times,
                                  long periodTimes,
                                  long periodCheck,
+                                 long periodWait,
                                  GateCommander commander,
                                  GateWatcher watcher
     ) {
@@ -74,12 +76,36 @@ public class ServerTransportKeeper implements Runnable, AutoCloseable {
     //------------------------------------------------------------------------
     //  open connection
 
+    private boolean checkOpen() {
+        long counter = 0;
+        while (!transport.isRunning() && !transport.isFailed() && (counter < periodWait || periodWait <= 0)) {
+            DelayTimer.sleep(100);
+            counter += 100;
+        }
+        return transport.isRunning();
+    }
+
+
+    //------------------------------------------------------------------------
+    //  update listeners
+
+    private void updateTransportUsers() {
+        for (ServerTransportUser user : transportUsers) {
+            user.setTransport(transport);
+            user.setLink(transport.isRunning());
+        }
+    }
+
+
+    //------------------------------------------------------------------------
+    //  open connection
+
     private boolean open() {
         transport = new ServerTransport(host, port, commander, watcher);
         thread = new Thread(transport);
         thread.start();
-        LOG.debug("transport implementing object created");
-        return true;
+        updateTransportUsers();
+        return checkOpen();
     }
 
 
@@ -134,9 +160,8 @@ public class ServerTransportKeeper implements Runnable, AutoCloseable {
                 continue;
             }
             // call subscribers - link set
-            for (ServerTransportUser user : transportUsers) {
-                user.setTransport(transport);
-            }
+            LOG.info("Connection with cloud server established");
+            updateTransportUsers();
             // check connection
             while (running && work) {
                 // slowdown
@@ -145,9 +170,8 @@ public class ServerTransportKeeper implements Runnable, AutoCloseable {
                 running = transport.isRunning();
             }
             // call subscribers - link break
-            for (ServerTransportUser user : transportUsers) {
-                user.setTransport(null);
-            }
+            LOG.error("Connection with cloud server broken");
+            updateTransportUsers();
             // close connection
             stop();
 

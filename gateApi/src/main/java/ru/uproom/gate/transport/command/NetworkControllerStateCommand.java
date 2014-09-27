@@ -1,5 +1,7 @@
 package ru.uproom.gate.transport.command;
 
+import ru.uproom.gate.transport.dto.parameters.DeviceStateEnum;
+
 /**
  * User: osipenko
  * Date: 14/09/17
@@ -7,9 +9,9 @@ package ru.uproom.gate.transport.command;
  */
 public class NetworkControllerStateCommand extends Command {
     private int gateId;
-    private String state;
+    private DeviceStateEnum state;
 
-    public NetworkControllerStateCommand(int gateId, String state) {
+    public NetworkControllerStateCommand(int gateId, DeviceStateEnum state) {
         super(CommandType.NetworkControllerState);
         this.gateId = gateId;
         this.state = state;
@@ -19,7 +21,7 @@ public class NetworkControllerStateCommand extends Command {
         return gateId;
     }
 
-    public String getState() {
+    public DeviceStateEnum getState() {
         return state;
     }
 }

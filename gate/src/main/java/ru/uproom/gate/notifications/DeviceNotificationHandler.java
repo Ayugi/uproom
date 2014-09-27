@@ -6,7 +6,7 @@ import ru.uproom.gate.transport.ServerTransportMarker;
 import ru.uproom.gate.transport.command.SetDeviceParameterCommand;
 import ru.uproom.gate.transport.dto.DeviceDTO;
 import ru.uproom.gate.transport.dto.DeviceType;
-import ru.uproom.gate.transport.dto.parameters.DeviceState;
+import ru.uproom.gate.transport.dto.parameters.DeviceStateEnum;
 import ru.uproom.gate.zwave.ZWaveHome;
 import ru.uproom.gate.zwave.ZWaveNode;
 
@@ -30,7 +30,7 @@ public abstract class DeviceNotificationHandler implements NotificationHandler {
                 prepareCommand(home, controller));
     }
 
-    protected abstract DeviceState getEvent();
+    protected abstract DeviceStateEnum getEvent();
 
     private SetDeviceParameterCommand prepareCommand(ZWaveHome home, ZWaveNode controller) {
         if (controller != null)
