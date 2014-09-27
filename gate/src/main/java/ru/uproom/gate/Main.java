@@ -24,7 +24,8 @@ public class Main {
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
 
     private static final String ZWAVE_DRIVER_NAME = "/dev/ttyUSB0";
-    private static final String ADDRESS_SERVER_NAME = "54.191.89.147";
+
+    private static final String ADDRESS_SERVER_NAME = "localhost";
     private static final int ADDRESS_SERVER_PORT = 8282;
 
     private static final int GATE_ID = 1;

@@ -49,7 +49,7 @@ public class UserController {
                       HttpServletRequest request) {
         User user = userDao.authenticate(username, password);
         if (null == user)
-            return null;
+            return new User();
         String sid = request.getRemoteHost() + System.currentTimeMillis() + Math.random();
         sessionHolder.newSession(sid, user);
         request.getSession().setAttribute("SID",sid);
