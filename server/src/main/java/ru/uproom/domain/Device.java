@@ -1,6 +1,7 @@
 package ru.uproom.domain;
 
 import ru.uproom.gate.transport.dto.DeviceDTO;
+import ru.uproom.gate.transport.dto.DeviceType;
 import ru.uproom.gate.transport.dto.parameters.DeviceParametersNames;
 
 import javax.persistence.*;
@@ -24,6 +25,9 @@ public class Device {
     @ManyToOne
     @JoinColumn(name = "user")
     private User user;
+    @Column(name = "type")
+    private DeviceType type;
+
     @Transient
     private DeviceState state;
     @Transient
@@ -36,6 +40,11 @@ public class Device {
         id = dto.getId();
         zid = dto.getZId();
         parameters = dto.getParameters();
+        type = dto.getType();
+    }
+
+    public DeviceDTO toDto (){
+        return new DeviceDTO(id,zid,type,new HashMap<>(parameters));
     }
 
     public int getId() {
@@ -76,6 +85,14 @@ public class Device {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public DeviceType getType() {
+        return type;
+    }
+
+    public void setType(DeviceType type) {
+        this.type = type;
     }
 
     public Map<DeviceParametersNames, String> getParameters() {

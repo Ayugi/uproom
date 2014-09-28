@@ -3,6 +3,9 @@ package ru.uproom.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.uproom.domain.Device;
+import ru.uproom.gate.transport.command.SendDeviceListCommand;
+import ru.uproom.gate.transport.command.SetDeviceParameterCommand;
+import ru.uproom.gate.transport.dto.parameters.DeviceParametersNames;
 import ru.uproom.prsistence.DeviceDao;
 
 import java.util.Collection;
@@ -20,6 +23,9 @@ public class DeviceStorageServiceImpl implements DeviceStorageService {
     @Autowired
     private DeviceDao deviceDao;
 
+    @Autowired
+    private GateTransport gateTransport;
+
     @Override
     public void onNewUser(int userId) {
         UserDeviceStorage storage = new UserDeviceStorage(deviceDao);
@@ -35,5 +41,31 @@ public class DeviceStorageServiceImpl implements DeviceStorageService {
     @Override
     public Collection<Device> fetchDevices(int userId) {
         return userStorage.get(userId).fetchDevices();
+    }
+
+    @Override
+    public Device updateDevice(int userId, Device device) {
+        Device stored = userStorage.get(userId).getDeviceById(device.getId());
+        if (!stored.getName().equals(device.getName())) {
+            stored.setName(device.getName());
+            deviceDao.saveDevice(stored);
+        }
+
+        if (handleParams(device, stored))
+            gateTransport.sendCommand(new SetDeviceParameterCommand(stored.toDto()),userId);
+
+        return stored;
+    }
+
+    private boolean handleParams(Device device, Device stored) {
+        boolean paramsChanged = false;
+        for (Map.Entry<DeviceParametersNames,String> entry : device.getParameters().entrySet()){
+            if (!stored.getParameters().containsKey(entry.getKey())
+                    || !stored.getParameters().get(entry.getKey()).equals(entry.getValue())){
+                stored.getParameters().put(entry.getKey(), entry.getValue());
+                paramsChanged = true;
+            }
+        }
+        return paramsChanged;
     }
 }

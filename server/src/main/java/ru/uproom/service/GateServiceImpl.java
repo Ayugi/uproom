@@ -30,8 +30,8 @@ public class GateServiceImpl implements GateTransport {
     private DeviceStorageService deviceStorage;
 
     @Override
-    public void sendCommand(Command command, String userId) {
-
+    public void sendCommand(Command command, int userId) {
+        activeSockets.get(userId).sendCommand(command);
     }
 
     @PostConstruct

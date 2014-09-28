@@ -40,4 +40,9 @@ public class UserDeviceStorage {
     public Collection<Device> fetchDevices() {
         return devicesById.values();
     }
+
+    public Device getDeviceById(int id){
+        return devicesById.get(id);
+
+    }
 }
