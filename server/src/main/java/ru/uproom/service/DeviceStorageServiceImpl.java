@@ -3,15 +3,13 @@ package ru.uproom.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.uproom.domain.Device;
+import ru.uproom.domain.DeviceState;
 import ru.uproom.gate.transport.command.SendDeviceListCommand;
 import ru.uproom.gate.transport.command.SetDeviceParameterCommand;
 import ru.uproom.gate.transport.dto.parameters.DeviceParametersNames;
 import ru.uproom.prsistence.DeviceDao;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by HEDIN on 16.09.2014.
@@ -44,12 +42,14 @@ public class DeviceStorageServiceImpl implements DeviceStorageService {
         if (devices.isEmpty()){
             Device test = new Device();
             test.setName("test device");
-            test.getParameters().put(DeviceParametersNames.Unknown,"test");
+            test.getParameters().put(DeviceParametersNames.Unknown, "test");
             test.getParameters().put(DeviceParametersNames.ApplicationVersion,"on");
             test.setUser(SessionHolderImpl.getInstance().currentUser());
             test.setZid(-1);
-            deviceDao.saveDevice(test);
+            test.setState(DeviceState.On);
+            //deviceDao.saveDevice(test);
             devices.add(test);
+            addDevices(userId,Collections.singletonList(test));
         }
         return devices;
     }
@@ -61,7 +61,7 @@ public class DeviceStorageServiceImpl implements DeviceStorageService {
             stored.setName(device.getName());
             deviceDao.saveDevice(stored);
         }
-
+        device.getParameters().put(DeviceParametersNames.State, device.getState().name());
         if (handleParams(device, stored))
             gateTransport.sendCommand(new SetDeviceParameterCommand(stored.toDto()),userId);
 
