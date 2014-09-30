@@ -3,17 +3,15 @@ package ru.uproom.service;
 import ru.uproom.domain.Device;
 import ru.uproom.prsistence.DeviceDao;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by HEDIN on 16.09.2014.
  */
 public class UserDeviceStorage {
     private DeviceDao deviceDao;
-    private Map<Integer, Device> devicesById;
-    private Map<Integer, Device> devicesByZId;
+    private Map<Integer, Device> devicesById = new HashMap<>();
+    private Map<Integer, Device> devicesByZId = new HashMap<>();
 
     public UserDeviceStorage(DeviceDao deviceDao) {
         this.deviceDao = deviceDao;
@@ -38,10 +36,10 @@ public class UserDeviceStorage {
     }
 
     public Collection<Device> fetchDevices() {
-        return devicesById.values();
+        return new ArrayList<>(devicesById.values());
     }
 
-    public Device getDeviceById(int id){
+    public Device getDeviceById(int id) {
         return devicesById.get(id);
 
     }

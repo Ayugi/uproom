@@ -17,6 +17,7 @@ import java.util.Map;
 public class Device {
     @Id
     @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
     @Column(name = "zid")
     private int zid;
