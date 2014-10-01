@@ -152,7 +152,10 @@ define([
                     console.log("Click on device");
 
                     var model = this.model;
-                    console.log("model" + model + " " + model.forEach);
+
+                    console.log("MODEL in sendDevice");
+                    console.log(model);
+
 
                     model.switch();
 
@@ -162,7 +165,7 @@ define([
 
                     model.save();
                     console.log("before checked");
-                    console.log(this.checked);
+
                 },
 
 

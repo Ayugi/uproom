@@ -5,10 +5,20 @@ define(['exports', 'backbone'], function (exports, Backbone) {
         },
         switch: function () {
             console.log("switch: function () {");
-            console.log("get " +  this.get );
-            console.log("state " +  this.get("state"));
 
-            console.log("set " +  this.set );
+//            console.log("state " +  this.get("state"));
+
+            console.log("THIS in DeviceModel = ");
+            console.log(this);
+
+
+            console.log("parameters IN MODEL = ");
+            var p = this.get("parameters");
+            console.log(p);
+            console.log(p.State);
+
+
+//            console.log("set " +  this.set );
 
             this.set("state",this.get("state") == "On" ? "Off" : "On");
             console.log("state after " +  this.get("state"));
