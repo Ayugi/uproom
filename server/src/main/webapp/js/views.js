@@ -177,11 +177,9 @@ define([
                 },
 
                 render: function () {
+                    console.log(" checked --- " + this.model.getState() == "On"?"checked":"")
                     this.$el.html(this.template({
-                        state: this.model.get('state') != null
-                                && this.model.get('state').toLowerCase() == 'on'
-                            ? 'Вкл'
-                            : 'Выкл',
+                        state: this.model.getState() == "On"?"checked":"",
                         title: this.model.getTitle()
                     }));
 
