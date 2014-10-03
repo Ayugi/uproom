@@ -91,6 +91,7 @@ public class GateSocketHandler implements Runnable {
                             transformDtosToDevices((SendDeviceListCommand) command));
             } catch (IOException e) {
                 e.printStackTrace();
+                stopped = true;
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }

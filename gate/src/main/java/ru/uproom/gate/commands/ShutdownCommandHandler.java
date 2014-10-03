@@ -1,7 +1,6 @@
 package ru.uproom.gate.commands;
 
-import ru.uproom.gate.notifications.GateNotificationType;
-import ru.uproom.gate.notifications.GateWatcher;
+import ru.uproom.gate.devices.GateDevicesSet;
 import ru.uproom.gate.transport.command.Command;
 import ru.uproom.gate.transport.command.CommandType;
 
@@ -14,8 +13,7 @@ import ru.uproom.gate.transport.command.CommandType;
 public class ShutdownCommandHandler implements CommandHandler {
 
     @Override
-    public boolean execute(Command command, GateWatcher watcher) {
-        watcher.onGateEvent(GateNotificationType.Shutdown, null);
+    public boolean execute(Command command, GateDevicesSet home) {
         return true;
     }
 }

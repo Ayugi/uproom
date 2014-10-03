@@ -21,9 +21,9 @@ import java.util.Map;
 @Service
 public class GateServiceImpl implements GateTransport {
 
-    @Value("${port}")
-    private int port = 8282;
     private static final Logger LOG = LoggerFactory.getLogger(GateServiceImpl.class);
+    @Value("${port}")
+    private int port;
     private Map<Integer, GateSocketHandler> activeSockets = new HashMap<>();
 
     @Autowired

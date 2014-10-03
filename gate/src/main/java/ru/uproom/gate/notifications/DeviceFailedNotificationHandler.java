@@ -1,6 +1,7 @@
 package ru.uproom.gate.notifications;
 
 import org.zwave4j.NotificationType;
+import ru.uproom.gate.notifications.zwave.ZwaveNotificationHandlerAnnotation;
 import ru.uproom.gate.transport.dto.parameters.DeviceStateEnum;
 
 /**
