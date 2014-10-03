@@ -50,7 +50,9 @@ public class ZWaveNode implements GateDevice {
 
         setHome(home);
         params.put(DeviceParametersNames.GateDeviceId, gateDeviceId);
-        setDeviceType(Manager.get().getNodeType(getHome().getHomeId(), zId));
+        params.put(DeviceParametersNames.ServerDeviceId, 0);
+        setDeviceType(Manager.get().getNodeType(
+                getHome().getHomeId(), gateDeviceId.shortValue()));
 
     }
 
@@ -114,10 +116,6 @@ public class ZWaveNode implements GateDevice {
         return (DeviceType) params.get(DeviceParametersNames.ServerDeviceType);
     }
 
-    public void setDeviceType(DeviceType type) {
-        params.put(DeviceParametersNames.ServerDeviceType, type);
-    }
-
     public void setDeviceType(String type) {
         Integer index = (Integer) params.get(DeviceParametersNames.GateDeviceId);
         if ((int) Manager.get().getControllerNodeId(home.getHomeId()) == index)
@@ -126,6 +124,10 @@ public class ZWaveNode implements GateDevice {
             // todo : set right device type for server using
             params.put(DeviceParametersNames.ServerDeviceType, DeviceType.None);
         }
+    }
+
+    public void setDeviceType(DeviceType type) {
+        params.put(DeviceParametersNames.ServerDeviceType, type);
     }
 
 
@@ -215,7 +217,12 @@ public class ZWaveNode implements GateDevice {
 
     @Override
     public DeviceDTO getDeviceDTO() {
-        DeviceDTO dto = new DeviceDTO(id, zId, type);
+
+        DeviceDTO dto = new DeviceDTO(
+                (Integer) params.get(DeviceParametersNames.ServerDeviceId),
+                (Integer) params.get(DeviceParametersNames.GateDeviceId),
+                (DeviceType) params.get(DeviceParametersNames.ServerDeviceType)
+        );
 
         Map<DeviceParametersNames, String> parameters = dto.getParameters();
         // add to map all values
@@ -230,7 +237,12 @@ public class ZWaveNode implements GateDevice {
     }
 
     public DeviceDTO getDeviceParameters(DeviceParametersNames[] paramNames) {
-        DeviceDTO dto = new DeviceDTO(id, zId, type);
+
+        DeviceDTO dto = new DeviceDTO(
+                (Integer) params.get(DeviceParametersNames.ServerDeviceId),
+                (Integer) params.get(DeviceParametersNames.GateDeviceId),
+                (DeviceType) params.get(DeviceParametersNames.ServerDeviceType)
+        );
 
         Map<DeviceParametersNames, String> parameters = dto.getParameters();
         // add to map all values

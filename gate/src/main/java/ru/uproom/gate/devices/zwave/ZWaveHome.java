@@ -170,6 +170,7 @@ public class ZWaveHome implements GateDevicesSet {
     public void setGateDeviceParameter(int indexDevice, DeviceParametersNames paramName, Object paramValue) {
         ZWaveNode node = nodes.get(indexDevice);
         if (node == null) return;
+        if (paramValue instanceof ValueId) paramValue = new ZWaveValue((ValueId) paramValue);
         node.setParameter(paramName, paramValue);
         if (!isReady()) return;
         transport.sendCommand(new SetDeviceParameterCommand(
