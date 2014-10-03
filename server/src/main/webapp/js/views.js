@@ -126,7 +126,10 @@ define([
 
             sendAddDevice: function () {
                     console.log("IN sendAddDevice");
-                    this.$.ajax("/devices/add");
+                    console.log("$=", $);
+                    console.log("$.ajax=", $.ajax);
+
+                    $.ajax(DEVICES_URL + "/add");
             },
 
             add: function (model) {
