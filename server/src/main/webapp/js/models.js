@@ -1,6 +1,7 @@
 define(['exports', 'backbone'], function (exports, Backbone) {
     exports.DeviceModel = Backbone.Model.extend({
         getTitle: function () {
+            console.log("getTitle");
             return '*' + this.get('name')
         },
         switch: function () {
@@ -20,11 +21,33 @@ define(['exports', 'backbone'], function (exports, Backbone) {
 
 //            console.log("set " +  this.set );
 
-            this.set("state",this.get("state") == "On" ? "Off" : "On");
+            this.setState(this.getState() == "On" ? "Off" : "On");
             console.log("state after " +  this.get("state"));
         },
         setState: function (st) {
-            this.state = st;
+            console.log("setState");
+            // TODO remove duplication
+            var p = this.get("parameters");
+            if(!p) {
+                p = {};
+                this.set("parameters",p);
+            }
+            p.State = st;
+        },
+        getState: function (){
+            console.log("getState");
+            var p = this.get("parameters");
+            if(!p) {
+                p = {};
+                this.set("parameters",p);
+            }
+            if (!p.State)
+                p.State = "Off"
+            return p.State;
+        },
+        getStateFlag: function (){
+            console.log("getStateFlag " + this.getState() == "On");
+            return this.getState() == "On";
         },
         url: DEVICES_URL
 
