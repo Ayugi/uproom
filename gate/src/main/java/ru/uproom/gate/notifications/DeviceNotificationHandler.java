@@ -36,7 +36,7 @@ public abstract class DeviceNotificationHandler implements NotificationHandler {
         if (controller != null)
             return new SetDeviceParameterCommand(controller.getDeviceInfo());
         else {
-            DeviceDTO device = new DeviceDTO(0, home.getHomeId(), (short) 0, DeviceType.Controller);
+            DeviceDTO device = new DeviceDTO(0, (short) 0, DeviceType.Controller);
             //device.getParameters().put("NodeState", getEvent().name());
             return new SetDeviceParameterCommand(device);
         }

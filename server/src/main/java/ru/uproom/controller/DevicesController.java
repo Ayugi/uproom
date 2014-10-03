@@ -28,10 +28,10 @@ public class DevicesController {
         return storageService.fetchDevices(sessionHolder.currentUser().getId());
     }
 
-    @RequestMapping(method = RequestMethod.POST)
+    @RequestMapping(method = RequestMethod.PUT)
     @ResponseBody
-    public Device addDevice(@RequestParam String name) {
-        return deviceStub();
+    public Device updateDevice(@RequestBody Device device) {
+        return storageService.updateDevice(sessionHolder.currentUser().getId(), device);
     }
 
     @RequestMapping(method = RequestMethod.DELETE, value = "{id}")

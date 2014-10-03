@@ -326,7 +326,7 @@ public class ZWaveNode {
     //  get node information as DTO
 
     public DeviceDTO getDeviceInfo() {
-        DeviceDTO dto = new DeviceDTO(id, home.getHomeId(), zId, type);
+        DeviceDTO dto = new DeviceDTO(id,  zId, type);
 
         Map<DeviceParametersNames, String> parameters = dto.getParameters();
         // add to map all values
@@ -341,7 +341,7 @@ public class ZWaveNode {
     }
 
     public DeviceDTO getDeviceParameters(DeviceParametersNames[] paramNames) {
-        DeviceDTO dto = new DeviceDTO(id, home.getHomeId(), zId, type);
+        DeviceDTO dto = new DeviceDTO(id, zId, type);
 
         Map<DeviceParametersNames, String> parameters = dto.getParameters();
         // add to map all values

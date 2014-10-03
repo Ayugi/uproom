@@ -2,6 +2,7 @@ package ru.uproom.service;
 
 import ru.uproom.domain.Device;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -12,5 +13,7 @@ public interface DeviceStorageService {
 
     void addDevices(int userId, List<Device> devices);
 
-    java.util.Collection<Device> fetchDevices(int userId);
+    Collection<Device> fetchDevices(int userId);
+
+    Device updateDevice(int userId, Device device);
 }
