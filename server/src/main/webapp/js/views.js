@@ -1,36 +1,42 @@
 define([
-	'exports', 'backbone', 'hbs!../templates/device-item', 'hbs!../templates/account-menu',
-	'hbs!../templates/auth', 'hbs!../templates/devices-list', 'hbs!../templates/sidebar', 'handlebars'
-], function(exports, Backbone, DeviceTpl, AccountMenuTpl, AuthTpl, DevicesListTpl, SidebarTpl) {
-	var BaseView = Backbone.View.extend({
-		initialize: function(options) {
-			Backbone.View.prototype.initialize.call(this, options);
-			this.app = options.app;
-			this.layout = {};
-		},
+    'exports', 'backbone', 'hbs!../templates/device-item', 'hbs!../templates/account-menu',
+    'hbs!../templates/auth', 'hbs!../templates/devices-list', 'hbs!../templates/sidebar', 'handlebars'
+], function (exports, Backbone, DeviceTpl, AccountMenuTpl, AuthTpl, DevicesListTpl, SidebarTpl) {
+    var BaseView = Backbone.View.extend({
+        initialize: function (options) {
+            Backbone.View.prototype.initialize.call(this, options);
+            this.app = options.app;
+            this.layout = {};
+        },
 
-		render: function() { this.$el.html(this.template()); return this }
-	});
+        render: function () {
+            this.$el.html(this.template());
+            return this
+        }
+    });
 
-	_.extend(exports, {
-		AccountMenuView: BaseView.extend({
-			events: {'click [data-id=signout]': function(event) {
-				this.app.deactivate();
-				$('body').trigger('click'); // Hide account menu
-				return false;
-			}},
+    _.extend(exports, {
+        AccountMenuView: BaseView.extend({
+            events: {'click [data-id=signout]': function (event) {
+                this.app.deactivate();
+                $('body').trigger('click'); // Hide account menu
+                return false;
+            }},
 
-			reset: function(user) { this.$('[data-id=name]').html(user.name); return this },
-			template: AccountMenuTpl,
-		}),
+            reset: function (user) {
+                this.$('[data-id=name]').html(user.name);
+                return this
+            },
+            template: AccountMenuTpl,
+        }),
 
-		// Get username/password and pass to backend for validation
-		AuthView: BaseView.extend({
-			events: {
+        // Get username/password and pass to backend for validation
+        AuthView: BaseView.extend({
+            events: {
                 'keypress [data-id=username]': 'submitOnEnter',
                 'keypress [data-id=password]': 'submitOnEnter',
                 'click [data-id=submit]': 'processAuth'
-			},
+            },
 
             processAuth: function () {
                 // Call backend auth method
@@ -61,112 +67,146 @@ define([
             submitOnEnter: function (e) {
                 if (e.keyCode == 13) this.processAuth();
             },
-			
-			// Define callbacks to be called on auth try
-			setCallback: function(funcs) {
-				this.callback = this.callback || {};
-				_.extend(this.callback = this.callback || {}, funcs);
-				return this;
-			},
 
-			template: AuthTpl
-		}),
+            // Define callbacks to be called on auth try
+            setCallback: function (funcs) {
+                this.callback = this.callback || {};
+                _.extend(this.callback = this.callback || {}, funcs);
+                return this;
+            },
 
-		// Manage application core views
-		DevicesView: BaseView.extend({
-			activate: function() {
-				this.layout.auth.$el.hide();
+            template: AuthTpl
+        }),
 
-				_.invoke([
-					this.layout.accountMenu.$el,
-					this.layout.list.$el,
-					this.layout.sidebar.$el
-				], 'show');
-				
-				return this;
-			},
+        // Manage application core views
+        DevicesView: BaseView.extend({
+            activate: function () {
+                this.layout.auth.$el.hide();
 
-			deactivate: function() {
-				this.layout.auth.$el.show();
-				
-				_.invoke([
-					this.layout.accountMenu.$el,
-					this.layout.list.$el,
-					this.layout.sidebar.$el
-				], 'hide');
+                _.invoke([
+                    this.layout.accountMenu.$el,
+                    this.layout.list.$el,
+                    this.layout.sidebar.$el
+                ], 'show');
 
-				return this;
-			},
+                return this;
+            },
 
-			initialize: function(options) {
-				BaseView.prototype.initialize.call(this, options);
-				this.user = {};
-			},
+            deactivate: function () {
+                this.layout.auth.$el.show();
 
-			render: function() {
-				this.layout.accountMenu = (new exports.AccountMenuView({app: this, el: '#fat-menu'})).render();
-				this.layout.auth        = (new exports.AuthView({el: '#auth'})).render();
-				this.layout.list        = (new exports.ListView({el: '#list'})).render();
-				this.layout.sidebar     = (new exports.SidebarView({el: '#sidebar'})).render();
-				return this;
-			}
-		}),
+                _.invoke([
+                    this.layout.accountMenu.$el,
+                    this.layout.list.$el,
+                    this.layout.sidebar.$el
+                ], 'hide');
 
-		// List of devices itself
-		ListView: BaseView.extend({
-			add: function(model) {
-				this.addItem(_.last(this.layout.items = this.layout.items.concat((new this.ItemView({
-					model: model
-				})).render())).el);
-				
-				return this;
-			},
+                return this;
+            },
 
-			// Append actual html element to the DOM
-			addItem: function(el) { this.$('[data-id=list-container]').append(el); return this },
+            initialize: function (options) {
+                BaseView.prototype.initialize.call(this, options);
+                this.user = {};
+            },
 
-			// Clear internal items storage and DOM structure
-			clear: function() { _.invoke(this.layout.items, 'remove'); this.layout.items = []; return this },
+            render: function () {
+                this.layout.accountMenu = (new exports.AccountMenuView({app: this, el: '#fat-menu'})).render();
+                this.layout.auth = (new exports.AuthView({el: '#auth'})).render();
+                this.layout.list = (new exports.ListView({el: '#list'})).render();
+                this.layout.sidebar = (new exports.SidebarView({el: '#sidebar'})).render();
+                return this;
+            }
+        }),
 
-			// List item view
-			ItemView: Backbone.View.extend({
-				initialize: function(options) {
-					Backbone.View.prototype.initialize.call(this, options);
+        // List of devices itself
+        ListView: BaseView.extend({
+            add: function (model) {
+                this.addItem(_.last(this.layout.items = this.layout.items.concat((new this.ItemView({
+                    model: model
+                })).render())).el);
 
-					// Catch model change event
-					this.model.on('change', this.render, this);
-				},
+                return this;
+            },
 
-				render: function() {
-					this.$el.html(this.template({
-						state: this.model.get('state').toLowerCase() == 'on' ? 'Вкл' : 'Выкл',
-						title: this.model.getTitle()
-					}));
+            // Append actual html element to the DOM
+            addItem: function (el) {
+                this.$('[data-id=list-container]').append(el);
+                return this
+            },
 
-					this.$el.data('id', this.model.id);
+            // Clear internal items storage and DOM structure
+            clear: function () {
+                _.invoke(this.layout.items, 'remove');
+                this.layout.items = [];
+                return this
+            },
 
-					return this;
-				},
+            // List item view
+            ItemView: Backbone.View.extend({
 
-				tagName: 'tr',
-				template: DeviceTpl
-			}),
+                events: {
+                    'click [data-id=switchCheck]': 'sendDevice'
+                },
 
-			reset: function(collection) {
-				this.collection = collection;
-				
-				// Create new item once collection gets new model
-				this.collection.on('add', this.add, this);
+                sendDevice: function () {
+                    console.log("Click on device");
 
-				this.clear();
-				this.collection.each(this.add, this);
+                    var model = this.model;
 
-				return this;
-			},
+                    console.log("MODEL in sendDevice");
+                    console.log(model);
 
-			template: DevicesListTpl
-		}),
-		
-		SidebarView: BaseView.extend({template: SidebarTpl})
-	})
+
+                    model.switch();
+
+                    console.log("model.get(url)="+model.get("url"));
+                    console.log("model.url="+model.url);
+
+
+                    model.save();
+                    console.log("before checked");
+
+                },
+
+
+                initialize: function (options) {
+                    Backbone.View.prototype.initialize.call(this, options);
+
+                    // Catch model change event
+                    this.model.on('change', this.render, this);
+                },
+
+                render: function () {
+                    console.log(" checked --- " + this.model.getState() == "On"?"checked":"")
+                    this.$el.html(this.template({
+                        state: this.model.getState() == "On"?"checked":"",
+                        title: this.model.getTitle()
+                    }));
+
+                    this.$el.data('id', this.model.id);
+
+                    return this;
+                },
+
+                tagName: 'tr',
+                template: DeviceTpl
+            }),
+
+            reset: function (collection) {
+                this.collection = collection;
+
+                // Create new item once collection gets new model
+                this.collection.on('add', this.add, this);
+
+                this.clear();
+                this.collection.each(this.add, this);
+
+                return this;
+            },
+
+            template: DevicesListTpl
+        }),
+
+        SidebarView: BaseView.extend({template: SidebarTpl})
+    })
 })

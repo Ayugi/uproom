@@ -1,9 +1,7 @@
 package ru.uproom.gate.notifications;
 
 import org.zwave4j.Notification;
-import ru.uproom.gate.transport.ServerTransportMarker;
-import ru.uproom.gate.transport.command.HandshakeCommand;
-import ru.uproom.gate.zwave.ZWaveHome;
+import ru.uproom.gate.devices.GateDevicesSet;
 
 /**
  * Handler which create device list and send it to server
@@ -13,12 +11,12 @@ import ru.uproom.gate.zwave.ZWaveHome;
 @GateNotificationHandlerAnnotation(value = GateNotificationType.Handshake)
 public class HandshakeGateNotificationHandler implements NotificationHandler {
     @Override
-    public boolean execute(int gateId, ZWaveHome home, ServerTransportMarker transport, Notification notification) {
-        if (transport == null) return false;
+    public boolean execute(Notification notification, GateDevicesSet home) {
+        //if (transport == null) return false;
 
-        return transport.sendCommand(new HandshakeCommand(
-                (int) home.getHomeId()
-        ));
+        return true;//transport.sendCommand(new HandshakeCommand(
+//                (int) home.getHomeId()
+//        ));
 
     }
 }

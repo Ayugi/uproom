@@ -21,17 +21,22 @@ import java.util.Map;
 @Service
 public class GateServiceImpl implements GateTransport {
 
-    @Value("${port}")
-    private int port = 8282;
     private static final Logger LOG = LoggerFactory.getLogger(GateServiceImpl.class);
+    @Value("${port}")
+    private int port;
     private Map<Integer, GateSocketHandler> activeSockets = new HashMap<>();
 
     @Autowired
     private DeviceStorageService deviceStorage;
 
     @Override
-    public void sendCommand(Command command, String userId) {
-
+    public void sendCommand(Command command, int userId) {
+        GateSocketHandler gateSocketHandler = activeSockets.get(userId);
+        if (null == gateSocketHandler){
+            LOG.error("gate offline for user " + userId);
+            return;
+        }
+        gateSocketHandler.sendCommand(command);
     }
 
     @PostConstruct
@@ -80,9 +85,11 @@ public class GateServiceImpl implements GateTransport {
         private void handleConnection(Socket accept) throws IOException {
             GateSocketHandler handler = new GateSocketHandler(accept, deviceStorage);
             int userId = handler.handshake();
+            if (userId < 0) return;
             activeSockets.put(userId, handler);
             handler.sendCommand(new GetDeviceListCommand());
-            handler.listen();
+            Thread thread = new Thread(handler);
+            thread.start();
         }
     }
 }
