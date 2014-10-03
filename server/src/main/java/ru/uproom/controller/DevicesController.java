@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.uproom.domain.Device;
 import ru.uproom.domain.DeviceState;
 import ru.uproom.gate.transport.command.AddModeOnCommand;
+import ru.uproom.gate.transport.command.CancelCommand;
 import ru.uproom.service.DeviceStorageService;
 import ru.uproom.service.GateTransport;
 import ru.uproom.service.SessionHolder;
@@ -22,6 +23,7 @@ public class DevicesController {
     @Autowired
     private DeviceStorageService storageService;
 
+    @Autowired
     private GateTransport gateTransport;
 
     private SessionHolder sessionHolder = SessionHolderImpl.getInstance();
@@ -53,11 +55,18 @@ public class DevicesController {
 
 
     @RequestMapping(method = RequestMethod.GET, value = "add")
+    @ResponseBody
     public String addDeviceMode(){
         gateTransport.sendCommand(new AddModeOnCommand(),sessionHolder.currentUser().getId());
         return "ok";
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = "cancel")
+    @ResponseBody
+    public String cancelAddDeviceMode(){
+        gateTransport.sendCommand(new CancelCommand(),sessionHolder.currentUser().getId());
+        return "ok";
+    }
     private Device deviceStub() {
         Device device1 = new Device();
         device1.setId(42);
