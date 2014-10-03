@@ -120,6 +120,15 @@ define([
 
         // List of devices itself
         ListView: BaseView.extend({
+            events: {
+                'click [id=add-device-btn]': 'sendAddDevice'
+            },
+
+            sendAddDevice: function () {
+                    console.log("IN sendAddDevice");
+                    this.$.ajax("/devices/add");
+            },
+
             add: function (model) {
                 this.addItem(_.last(this.layout.items = this.layout.items.concat((new this.ItemView({
                     model: model
