@@ -1,7 +1,8 @@
 package ru.uproom.gate.notifications;
 
 import org.zwave4j.NotificationType;
-import ru.uproom.gate.transport.dto.parameters.DeviceState;
+import ru.uproom.gate.notifications.zwave.ZwaveNotificationHandlerAnnotation;
+import ru.uproom.gate.transport.dto.parameters.DeviceStateEnum;
 
 /**
  * Handler for Z-Wave notification DRIVER_READY
@@ -12,8 +13,8 @@ import ru.uproom.gate.transport.dto.parameters.DeviceState;
 public class DeviceFailedNotificationHandler extends DeviceNotificationHandler {
 
     @Override
-    protected DeviceState getEvent() {
-        return DeviceState.Failed;
+    protected DeviceStateEnum getEvent() {
+        return DeviceStateEnum.Down;
     }
 
 }

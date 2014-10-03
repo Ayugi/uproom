@@ -9,16 +9,10 @@ import java.util.List;
  */
 public class SendDeviceListCommand extends Command {
     List<DeviceDTO> devices;
-    private int gateId;
 
-    public SendDeviceListCommand(int gateId, List<DeviceDTO> devices) {
+    public SendDeviceListCommand(List<DeviceDTO> devices) {
         super(CommandType.SendDeviceList);
-        this.gateId = gateId;
         this.devices = devices;
-    }
-
-    public int getGateId() {
-        return gateId;
     }
 
     public List<DeviceDTO> getDevices() {

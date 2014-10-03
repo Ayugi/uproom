@@ -1,10 +1,8 @@
 package ru.uproom.gate.notifications;
 
 import org.zwave4j.Notification;
-import ru.uproom.gate.transport.ServerTransportMarker;
-import ru.uproom.gate.transport.command.SendDeviceListCommand;
+import ru.uproom.gate.devices.GateDevicesSet;
 import ru.uproom.gate.transport.dto.DeviceDTO;
-import ru.uproom.gate.zwave.ZWaveHome;
 
 import java.util.List;
 
@@ -16,13 +14,13 @@ import java.util.List;
 @GateNotificationHandlerAnnotation(value = GateNotificationType.SendDeviceList)
 public class SendDeviceListGateNotificationHandler implements NotificationHandler {
     @Override
-    public boolean execute(int gateId, ZWaveHome home, ServerTransportMarker transport, Notification notification) {
-        if (transport == null) return false;
+    public boolean execute(Notification notification, GateDevicesSet home) {
 
         // create device list
-        List<DeviceDTO> devices = home.getDeviceList();
+        List<DeviceDTO> devices = null;//home.getDeviceList();
         // send device list if z-wave network ready to use
-        if (!home.isReady()) return false;
-        return transport.sendCommand(new SendDeviceListCommand(gateId, devices));
+        //if (!home.isReady()) return false;
+        //transport.sendCommand(new SendDeviceListCommand(devices));
+        return true;
     }
 }
