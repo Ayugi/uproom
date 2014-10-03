@@ -7,10 +7,8 @@ package ru.uproom.gate.transport.dto.parameters;
  */
 public enum DeviceParametersNames {
     Unknown(0),
-    ServerDeviceId(1),
-    GateDeviceId(2),
     ServerDeviceType(1),
-    State(3),
+    State(2),
     ApplicationVersion(8782082),
     ProtocolVersion(8782081),
     Switch(2425088),

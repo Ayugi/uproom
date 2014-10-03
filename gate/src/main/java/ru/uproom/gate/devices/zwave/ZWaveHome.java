@@ -147,7 +147,7 @@ public class ZWaveHome implements GateDevicesSet {
     @Override
     public void removeGateDevice(int index) {
         ZWaveNode node = nodes.remove(index);
-        node.setParameter(DeviceParametersNames.GateDeviceId, 0);
+        node.setZId(0);
         transport.sendCommand(new SetDeviceParameterCommand(node.getDeviceDTO()));
     }
 
@@ -174,9 +174,7 @@ public class ZWaveHome implements GateDevicesSet {
         node.setParameter(paramName, paramValue);
         if (!isReady()) return;
         transport.sendCommand(new SetDeviceParameterCommand(
-                node.getDeviceParameters(new DeviceParametersNames[]{
-                        paramName
-                })
+                node.getDeviceParameters(paramName)
         ));
     }
 
@@ -304,8 +302,7 @@ public class ZWaveHome implements GateDevicesSet {
 
     @Override
     public void setDeviceDTO(DeviceDTO dto) {
-        Integer serverDeviceId = Integer.parseInt(dto.getParameters().get(DeviceParametersNames.ServerDeviceId));
-        ZWaveNode node = getNodeByParameter(DeviceParametersNames.ServerDeviceId, serverDeviceId);
+        ZWaveNode node = nodes.get(dto.getZId());
         if (node == null) return;
         node.setParams(dto);
     }
