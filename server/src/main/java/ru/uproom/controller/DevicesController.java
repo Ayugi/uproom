@@ -7,6 +7,7 @@ import ru.uproom.domain.Device;
 import ru.uproom.domain.DeviceState;
 import ru.uproom.gate.transport.command.AddModeOnCommand;
 import ru.uproom.gate.transport.command.CancelCommand;
+import ru.uproom.gate.transport.command.RemoveModeOnCommand;
 import ru.uproom.service.DeviceStorageService;
 import ru.uproom.service.GateTransport;
 import ru.uproom.service.SessionHolder;
@@ -58,6 +59,13 @@ public class DevicesController {
     @ResponseBody
     public String addDeviceMode(){
         gateTransport.sendCommand(new AddModeOnCommand(),sessionHolder.currentUser().getId());
+        return "ok";
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "remove")
+    @ResponseBody
+    public String removeDeviceMode(){
+        gateTransport.sendCommand(new RemoveModeOnCommand(),sessionHolder.currentUser().getId());
         return "ok";
     }
 
