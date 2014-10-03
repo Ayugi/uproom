@@ -60,6 +60,7 @@ public class GateSocketHandler implements Runnable {
             }
             HandshakeCommand handshake = (HandshakeCommand) handshakeObj;
             userId = handshake.getGateId();
+            deviceStorage.onNewUser(userId);
             LOG.info("handshake successful userId " + userId);
             return userId;
         } catch (IOException e) {
