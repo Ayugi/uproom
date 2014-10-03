@@ -30,8 +30,13 @@ public class GateServiceImpl implements GateTransport {
     private DeviceStorageService deviceStorage;
 
     @Override
-    public void sendCommand(Command command, String userId) {
-
+    public void sendCommand(Command command, int userId) {
+        GateSocketHandler gateSocketHandler = activeSockets.get(userId);
+        if (null == gateSocketHandler){
+            LOG.error("gate offline for user " + userId);
+            return;
+        }
+        gateSocketHandler.sendCommand(command);
     }
 
     @PostConstruct

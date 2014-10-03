@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import ru.uproom.domain.User;
 import ru.uproom.prsistence.UserDao;
+import ru.uproom.service.DeviceStorageService;
 import ru.uproom.service.SessionHolder;
 import ru.uproom.service.SessionHolderImpl;
 
@@ -25,6 +26,10 @@ import java.util.List;
 public class UserController {
     @Autowired
     private UserDao userDao;
+
+    @Autowired
+    private DeviceStorageService deviceStorageService;
+
 
     private SessionHolder sessionHolder = SessionHolderImpl.getInstance();
 
@@ -52,6 +57,7 @@ public class UserController {
             return new User();
         String sid = request.getRemoteHost() + System.currentTimeMillis() + Math.random();
         sessionHolder.newSession(sid, user);
+        deviceStorageService.onNewUser(user.getId());
         request.getSession().setAttribute("SID",sid);
         return user;
     }

@@ -21,10 +21,8 @@ public class DeviceDTO implements Serializable {
 
     // device ID in server database
     private int id;
-    // gate ID
-    private long gateId;
     // device ID in Z-Wave home net (if =0 then device removed)
-    private short zId = 0;
+    private int zId = 0;
     // device type in server database
     private DeviceType type = DeviceType.None;
     // parameters of device
@@ -36,11 +34,18 @@ public class DeviceDTO implements Serializable {
     //######    constructors
 
 
-    public DeviceDTO(int id, long gateId, short zId, DeviceType type) {
+    public DeviceDTO(int id, int zId, DeviceType type) {
+        this(id,zId,type,new HashMap<DeviceParametersNames, String>());
         this.id = id;
-        this.gateId = gateId;
         this.zId = zId;
         this.type = type;
+    }
+
+    public DeviceDTO(int id, int zId, DeviceType type, Map<DeviceParametersNames, String> parameters) {
+        this.id = id;
+        this.zId = zId;
+        this.type = type;
+        this.parameters = parameters;
     }
 
 
@@ -52,11 +57,7 @@ public class DeviceDTO implements Serializable {
         return id;
     }
 
-    public long getGateId() {
-        return gateId;
-    }
-
-    public short getZId() {
+    public int getZId() {
         return zId;
     }
 
