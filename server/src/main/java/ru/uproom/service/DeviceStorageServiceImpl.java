@@ -26,6 +26,8 @@ public class DeviceStorageServiceImpl implements DeviceStorageService {
 
     @Override
     public void onNewUser(int userId) {
+        if (userStorage.containsKey(userId))
+            return;
         UserDeviceStorage storage = new UserDeviceStorage(deviceDao);
         userStorage.put(userId, storage);
         storage.addDevices(deviceDao.fetchUserDevices(userId));
@@ -39,17 +41,17 @@ public class DeviceStorageServiceImpl implements DeviceStorageService {
     @Override
     public Collection<Device> fetchDevices(int userId) {
         Collection<Device> devices = userStorage.get(userId).fetchDevices();
-        if (devices.isEmpty()){
+        if (devices.isEmpty()) {
             Device test = new Device();
             test.setName("test device");
             test.getParameters().put(DeviceParametersNames.Unknown, "test");
-            test.getParameters().put(DeviceParametersNames.ApplicationVersion,"on");
+            test.getParameters().put(DeviceParametersNames.State, "On");
             test.setUser(SessionHolderImpl.getInstance().currentUser());
             test.setZid(-1);
             test.setState(DeviceState.On);
             //deviceDao.saveDevice(test);
             devices.add(test);
-            addDevices(userId,Collections.singletonList(test));
+            addDevices(userId, Collections.singletonList(test));
         }
         return devices;
     }
@@ -61,18 +63,19 @@ public class DeviceStorageServiceImpl implements DeviceStorageService {
             stored.setName(device.getName());
             deviceDao.saveDevice(stored);
         }
-        device.getParameters().put(DeviceParametersNames.State, device.getState().name());
+        if (null != device.getState())
+            device.getParameters().put(DeviceParametersNames.State, device.getState().name());
         if (handleParams(device, stored))
-            gateTransport.sendCommand(new SetDeviceParameterCommand(stored.toDto()),userId);
+            gateTransport.sendCommand(new SetDeviceParameterCommand(stored.toDto()), userId);
 
         return stored;
     }
 
     private boolean handleParams(Device device, Device stored) {
         boolean paramsChanged = false;
-        for (Map.Entry<DeviceParametersNames,String> entry : device.getParameters().entrySet()){
+        for (Map.Entry<DeviceParametersNames, String> entry : device.getParameters().entrySet()) {
             if (!stored.getParameters().containsKey(entry.getKey())
-                    || !stored.getParameters().get(entry.getKey()).equals(entry.getValue())){
+                    || !stored.getParameters().get(entry.getKey()).equals(entry.getValue())) {
                 stored.getParameters().put(entry.getKey(), entry.getValue());
                 paramsChanged = true;
             }
