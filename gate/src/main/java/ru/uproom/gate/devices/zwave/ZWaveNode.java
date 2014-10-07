@@ -8,6 +8,7 @@ import ru.uproom.gate.devices.ZWaveNodeCallback;
 import ru.uproom.gate.transport.dto.DeviceDTO;
 import ru.uproom.gate.transport.dto.DeviceType;
 import ru.uproom.gate.transport.dto.parameters.DeviceParametersNames;
+import ru.uproom.gate.transport.dto.parameters.DeviceStateEnum;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -117,10 +118,6 @@ public class ZWaveNode implements GateDevice {
         return (DeviceType) params.get(DeviceParametersNames.ServerDeviceType);
     }
 
-    public void setDeviceType(DeviceType type) {
-        params.put(DeviceParametersNames.ServerDeviceType, type);
-    }
-
     public void setDeviceType(String type) {
         if ((int) Manager.get().getControllerNodeId(home.getHomeId()) == zId)
             params.put(DeviceParametersNames.ServerDeviceType, DeviceType.Controller);
@@ -128,6 +125,10 @@ public class ZWaveNode implements GateDevice {
             // todo : set right device type for server using
             params.put(DeviceParametersNames.ServerDeviceType, DeviceType.None);
         }
+    }
+
+    public void setDeviceType(DeviceType type) {
+        params.put(DeviceParametersNames.ServerDeviceType, type);
     }
 
 
@@ -260,9 +261,11 @@ public class ZWaveNode implements GateDevice {
     public boolean setParams(DeviceDTO dto) {
         for (Map.Entry<DeviceParametersNames, String> entry : dto.getParameters().entrySet()) {
             Object param = params.get(entry.getKey());
-            if (param == null) continue;
+            if (param == null || entry.getKey().isReadOnly()) continue;
             if (param instanceof ZWaveValue)
                 ((ZWaveValue) param).setValue(entry.getValue());
+            else if (param instanceof DeviceStateEnum)
+                params.put(entry.getKey(), DeviceStateEnum.fromString(entry.getValue()));
             else
                 params.put(entry.getKey(), entry.getValue());
         }
@@ -270,6 +273,5 @@ public class ZWaveNode implements GateDevice {
         id = dto.getId();
         return true;
     }
-
 
 }
