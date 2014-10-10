@@ -3,7 +3,6 @@ package ru.uproom.gate.commands;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.uproom.gate.devices.GateDevicesSet;
 import ru.uproom.gate.domain.ClassesSearcher;
@@ -30,9 +29,6 @@ public class GateCommanderImpl implements GateCommander {
 
 
     private static final Logger LOG = LoggerFactory.getLogger(NotificationWatcherImpl.class);
-
-    @Value("${command_handlers_path}")
-    private String handlersPath;
 
     private Map<CommandType, CommandHandler> commandHandlers =
             new EnumMap<CommandType, CommandHandler>(CommandType.class);

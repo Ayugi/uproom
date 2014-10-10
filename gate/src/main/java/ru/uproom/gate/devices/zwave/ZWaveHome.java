@@ -39,6 +39,10 @@ public class ZWaveHome implements GateDevicesSet {
     private final Map<Integer, ZWaveNode> nodes = new HashMap<Integer, ZWaveNode>();
     @Value("${zwave_stick}")
     private String zWaveStick;
+    @Value("${zwave_cfg_path}")
+    private String zWaveCfgPath;
+    @Value("${zwave_usr_path}")
+    private String zWaveUserPath;
     private ZWaveHomeDriver driver;
     private Thread threadDriver;
     private long homeId;
@@ -64,20 +68,23 @@ public class ZWaveHome implements GateDevicesSet {
         NativeLibraryLoader.loadLibrary(ZWave4j.LIBRARY_NAME, ZWave4j.class);
         LOG.info("Libraries loaded");
 
+    }
+
+    @PostConstruct
+    public void init() {
+
         // reading current librarian options
         LOG.info("Options loading ...");
         final Options options = Options.create(
-                "/home/osipenko/.uproom21/zwave",
-                "/home/osipenko/.uproom21/config",
+                zWaveCfgPath,
+                zWaveUserPath,
                 ""
         );
         options.addOptionBool("ConsoleOutput", false);
         options.lock();
         LOG.info("Options loaded");
-    }
 
-    @PostConstruct
-    public void init() {
+        // create manager
         Manager.create();
         Manager.get().addWatcher(watcher, this);
         startDriver();
