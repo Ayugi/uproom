@@ -16,7 +16,7 @@ import java.util.ArrayList;
 /**
  * Created by hedin on 30.08.2014.
  */
-//@Ignore
+@Ignore
 public class TestSocketConnect {
     private static final int testPort = 19999;
 
