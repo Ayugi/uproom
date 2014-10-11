@@ -39,6 +39,10 @@ public class ZWaveHome implements GateDevicesSet {
     private final Map<Integer, ZWaveNode> nodes = new HashMap<Integer, ZWaveNode>();
     @Value("${zwave_stick}")
     private String zWaveStick;
+    @Value("${zwave_cfg_path}")
+    private String zWaveCfgPath;
+    @Value("${zwave_usr_path}")
+    private String zWaveUserPath;
     private ZWaveHomeDriver driver;
     private Thread threadDriver;
     private long homeId;
@@ -64,20 +68,23 @@ public class ZWaveHome implements GateDevicesSet {
         NativeLibraryLoader.loadLibrary(ZWave4j.LIBRARY_NAME, ZWave4j.class);
         LOG.info("Libraries loaded");
 
+    }
+
+    @PostConstruct
+    public void init() {
+
         // reading current librarian options
         LOG.info("Options loading ...");
         final Options options = Options.create(
-                "/home/osipenko/.uproom21/zwave",
-                "/home/osipenko/.uproom21/config",
+                zWaveCfgPath,
+                zWaveUserPath,
                 ""
         );
         options.addOptionBool("ConsoleOutput", false);
         options.lock();
         LOG.info("Options loaded");
-    }
 
-    @PostConstruct
-    public void init() {
+        // create manager
         Manager.create();
         Manager.get().addWatcher(watcher, this);
         startDriver();
@@ -147,7 +154,7 @@ public class ZWaveHome implements GateDevicesSet {
     @Override
     public void removeGateDevice(int index) {
         ZWaveNode node = nodes.remove(index);
-        node.setParameter(DeviceParametersNames.GateDeviceId, 0);
+        node.setZId(0);
         transport.sendCommand(new SetDeviceParameterCommand(node.getDeviceDTO()));
     }
 
@@ -170,12 +177,11 @@ public class ZWaveHome implements GateDevicesSet {
     public void setGateDeviceParameter(int indexDevice, DeviceParametersNames paramName, Object paramValue) {
         ZWaveNode node = nodes.get(indexDevice);
         if (node == null) return;
+        if (paramValue instanceof ValueId) paramValue = new ZWaveValue((ValueId) paramValue);
         node.setParameter(paramName, paramValue);
         if (!isReady()) return;
         transport.sendCommand(new SetDeviceParameterCommand(
-                node.getDeviceParameters(new DeviceParametersNames[]{
-                        paramName
-                })
+                node.getDeviceParameters(paramName)
         ));
     }
 
@@ -303,8 +309,7 @@ public class ZWaveHome implements GateDevicesSet {
 
     @Override
     public void setDeviceDTO(DeviceDTO dto) {
-        Integer serverDeviceId = Integer.parseInt(dto.getParameters().get(DeviceParametersNames.ServerDeviceId));
-        ZWaveNode node = getNodeByParameter(DeviceParametersNames.ServerDeviceId, serverDeviceId);
+        ZWaveNode node = nodes.get(dto.getZId());
         if (node == null) return;
         node.setParams(dto);
     }
