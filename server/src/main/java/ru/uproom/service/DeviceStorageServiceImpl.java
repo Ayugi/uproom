@@ -28,7 +28,7 @@ public class DeviceStorageServiceImpl implements DeviceStorageService {
     public void onNewUser(int userId) {
         if (userStorage.containsKey(userId))
             return;
-        UserDeviceStorage storage = new UserDeviceStorage(deviceDao);
+        UserDeviceStorage storage = new UserDeviceStorage(deviceDao, userId);
         userStorage.put(userId, storage);
         storage.addDevices(deviceDao.fetchUserDevices(userId));
     }
@@ -61,7 +61,7 @@ public class DeviceStorageServiceImpl implements DeviceStorageService {
         Device stored = userStorage.get(userId).getDeviceById(device.getId());
         if (!stored.getName().equals(device.getName())) {
             stored.setName(device.getName());
-            deviceDao.saveDevice(stored);
+            deviceDao.saveDevice(stored, userId);
         }
         if (null != device.getState())
             device.getParameters().put(DeviceParametersNames.State, device.getState().name());
