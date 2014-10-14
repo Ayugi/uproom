@@ -1,6 +1,7 @@
 package ru.uproom.service;
 
 import junit.framework.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import ru.uproom.gate.transport.command.HandshakeCommand;

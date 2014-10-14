@@ -36,14 +36,13 @@ public class ZWaveHome implements GateDevicesSet {
     //######    fields
 
     private static final Logger LOG = LoggerFactory.getLogger(GateDevicesSet.class);
-    private final Map<Integer, ZWaveNode> nodes = new HashMap<Integer, ZWaveNode>();
+    private final Map<Integer, ZWaveNode> nodes = new HashMap<>();
     @Value("${zwave_stick}")
     private String zWaveStick;
     @Value("${zwave_cfg_path}")
     private String zWaveCfgPath;
     @Value("${zwave_usr_path}")
     private String zWaveUserPath;
-    private ZWaveHomeDriver driver;
     private Thread threadDriver;
     private long homeId;
     private boolean ready;
@@ -126,7 +125,6 @@ public class ZWaveHome implements GateDevicesSet {
     public void setReady(boolean ready) {
         this.ready = ready;
         transport.sendCommand(new SendDeviceListCommand(getDeviceDTOList()));
-        //watcher.onGateEvent(GateNotificationType.SendDeviceList, null);
     }
 
     public boolean isFailed() {
@@ -263,19 +261,19 @@ public class ZWaveHome implements GateDevicesSet {
     //##############################################################################################################
     //######    inner classes
 
-
-    //------------------------------------------------------------------------
-    // (re)start Z-Wave driver
-
     private void startDriver() {
-        driver = new ZWaveHomeDriver();
+        ZWaveHomeDriver driver = new ZWaveHomeDriver();
         threadDriver = new Thread(driver);
         threadDriver.start();
     }
 
 
+    //##############################################################################################################
+    //######    methods
+
+
     //------------------------------------------------------------------------
-    // create Z-Wave driver and keep it work
+    // (re)start Z-Wave driver
 
     public ZWaveNode getNodeByParameter(DeviceParametersNames paramName, Object paramValue) {
         for (Map.Entry<Integer, ZWaveNode> entry : nodes.entrySet()) {
@@ -287,12 +285,8 @@ public class ZWaveHome implements GateDevicesSet {
     }
 
 
-    //##############################################################################################################
-    //######    methods
-
-
     //------------------------------------------------------------------------
-    //  find node by ServerID
+    // create Z-Wave driver and keep it work
 
     public List<DeviceDTO> getDeviceDTOList() {
         List<DeviceDTO> devices = new ArrayList<DeviceDTO>();
@@ -305,7 +299,7 @@ public class ZWaveHome implements GateDevicesSet {
 
 
     //------------------------------------------------------------------------
-    //  create device list as list of serializable objects
+    //  find node by ServerID
 
     @Override
     public void setDeviceDTO(DeviceDTO dto) {
@@ -313,6 +307,10 @@ public class ZWaveHome implements GateDevicesSet {
         if (node == null) return;
         node.setParams(dto);
     }
+
+
+    //------------------------------------------------------------------------
+    //  create device list as list of serializable objects
 
     @Override
     public String toString() {

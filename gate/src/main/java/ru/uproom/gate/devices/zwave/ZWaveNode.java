@@ -50,10 +50,9 @@ public class ZWaveNode implements GateDevice {
     public ZWaveNode(GateDevicesSet home, Integer gateDeviceId) {
 
         setHome(home);
-        zId = gateDeviceId.intValue();
+        zId = gateDeviceId;
         id = 0;
-        setDeviceType(Manager.get().getNodeType(
-                getHome().getHomeId(), gateDeviceId.shortValue()));
+        setDeviceType();
 
     }
 
@@ -118,17 +117,20 @@ public class ZWaveNode implements GateDevice {
         return (DeviceType) params.get(DeviceParametersNames.ServerDeviceType);
     }
 
-    public void setDeviceType(String type) {
+    public void setDeviceType(DeviceType type) {
+        params.put(DeviceParametersNames.ServerDeviceType, type);
+    }
+
+    public void setDeviceType() {
         if ((int) Manager.get().getControllerNodeId(home.getHomeId()) == zId)
             params.put(DeviceParametersNames.ServerDeviceType, DeviceType.Controller);
         else {
             // todo : set right device type for server using
-            params.put(DeviceParametersNames.ServerDeviceType, DeviceType.None);
+            params.put(
+                    DeviceParametersNames.ServerDeviceType,
+                    DeviceType.byStringKey(Manager.get().getNodeType(home.getHomeId(), (short) zId))
+            );
         }
-    }
-
-    public void setDeviceType(DeviceType type) {
-        params.put(DeviceParametersNames.ServerDeviceType, type);
     }
 
 
