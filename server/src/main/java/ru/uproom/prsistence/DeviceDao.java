@@ -8,7 +8,7 @@ import java.util.List;
  * Created by HEDIN on 16.09.2014.
  */
 public interface DeviceDao {
-    Device saveDevice(Device device);
+    Device saveDevice(Device device, int userId);
 
     List<Device> fetchUserDevices(Integer userId);
 }

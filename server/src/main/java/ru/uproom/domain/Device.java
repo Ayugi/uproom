@@ -13,7 +13,12 @@ import java.util.Map;
  */
 @Entity
 @Table(name = "device")
-@NamedQuery(name = "userDevices", query = "select d from Device d where d.user = :user")
+@NamedQueries({
+        @NamedQuery(name = "userDevices", query = "select d from Device d where d.user = :user"),
+        @NamedQuery(name = "userDeviceByZId", query = "select d from Device d where d.user.id = :userId " +
+                " AND d.zid = :zid")
+})
+
 public class Device {
     @Id
     @Column(name = "id")
@@ -44,8 +49,8 @@ public class Device {
         type = dto.getType();
     }
 
-    public DeviceDTO toDto (){
-        return new DeviceDTO(id,zid,type,new HashMap<>(parameters));
+    public DeviceDTO toDto() {
+        return new DeviceDTO(id, zid, type, new HashMap<>(parameters));
     }
 
     public int getId() {
