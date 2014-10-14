@@ -7,4 +7,6 @@ package ru.uproom.gate.transport;
  */
 public interface ServerTransportUser {
     public void setTransport(ServerTransportMarker transport);
+
+    public void setLink(boolean link);
 }

@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * Created by hedin on 30.08.2014.
  */
-public class GateSocketHandler {
+public class GateSocketHandler implements Runnable {
     private static final Logger LOG = LoggerFactory.getLogger(GateSocketHandler.class);
     private Socket socket;
     private ObjectInputStream input;
@@ -54,10 +54,13 @@ public class GateSocketHandler {
         LOG.info("handshake");
         try {
             Object handshakeObj = input.readObject();
-            if (!(handshakeObj instanceof HandshakeCommand))
-                throw new RuntimeException("Invalid handshake received " + handshakeObj);
+            if (!(handshakeObj instanceof HandshakeCommand)) {
+                LOG.debug("Invalid handshake received {}", handshakeObj);
+                return -1;
+            }
             HandshakeCommand handshake = (HandshakeCommand) handshakeObj;
             userId = handshake.getGateId();
+            deviceStorage.onNewUser(userId);
             LOG.info("handshake successful userId " + userId);
             return userId;
         } catch (IOException e) {
@@ -76,7 +79,8 @@ public class GateSocketHandler {
         }
     }
 
-    public void listen() {
+    @Override
+    public void run() {
         LOG.info("listen ");
         while (!stopped) {
             try {
@@ -88,6 +92,7 @@ public class GateSocketHandler {
                             transformDtosToDevices((SendDeviceListCommand) command));
             } catch (IOException e) {
                 e.printStackTrace();
+                stopped = true;
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
