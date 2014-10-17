@@ -1,6 +1,7 @@
 package ru.uproom.service;
 
 import ru.uproom.domain.Device;
+import ru.uproom.gate.transport.dto.parameters.DeviceParametersNames;
 import ru.uproom.prsistence.DeviceDao;
 
 import java.util.*;
@@ -28,7 +29,11 @@ public class UserDeviceStorage {
                 continue;
             }
             if (0 == device.getId()) {
-                device.setName("new device");
+                //device.setName("new device");
+                device.setName(
+                        device.getParameters().get(DeviceParametersNames.ManufacturerName) + " " +
+                                device.getParameters().get(DeviceParametersNames.ProductName)
+                );
                 deviceDao.saveDevice(device, userId);
             }
             devicesById.put(device.getId(), device);
