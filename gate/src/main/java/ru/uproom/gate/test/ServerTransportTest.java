@@ -221,7 +221,7 @@ public class ServerTransportTest implements AutoCloseable, Runnable {
                         //System.out.println("TEST (ServerTransportOut) >>>> send GetDeviceList command");
                         //output.writeObject(new GetDeviceListCommand(String.format("gate-%06d", gateId)));
                         System.out.println("TEST (ServerTransportOut) >>>> send SetDeviceParameters command");
-                        DeviceDTO device = new DeviceDTO(0, 2, DeviceType.PowerSwitch);
+                        DeviceDTO device = new DeviceDTO(0, 2, DeviceType.BinarySwitch);
                         device.getParameters().put(DeviceParametersNames.Switch, switchOn.toString());
                         output.writeObject(new SetDeviceParameterCommand(device));
                     }

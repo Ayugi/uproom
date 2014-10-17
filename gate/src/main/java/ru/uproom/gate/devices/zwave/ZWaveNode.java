@@ -53,6 +53,8 @@ public class ZWaveNode implements GateDevice {
         zId = gateDeviceId;
         id = 0;
         setDeviceType();
+        setManufacturerName();
+        setProductName();
 
     }
 
@@ -111,26 +113,39 @@ public class ZWaveNode implements GateDevice {
 
 
     //------------------------------------------------------------------------
-    //  get node type in Z-Wave net
-
-    public DeviceType getDeviceType() {
-        return (DeviceType) params.get(DeviceParametersNames.ServerDeviceType);
-    }
-
-    public void setDeviceType(DeviceType type) {
-        params.put(DeviceParametersNames.ServerDeviceType, type);
-    }
+    //  set node type in Z-Wave net
 
     public void setDeviceType() {
         if ((int) Manager.get().getControllerNodeId(home.getHomeId()) == zId)
             params.put(DeviceParametersNames.ServerDeviceType, DeviceType.Controller);
         else {
-            // todo : set right device type for server using
             params.put(
                     DeviceParametersNames.ServerDeviceType,
                     DeviceType.byStringKey(Manager.get().getNodeType(home.getHomeId(), (short) zId))
             );
         }
+    }
+
+
+    //------------------------------------------------------------------------
+    //  set node manufacturer name in Z-Wave net
+
+    public void setManufacturerName() {
+        params.put(
+                DeviceParametersNames.ManufacturerName,
+                Manager.get().getNodeManufacturerName(home.getHomeId(), (short) zId)
+        );
+    }
+
+
+    //------------------------------------------------------------------------
+    //  set node product name in Z-Wave net
+
+    public void setProductName() {
+        params.put(
+                DeviceParametersNames.ProductName,
+                Manager.get().getNodeProductName(home.getHomeId(), (short) zId)
+        );
     }
 
 
