@@ -182,6 +182,7 @@ public class ServerTransportImpl implements ServerTransport {
     public void sendCommand(Command command) {
         try {
             if (output != null) output.writeObject(command);
+            LOG.debug("Send command to server : " + command.getType().name());
         } catch (IOException e) {
             LOG.error(e.getMessage());
         }

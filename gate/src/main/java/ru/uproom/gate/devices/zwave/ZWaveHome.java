@@ -72,11 +72,13 @@ public class ZWaveHome implements GateDevicesSet {
     @PostConstruct
     public void init() {
 
+        String userDir = System.getProperties().getProperty("user.home");
+        LOG.debug(">>>>>>>>>>>>>>>> user home path = " + userDir);
         // reading current librarian options
         LOG.info("Options loading ...");
         final Options options = Options.create(
-                zWaveCfgPath,
-                zWaveUserPath,
+                userDir + "/" + zWaveCfgPath,
+                userDir + "/" + zWaveUserPath,
                 ""
         );
         options.addOptionBool("ConsoleOutput", false);
@@ -124,7 +126,7 @@ public class ZWaveHome implements GateDevicesSet {
 
     public void setReady(boolean ready) {
         this.ready = ready;
-        transport.sendCommand(new SendDeviceListCommand(getDeviceDTOList()));
+        getDeviceDTOList();
     }
 
     public boolean isFailed() {
