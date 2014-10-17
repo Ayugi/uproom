@@ -31,8 +31,9 @@ public class UserDeviceStorage {
             if (0 == device.getId()) {
                 //device.setName("new device");
                 device.setName(
-                        device.getParameters().get(DeviceParametersNames.ManufacturerName) + " " +
-                                device.getParameters().get(DeviceParametersNames.ProductName)
+                        "[" + device.getParameters().get(DeviceParametersNames.ServerDeviceType) + "]" +
+                                " " + device.getParameters().get(DeviceParametersNames.ManufacturerName) +
+                                " " + device.getParameters().get(DeviceParametersNames.ProductName)
                 );
                 deviceDao.saveDevice(device, userId);
             }
