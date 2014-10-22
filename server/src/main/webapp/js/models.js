@@ -49,6 +49,16 @@ define(['exports', 'backbone'], function (exports, Backbone) {
             console.log("getStateFlag " + this.getState() == "On");
             return this.getState() == "On";
         },
+        setLevel: function (level) {
+            // TODO remove duplication
+            var p = this.get("parameters");
+            if (!p) {
+                p = {};
+                this.set("parameters", p);
+            }
+            p.Level = level;
+        },
+
         url: DEVICES_URL
 
     });
