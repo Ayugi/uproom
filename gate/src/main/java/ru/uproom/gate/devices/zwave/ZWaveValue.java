@@ -1,11 +1,11 @@
 package ru.uproom.gate.devices.zwave;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.zwave4j.Manager;
 import org.zwave4j.ValueId;
-import ru.uproom.gate.devices.ZWaveValueCallback;
-import ru.uproom.gate.transport.dto.parameters.DeviceParametersNames;
+import ru.uproom.gate.notifications.zwave.NotificationWatcherImpl;
 
-import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -17,11 +17,10 @@ public class ZWaveValue {
     //=============================================================================================================
     //======    fields
 
+    private static final Logger LOG = LoggerFactory.getLogger(NotificationWatcherImpl.class);
 
     private int id;
     private ValueId valueId;
-    private DeviceParametersNames valueName;
-    private ArrayList<ZWaveValueCallback> events = new ArrayList<ZWaveValueCallback>();
 
 
     //=============================================================================================================
@@ -30,26 +29,12 @@ public class ZWaveValue {
 
     public ZWaveValue(ValueId valueId) {
         this.valueId = valueId;
-        String label = Manager.get().getValueLabel(valueId);
         this.id = ZWaveValueIndexFactory.createIndex(valueId);
-        this.valueName = DeviceParametersNames.byZWaveCode(id);
     }
 
 
     //=============================================================================================================
     //======    getters & setters
-
-
-    //------------------------------------------------------------------------
-    //  z-wave value ID
-
-    public ValueId getValueId() {
-        return valueId;
-    }
-
-    public void setValueId(ValueId valueId) {
-        this.valueId = valueId;
-    }
 
 
     //------------------------------------------------------------------------
@@ -61,60 +46,10 @@ public class ZWaveValue {
 
 
     //------------------------------------------------------------------------
-    //  z-wave value index
-
-    public Short getValueIndex() {
-        return valueId.getIndex();
-    }
-
-
-    //------------------------------------------------------------------------
     //  gate value id
 
     public int getId() {
         return id;
-    }
-
-
-    //------------------------------------------------------------------------
-    //  z-wave value command class
-
-    public Short getValueCommandClass() {
-        return valueId.getCommandClassId();
-    }
-
-
-    //------------------------------------------------------------------------
-    //  z-wave value instance id
-
-    public Short getValueInstance() {
-        return valueId.getInstance();
-    }
-
-
-    //------------------------------------------------------------------------
-    //  events associated with value
-
-    public boolean addEvent(ZWaveValueCallback event) {
-        return events.add(event);
-    }
-
-    public boolean removeEvent(ZWaveValueCallback event) {
-        return events.remove(event);
-    }
-
-    public void callEvents() {
-        for (ZWaveValueCallback event : events) {
-            event.onCallback(this);
-        }
-    }
-
-
-    //------------------------------------------------------------------------
-    //  server value name
-
-    public DeviceParametersNames getValueName() {
-        return valueName;
     }
 
 
@@ -128,19 +63,19 @@ public class ZWaveValue {
     private Object getValue() {
         switch (valueId.getType()) {
             case BOOL:
-                AtomicReference<Boolean> b = new AtomicReference<Boolean>();
+                AtomicReference<Boolean> b = new AtomicReference<>();
                 Manager.get().getValueAsBool(valueId, b);
                 return b.get();
             case BYTE:
-                AtomicReference<Short> bb = new AtomicReference<Short>();
+                AtomicReference<Short> bb = new AtomicReference<>();
                 Manager.get().getValueAsByte(valueId, bb);
                 return bb.get();
             case DECIMAL:
-                AtomicReference<Float> f = new AtomicReference<Float>();
+                AtomicReference<Float> f = new AtomicReference<>();
                 Manager.get().getValueAsFloat(valueId, f);
                 return f.get();
             case INT:
-                AtomicReference<Integer> i = new AtomicReference<Integer>();
+                AtomicReference<Integer> i = new AtomicReference<>();
                 Manager.get().getValueAsInt(valueId, i);
                 return i.get();
             case LIST:
@@ -148,17 +83,17 @@ public class ZWaveValue {
             case SCHEDULE:
                 return null;
             case SHORT:
-                AtomicReference<Short> s = new AtomicReference<Short>();
+                AtomicReference<Short> s = new AtomicReference<>();
                 Manager.get().getValueAsShort(valueId, s);
                 return s.get();
             case STRING:
-                AtomicReference<String> ss = new AtomicReference<String>();
+                AtomicReference<String> ss = new AtomicReference<>();
                 Manager.get().getValueAsString(valueId, ss);
                 return ss.get();
             case BUTTON:
                 return null;
             case RAW:
-                AtomicReference<short[]> sss = new AtomicReference<short[]>();
+                AtomicReference<short[]> sss = new AtomicReference<>();
                 Manager.get().getValueAsRaw(valueId, sss);
                 return sss.get();
             default:
@@ -182,13 +117,11 @@ public class ZWaveValue {
     @Override
     public String toString() {
 
-        String result = String.format("{\"id\":\"%d\",\"label\":\"%s\",\"value\":\"%s\"}",
+        return String.format("{\"id\":\"%d\",\"label\":\"%s\",\"value\":\"%s\"}",
                 id,
                 getValueLabel(),
                 getValueAsString()
         );
-
-        return result;
     }
 
 
@@ -196,6 +129,7 @@ public class ZWaveValue {
     //  set parameter value as string
 
     public boolean setValue(String value) {
+        LOG.debug(">>>> set value : " + this.toString() + " to value : " + value);
         return Manager.get().setValueAsString(valueId, value);
     }
 }
