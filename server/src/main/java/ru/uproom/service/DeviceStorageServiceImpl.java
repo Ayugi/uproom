@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.uproom.domain.Device;
 import ru.uproom.domain.DeviceState;
-import ru.uproom.gate.transport.command.SendDeviceListCommand;
 import ru.uproom.gate.transport.command.SetDeviceParameterCommand;
 import ru.uproom.gate.transport.dto.parameters.DeviceParametersNames;
 import ru.uproom.prsistence.DeviceDao;
@@ -65,6 +64,12 @@ public class DeviceStorageServiceImpl implements DeviceStorageService {
         }
         if (null != device.getState())
             device.getParameters().put(DeviceParametersNames.State, device.getState().name());
+        if (device.getParameters().containsKey(DeviceParametersNames.State))
+            device.getParameters().put(DeviceParametersNames.Switch,
+                    "On".equals(device.getParameters().get(DeviceParametersNames.State))
+                            ? "true"
+                            : "false"
+            );
         if (handleParams(device, stored))
             gateTransport.sendCommand(new SetDeviceParameterCommand(stored.toDto()), userId);
 

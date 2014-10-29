@@ -8,7 +8,7 @@ import ru.uproom.gate.transport.dto.parameters.DeviceParametersNames;
  */
 public interface GateDevice {
 
-    public short getZId();
+    public int getZId();
 
     public Object getParameter(DeviceParametersNames name);
 

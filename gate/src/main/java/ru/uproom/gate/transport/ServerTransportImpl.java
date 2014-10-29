@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
 /**
  * class with functionality of changing data with server
@@ -165,10 +166,12 @@ public class ServerTransportImpl implements ServerTransport {
             socket = new Socket(this.host, this.port);
             output = new ObjectOutputStream(socket.getOutputStream());
             return true;
+        } catch (UnknownHostException e) {
+            LOG.error("[UnknownHostException] - " + e.getMessage());
         } catch (IOException e) {
-            LOG.error(e.getMessage());
-            return false;
+            LOG.error("[IOException]" + e.getMessage());
         }
+        return false;
     }
 
 
@@ -179,6 +182,7 @@ public class ServerTransportImpl implements ServerTransport {
     public void sendCommand(Command command) {
         try {
             if (output != null) output.writeObject(command);
+            LOG.debug("Send command to server : " + command.getType().name());
         } catch (IOException e) {
             LOG.error(e.getMessage());
         }

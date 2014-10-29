@@ -31,8 +31,14 @@ public class ZWaveControllerCallbackImpl implements ControllerCallback {
             return;
         }
 
+        // complete current mode
+        if (controllerState == ControllerState.COMPLETED) {
+            home.setControllerState(DeviceStateEnum.Work, true);
+            return;
+        }
+
         // set requested mode
-        if (controllerState == ControllerState.WAITING && controllerError == ControllerError.NONE) {
+        if (controllerState == ControllerState.WAITING) {
             home.setControllerState(home.getRequestedMode(), true);
         }
 

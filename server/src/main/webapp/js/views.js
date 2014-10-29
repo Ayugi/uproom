@@ -157,7 +157,8 @@ define([
             ItemView: Backbone.View.extend({
 
                 events: {
-                    'click [data-id=switchCheck]': 'sendDevice'
+                    'click [data-id=switchCheck]': 'sendDevice',
+                    'change [data-id=level]': 'sendLevel'
                 },
 
                 sendDevice: function () {
@@ -180,6 +181,14 @@ define([
 
                 },
 
+                sendLevel: function () {
+                    console.log("SEND LEVEL");
+                    var value = this.$('[data-id=level]').val();
+                    console.log(value);
+                    this.model.setLevel(value);
+                    this.model.save();
+                    console.log("LEVEL SENT");
+                },
 
                 initialize: function (options) {
                     Backbone.View.prototype.initialize.call(this, options);
