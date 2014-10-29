@@ -27,7 +27,7 @@ public class AllNodesQueriedNotificationHandler implements NotificationHandler {
         home.setReady(true);
         home.setControllerState(DeviceStateEnum.Work, false);
 
-        LOG.debug("z-wave notification : {}" + notification.getType().name() + ", z-wave network : {}",
+        LOG.debug("z-wave notification : {}, z-wave network : {}",
                 new Object[]{notification.getType(), home.getControllerState()});
 
         // send message to server

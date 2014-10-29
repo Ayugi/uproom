@@ -1,10 +1,7 @@
 package ru.uproom.gate.devices.zwave;
 
 import org.zwave4j.Manager;
-import org.zwave4j.Notification;
-import ru.uproom.gate.devices.GateDevice;
 import ru.uproom.gate.devices.GateDevicesSet;
-import ru.uproom.gate.devices.ZWaveNodeCallback;
 import ru.uproom.gate.transport.dto.DeviceDTO;
 import ru.uproom.gate.transport.dto.DeviceType;
 import ru.uproom.gate.transport.dto.parameters.DeviceParametersNames;
@@ -20,7 +17,7 @@ import java.util.Map;
  * <p/>
  * Created by osipenko on 31.07.14.
  */
-public class ZWaveNode implements GateDevice {
+public class ZWaveNode {
 
 
     //=============================================================================================================
@@ -28,19 +25,16 @@ public class ZWaveNode implements GateDevice {
 
 
     // device type
-    DeviceType type;
     private GateDevicesSet home = null;
-    private boolean polled = false;
 
-    private List<Integer> groups = new ArrayList<Integer>();
-    private List<ZWaveNodeCallback> events = new ArrayList<ZWaveNodeCallback>();
+    private List<Integer> groups = new ArrayList<>();
     // device ID in server database
     private int id;
     // device ID in Z-Wave net
     private int zId = 0;
     // device parameters
     private Map<DeviceParametersNames, Object> params =
-            new EnumMap<DeviceParametersNames, Object>(DeviceParametersNames.class);
+            new EnumMap<>(DeviceParametersNames.class);
 
 
     //=============================================================================================================
@@ -76,24 +70,7 @@ public class ZWaveNode implements GateDevice {
 
 
     //------------------------------------------------------------------------
-    //  polling
-
-    public boolean isPolled() {
-        return polled;
-    }
-
-    public void setPolled(boolean _polled) {
-        polled = _polled;
-    }
-
-
-    //------------------------------------------------------------------------
     // device ID in Z-Wave net
-
-    @Override
-    public int getZId() {
-        return zId;
-    }
 
     public void setZId(int zId) {
         this.zId = zId;
@@ -135,6 +112,10 @@ public class ZWaveNode implements GateDevice {
                 DeviceParametersNames.ManufacturerName,
                 Manager.get().getNodeManufacturerName(home.getHomeId(), (short) zId)
         );
+        params.put(
+                DeviceParametersNames.ManufacturerId,
+                Manager.get().getNodeManufacturerId(home.getHomeId(), (short) zId)
+        );
     }
 
 
@@ -146,23 +127,19 @@ public class ZWaveNode implements GateDevice {
                 DeviceParametersNames.ProductName,
                 Manager.get().getNodeProductName(home.getHomeId(), (short) zId)
         );
+        params.put(
+                DeviceParametersNames.ProductId,
+                Manager.get().getNodeProductId(home.getHomeId(), (short) zId)
+        );
     }
 
 
     //------------------------------------------------------------------------
     //  node groups
-
-    @Override
     public void setGroup(Integer index) {
         if (!isExistGroup(index)) groups.add(index);
     }
 
-    @Override
-    public void removeGroup(Integer index) {
-        groups.remove(index);
-    }
-
-    @Override
     public boolean isExistGroup(Integer index) {
         return (groups.indexOf(index) >= 0);
     }
@@ -171,30 +148,6 @@ public class ZWaveNode implements GateDevice {
     //------------------------------------------------------------------------
     //  events handling
 
-    public boolean addEvent(ZWaveNodeCallback event) {
-        return events.add(event);
-    }
-
-    public boolean removeEvent(ZWaveNodeCallback event) {
-        return events.remove(event);
-    }
-
-    public void callEvents(Notification notification) {
-        for (ZWaveNodeCallback event : events) {
-            event.onCallback(this, notification);
-        }
-    }
-
-
-    //------------------------------------------------------------------------
-    //  events handling
-
-    @Override
-    public Object getParameter(DeviceParametersNames name) {
-        return params.get(name);
-    }
-
-    @Override
     public Object setParameter(DeviceParametersNames name, Object value) {
         return params.put(name, value);
     }
@@ -213,27 +166,8 @@ public class ZWaveNode implements GateDevice {
 
 
     //------------------------------------------------------------------------
-    //  get node values list as string
-
-    public String getValueList() {
-        String result = "[";
-
-        boolean needComma = false;
-        for (Map.Entry<DeviceParametersNames, Object> entry : params.entrySet()) {
-            if (needComma) result += ",";
-            else needComma = true;
-            result += entry.getValue().toString();
-        }
-        result += "]";
-
-        return result;
-    }
-
-
-    //------------------------------------------------------------------------
     //  get node information as DTO
 
-    @Override
     public DeviceDTO getDeviceDTO() {
         return getDeviceParameters(new ArrayList<>(params.keySet()).
                 toArray(new DeviceParametersNames[params.keySet().size()]));
@@ -265,10 +199,8 @@ public class ZWaveNode implements GateDevice {
 
     @Override
     public String toString() {
-        String result = String.format("{\"id\":\"%d\",\"type\":\"%s\"}",
+        return String.format("{\"id\":\"%d\",\"type\":\"%s\"}",
                 zId, params.get(DeviceParametersNames.ServerDeviceType));
-
-        return result;
     }
 
 
@@ -276,6 +208,7 @@ public class ZWaveNode implements GateDevice {
     //  set node any values
 
     public boolean setParams(DeviceDTO dto) {
+
         for (Map.Entry<DeviceParametersNames, String> entry : dto.getParameters().entrySet()) {
             Object param = params.get(entry.getKey());
             if (param == null || entry.getKey().isReadOnly()) continue;
@@ -288,6 +221,7 @@ public class ZWaveNode implements GateDevice {
         }
         // some hard code
         id = dto.getId();
+
         return true;
     }
 

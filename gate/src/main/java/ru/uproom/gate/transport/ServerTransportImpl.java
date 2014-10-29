@@ -41,10 +41,6 @@ public class ServerTransportImpl implements ServerTransport {
     private int times = 0;
     @Value("${period_between_attempts}")
     private long periodBetweenAttempts = 0;
-    @Value("${period_connection_check}")
-    private long periodCheck = 0;
-    @Value("${period_connection_wait}")
-    private long periodWait = 0;
     @Value("${gateId}")
     private int gateId;
 
@@ -169,7 +165,7 @@ public class ServerTransportImpl implements ServerTransport {
         } catch (UnknownHostException e) {
             LOG.error("[UnknownHostException] - " + e.getMessage());
         } catch (IOException e) {
-            LOG.error("[IOException]" + e.getMessage());
+            LOG.error("[IOException] - " + e.getMessage());
         }
         return false;
     }
