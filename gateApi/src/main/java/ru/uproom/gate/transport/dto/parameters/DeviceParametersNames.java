@@ -11,8 +11,10 @@ public enum DeviceParametersNames {
     ServerDeviceType(1, true),
     State(2, false),
     ManufacturerName(3, true),
-    ProductName(4, true),
-    ProductType(5, true),
+    ManufacturerId(4, true),
+    ProductName(5, true),
+    ProductId(6, true),
+    ProductType(7, true),
     // z-wave parameters
     Basic(2097408, true),
     Switch(2425088, false),

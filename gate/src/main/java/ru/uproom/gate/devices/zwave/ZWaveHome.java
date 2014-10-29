@@ -72,13 +72,11 @@ public class ZWaveHome implements GateDevicesSet {
     @PostConstruct
     public void init() {
 
-        String userDir = System.getProperties().getProperty("user.home");
-        LOG.debug(">>>>>>>>>>>>>>>> user home path = " + userDir);
         // reading current librarian options
         LOG.info("Options loading ...");
         final Options options = Options.create(
-                userDir + "/" + zWaveCfgPath,
-                userDir + "/" + zWaveUserPath,
+                zWaveCfgPath,
+                zWaveUserPath,
                 ""
         );
         options.addOptionBool("ConsoleOutput", false);
@@ -275,23 +273,10 @@ public class ZWaveHome implements GateDevicesSet {
 
 
     //------------------------------------------------------------------------
-    // (re)start Z-Wave driver
-
-    public ZWaveNode getNodeByParameter(DeviceParametersNames paramName, Object paramValue) {
-        for (Map.Entry<Integer, ZWaveNode> entry : nodes.entrySet()) {
-            Object value = entry.getValue().getParameter(paramName);
-            if (value == null) continue;
-            if (value.toString().equalsIgnoreCase(paramValue.toString())) return entry.getValue();
-        }
-        return null;
-    }
-
-
-    //------------------------------------------------------------------------
     // create Z-Wave driver and keep it work
 
     public List<DeviceDTO> getDeviceDTOList() {
-        List<DeviceDTO> devices = new ArrayList<DeviceDTO>();
+        List<DeviceDTO> devices = new ArrayList<>();
         for (Map.Entry<Integer, ZWaveNode> entry : nodes.entrySet()) {
             devices.add(entry.getValue().getDeviceDTO());
         }
