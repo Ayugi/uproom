@@ -1,7 +1,6 @@
 <td>{{ title }}</td>
 <td>
-    <input data-id="switchCheck" type="checkbox" value="" {{ state }}>
+    <input data-id="switchCheck" type="checkbox" {{ state }}>&nbsp;&nbsp;&nbsp;
     <input id="slider{{ id }}" data-id="level" data-slider-id='slider' type="text" data-slider-min="0"
-           data-slider-max="20" data-slider-step="1" data-slider-value="14"/>
-    <!-- <input data-id="level" type="text" value="0" {{ level }}> -->
+           data-slider-max="100" data-slider-step="1" data-slider-value="{{ value }}"/>
 </td>
