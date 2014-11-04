@@ -37,6 +37,10 @@ public class GateSocketHandler implements Runnable {
         return lastPingIssued;
     }
 
+    public int getUserId() {
+        return userId;
+    }
+
     private long lastPingInterval = -1;
     private long lastPingIssued = -1;
     private ConnectionChecker checker = new ConnectionChecker();
@@ -91,9 +95,9 @@ public class GateSocketHandler implements Runnable {
         try {
             output.writeObject(command);
         } catch (IOException e) {
-            LOG.warn("network failure " ,e);
+            LOG.warn("network failure ", e);
             checker.stop();
-            gateTransport.onConnectionFailure(userId);
+            gateTransport.onConnectionFailure(this);
             stop();
         }
     }

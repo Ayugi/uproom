@@ -32,7 +32,7 @@ public class GateServiceImpl implements GateTransport {
     @Override
     public void sendCommand(Command command, int userId) {
         GateSocketHandler gateSocketHandler = activeSockets.get(userId);
-        if (null == gateSocketHandler){
+        if (null == gateSocketHandler) {
             LOG.error("gate offline for user " + userId);
             return;
         }
@@ -40,8 +40,9 @@ public class GateServiceImpl implements GateTransport {
     }
 
     @Override
-    public void onConnectionFailure(int userId) {
-        activeSockets.remove(userId);
+    public void onConnectionFailure(GateSocketHandler handler) {
+        if (activeSockets.get(handler.getUserId()) == handler)
+            activeSockets.remove(handler.getUserId());
     }
 
     @PostConstruct
