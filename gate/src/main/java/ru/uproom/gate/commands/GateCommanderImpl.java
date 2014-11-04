@@ -44,7 +44,6 @@ public class GateCommanderImpl implements GateCommander {
     @PostConstruct
     private void prepareCommandHandlers() {
 
-        // todo : переделать с использованием варианта загрузки из jar-файла (пример: Пишем свой загрузчик JAVA-классов)
         if (!getCommandHandlersFromPath())
             getCommandHandlersFromJar();
 

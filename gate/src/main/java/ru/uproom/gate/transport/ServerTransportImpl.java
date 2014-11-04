@@ -189,6 +189,7 @@ public class ServerTransportImpl implements ServerTransport {
 
     @Override
     public void restartLink() {
+        LOG.error("link with server must be restarted");
         stop();
         reader.setReaderWork(false);
     }
