@@ -12,5 +12,6 @@ public enum CommandType {
     Handshake,
     SetDeviceParameter,
     NetworkControllerState,
-    Shutdown
+    Shutdown,
+    Ping
 }

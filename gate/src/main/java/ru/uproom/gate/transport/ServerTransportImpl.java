@@ -44,7 +44,6 @@ public class ServerTransportImpl implements ServerTransport {
     @Value("${gateId}")
     private int gateId;
 
-
     private ServerTransportReader reader;
     private Thread threadReader;
     private Socket socket;
@@ -186,23 +185,39 @@ public class ServerTransportImpl implements ServerTransport {
 
 
     //------------------------------------------------------------------------
+    //  restart connection from outside
+
+    @Override
+    public void restartLink() {
+        stop();
+        reader.setReaderWork(false);
+    }
+
+
+    //------------------------------------------------------------------------
     //  send command from gate to server
 
     public class ServerTransportReader implements Runnable {
+
+        private boolean isReaderWork;
+
+        public void setReaderWork(boolean isReaderWork) {
+            this.isReaderWork = isReaderWork;
+        }
 
         @Override
         public void run() {
 
             // set connections
-            boolean work = open();
-            if (work) {
+            isReaderWork = open();
+            if (isReaderWork) {
                 sendCommand(new HandshakeCommand(gateId));
-                work = getInputStream();
+                isReaderWork = getInputStream();
             }
 
             // read commands
             Command command = null;
-            while (work) {
+            while (isReaderWork) {
                 LOG.debug("Waiting for next command from server");
 
                 // get next command
@@ -210,17 +225,17 @@ public class ServerTransportImpl implements ServerTransport {
                     if (input != null)
                         command = (Command) input.readObject();
                 } catch (IOException e) {
-                    work = false;
+                    isReaderWork = false;
                     LOG.error(e.getMessage());
                 } catch (ClassNotFoundException e) {
-                    work = false;
+                    isReaderWork = false;
                     LOG.error(e.getMessage());
                 }
 
                 if (command != null) {
                     LOG.debug("receive command : {}", command.getType().name());
                     if (commander != null) commander.execute(command);
-                } else work = false;
+                } else isReaderWork = false;
             }
 
             if (Thread.currentThread().isInterrupted()) return;
