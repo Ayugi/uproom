@@ -27,6 +27,7 @@ public class GateSocketHandler implements Runnable {
     private int userId;
     private boolean stopped;
     private DeviceStorageService deviceStorage;
+    private GateTransport gateTransport;
 
     public long getLastPingInterval() {
         return lastPingInterval;
@@ -40,9 +41,10 @@ public class GateSocketHandler implements Runnable {
     private long lastPingIssued = -1;
     private ConnectionChecker checker = new ConnectionChecker();
 
-    public GateSocketHandler(Socket socket, DeviceStorageService deviceStorage) {
+    public GateSocketHandler(Socket socket, DeviceStorageService deviceStorage, GateTransport gateTransport) {
         this.socket = socket;
         this.deviceStorage = deviceStorage;
+        this.gateTransport = gateTransport;
         prepareReaderStream();
         prepareWriterStream();
     }
@@ -89,7 +91,10 @@ public class GateSocketHandler implements Runnable {
         try {
             output.writeObject(command);
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.warn("network failure " ,e);
+            checker.stop();
+            gateTransport.onConnectionFailure(userId);
+            stop();
         }
     }
 
@@ -139,10 +144,12 @@ public class GateSocketHandler implements Runnable {
         @Override
         public void run() {
             while (! stopped){
-                try {
-                    wait(5000);
-                } catch (InterruptedException e) {
-                    LOG.error("unexpected interruption", e);
+                synchronized (this) {
+                    try {
+                        wait(5000);
+                    } catch (InterruptedException e) {
+                        LOG.error("unexpected interruption", e);
+                    }
                 }
                 sendCommand(new PingCommand());
                 lastPingIssued = System.currentTimeMillis();
