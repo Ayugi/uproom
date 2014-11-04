@@ -56,6 +56,12 @@ public class ZWaveHome implements GateDevicesSet {
 
     private DeviceStateEnum requestState;
 
+    private ServerTransportWatchDog watchdog;
+    private Thread threadWatchdog;
+    private int watchDogCounter;
+    @Value("${period_wait_ping}")
+    private int periodWaitPing;
+
 
     //##############################################################################################################
     //######    constructors
@@ -92,6 +98,7 @@ public class ZWaveHome implements GateDevicesSet {
     @PreDestroy
     public void close() {
         threadDriver.interrupt();
+        watchdog.setWatchDogWork(false);
         Manager.get().removeWatcher(watcher, this);
         Manager.get().removeDriver(zWaveStick);
         Manager.destroy();
@@ -304,6 +311,19 @@ public class ZWaveHome implements GateDevicesSet {
         return String.format("{\"id\":\"%d\"", homeId);
     }
 
+    @Override
+    public void ping() {
+
+        watchdog.setWatchDogOn(true);
+        watchDogCounter++;
+        if (watchDogCounter > 99999) watchDogCounter = 0;
+
+    }
+
+
+    //------------------------------------------------------------------------
+    //  gate receive ping from server
+
     public class ZWaveHomeDriver implements Runnable {
 
         @Override
@@ -315,4 +335,39 @@ public class ZWaveHome implements GateDevicesSet {
             startDriver();
         }
     }
+
+
+    //------------------------------------------------------------------------
+    //  send command from gate to server
+
+    public class ServerTransportWatchDog implements Runnable {
+
+        private boolean watchDogWork = true;
+        private boolean isWatchDogOn;
+
+        public void setWatchDogWork(boolean watchDogWork) {
+            this.watchDogWork = watchDogWork;
+        }
+
+        public void setWatchDogOn(boolean isWatchDogOn) {
+            this.isWatchDogOn = isWatchDogOn;
+        }
+
+        @Override
+        public void run() {
+
+            int watchDogCounterPrevious = watchDogCounter;
+
+            while (watchDogWork) {
+                if (isWatchDogOn && watchDogCounter == watchDogCounterPrevious) {
+                    isWatchDogOn = false;
+                    transport.restartLink();
+                }
+                DelayTimer.sleep(periodWaitPing);
+            }
+
+        }
+    }
+
+
 }

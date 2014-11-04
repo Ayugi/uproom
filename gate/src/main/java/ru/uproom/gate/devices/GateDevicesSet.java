@@ -43,4 +43,6 @@ public interface GateDevicesSet {
 
     public DeviceStateEnum getRequestedMode();
 
+    public void ping();
+
 }
