@@ -6,9 +6,14 @@ package ru.uproom.gate.transport.command;
  * Created by osipenko on 10.09.14.
  */
 public class PingCommand extends Command {
+    private long issued;
 
     public PingCommand() {
         super(CommandType.Ping);
+        issued = System.currentTimeMillis();
     }
 
+    public long getIssued() {
+        return issued;
+    }
 }
