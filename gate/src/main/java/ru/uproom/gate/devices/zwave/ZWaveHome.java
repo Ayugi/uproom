@@ -10,6 +10,7 @@ import ru.uproom.gate.devices.GateDevicesSet;
 import ru.uproom.gate.domain.DelayTimer;
 import ru.uproom.gate.transport.ServerTransport;
 import ru.uproom.gate.transport.command.NetworkControllerStateCommand;
+import ru.uproom.gate.transport.command.PingCommand;
 import ru.uproom.gate.transport.command.SendDeviceListCommand;
 import ru.uproom.gate.transport.command.SetDeviceParameterCommand;
 import ru.uproom.gate.transport.dto.DeviceDTO;
@@ -93,6 +94,8 @@ public class ZWaveHome implements GateDevicesSet {
         Manager.create();
         Manager.get().addWatcher(watcher, this);
         startDriver();
+
+        startWatchDog();
     }
 
     @PreDestroy
@@ -311,18 +314,33 @@ public class ZWaveHome implements GateDevicesSet {
         return String.format("{\"id\":\"%d\"", homeId);
     }
 
+
+    //------------------------------------------------------------------------
+    //  gate receive ping from server
+
     @Override
     public void ping() {
 
         watchdog.setWatchDogOn(true);
         watchDogCounter++;
         if (watchDogCounter > 99999) watchDogCounter = 0;
+        transport.sendCommand(new PingCommand());
 
     }
 
 
     //------------------------------------------------------------------------
-    //  gate receive ping from server
+    //  listener for check data exchange
+
+    private void startWatchDog() {
+        watchdog = new ServerTransportWatchDog();
+        threadWatchdog = new Thread(watchdog);
+        threadWatchdog.start();
+    }
+
+
+    //------------------------------------------------------------------------
+    //  listener for check data exchange
 
     public class ZWaveHomeDriver implements Runnable {
 
@@ -338,7 +356,7 @@ public class ZWaveHome implements GateDevicesSet {
 
 
     //------------------------------------------------------------------------
-    //  send command from gate to server
+    //  check data exchange between gate and server
 
     public class ServerTransportWatchDog implements Runnable {
 
@@ -356,13 +374,14 @@ public class ZWaveHome implements GateDevicesSet {
         @Override
         public void run() {
 
-            int watchDogCounterPrevious = watchDogCounter;
+            int watchDogCounterPrevious = -1;
 
             while (watchDogWork) {
                 if (isWatchDogOn && watchDogCounter == watchDogCounterPrevious) {
                     isWatchDogOn = false;
                     transport.restartLink();
                 }
+                watchDogCounterPrevious = watchDogCounter;
                 DelayTimer.sleep(periodWaitPing);
             }
 

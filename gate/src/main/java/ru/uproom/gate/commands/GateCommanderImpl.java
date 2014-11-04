@@ -103,7 +103,11 @@ public class GateCommanderImpl implements GateCommander {
             LOG.error("Handler for command '{}' not found", command.getType());
             return false;
         }
-        return (home.isReady()) ? handler.execute(command, home) : false;
+        if (command.getType() == CommandType.Ping) handler.execute(command, home);
+        else if (home.isReady()) handler.execute(command, home);
+        else return false;
+
+        return true;
     }
 
 // todo : move out commented code and all code below after implementation all commands

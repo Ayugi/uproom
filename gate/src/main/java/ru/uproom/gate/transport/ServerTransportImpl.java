@@ -224,10 +224,7 @@ public class ServerTransportImpl implements ServerTransport {
                 try {
                     if (input != null)
                         command = (Command) input.readObject();
-                } catch (IOException e) {
-                    isReaderWork = false;
-                    LOG.error(e.getMessage());
-                } catch (ClassNotFoundException e) {
+                } catch (IOException | ClassNotFoundException e) {
                     isReaderWork = false;
                     LOG.error(e.getMessage());
                 }
