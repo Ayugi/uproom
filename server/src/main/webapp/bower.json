@@ -24,6 +24,6 @@
         "font-awesome-css": "~4.0.3",
         "requirejs-bower": "~2.1.15",
         "require-handlebars-plugin": "~0.8.1",
-        "seiyria-bootstrap-slider": "4.0.8"
+        "seiyria-bootstrap-slider": "~4.0.8"
     }
 }

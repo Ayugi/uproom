@@ -139,6 +139,12 @@ define([
                     model: model, template_type: "dimmer" //dimmer switch
                 })).render())).el);
 
+                $('#slider'+model.id).slider({
+                    formatter: function(value) {
+                        return 'Current value: ' + value;
+                    }
+                });
+
                 return this;
             },
 
@@ -160,7 +166,8 @@ define([
 
                 events: {
                     'click [data-id=switchCheck]': 'sendDevice',
-                    'change [data-id=level]': 'sendLevel'
+                    'slideStop [data-id=level]': 'sendLevel'
+
                 },
 
                 sendDevice: function () {
@@ -205,15 +212,14 @@ define([
                     this.$el.html(this.template({
                         state: this.model.getState() == "On" ? "checked" : "",
                         title: this.model.getTitle(),
-                        id: this.model.id
+                        id: this.model.id,
+                        value: this.model.getLevel()
                     }));
 
                     this.$el.data('id', this.model.id);
 
-                    //var slider = new Slider("#slider"+this.model.id);
-
-                    $('#slider'+this.model.id).slider({
-                        formatter: function(value) {
+                    $('#slider' + this.model.id).slider({
+                        formatter: function (value) {
                             return 'Current value: ' + value;
                         }
                     });
