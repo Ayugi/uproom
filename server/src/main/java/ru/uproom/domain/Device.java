@@ -116,4 +116,13 @@ public class Device {
             state = device.getState();
         parameters.putAll(device.getParameters());
     }
+
+    public void mergeByZId(Device device) {
+        if (0 != device.getId())
+            id = device.getZid();
+        if (null != device.getState())
+            state = device.getState();
+        parameters.putAll(device.getParameters());
+    }
+
 }
