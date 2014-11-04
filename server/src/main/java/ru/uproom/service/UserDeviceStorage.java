@@ -28,6 +28,11 @@ public class UserDeviceStorage {
                 deviceDao.saveDevice(existing, userId);
                 continue;
             }
+            if (devicesByZId.containsKey(device.getZid())){
+                Device existing = devicesByZId.get(device.getZid());
+                existing.mergeByZId(device);
+                continue;
+            }
             if (0 == device.getId()) {
                 //device.setName("new device");
                 device.setName(
