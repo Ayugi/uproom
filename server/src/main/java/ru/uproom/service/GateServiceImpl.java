@@ -39,6 +39,11 @@ public class GateServiceImpl implements GateTransport {
         gateSocketHandler.sendCommand(command);
     }
 
+    @Override
+    public void onConnectionFailure(int userId) {
+        activeSockets.remove(userId);
+    }
+
     @PostConstruct
     public void init() {
         LOG.info("INIT");
