@@ -21,7 +21,17 @@ define(['exports', 'backbone'], function (exports, Backbone) {
 
 //            console.log("set " +  this.set );
 
-            this.setState(this.getState() == "On" ? "Off" : "On");
+            var st = this.getState() == "On" ? "Off" : "On";
+            if ("Off" == st){
+                this.set("levelBackup", p.Level)
+                p.Level = 0;
+            }
+            else {
+                var levelBackup = this.get("levelBackup");
+                if (levelBackup)
+                    p.Level = levelBackup;
+            }
+            this.setState(st);
             console.log("state after " + this.get("state"));
         },
         setState: function (st) {
@@ -57,6 +67,18 @@ define(['exports', 'backbone'], function (exports, Backbone) {
                 this.set("parameters", p);
             }
             p.Level = level;
+        },
+
+        getLevel: function () {
+            // TODO remove duplication
+            var p = this.get("parameters");
+            if (!p) {
+                p = {};
+                this.set("parameters", p);
+            }
+            if (!p.Level)
+                p.Level = 0;
+            return p.Level;
         },
 
         url: DEVICES_URL

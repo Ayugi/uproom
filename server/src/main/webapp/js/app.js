@@ -1,4 +1,4 @@
-define(['backbone', 'views', 'models'], function(Backbone, Views, Models) {
+define(['backbone', 'views', 'models', 'slider'], function(Backbone, Views, Models) { // , 'slider' , Slider
 	var
 		devicesCollection = new Models.DevicesCollection(),
 		app = (new Views.DevicesView({})).render();
