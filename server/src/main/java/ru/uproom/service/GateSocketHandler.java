@@ -27,16 +27,7 @@ public class GateSocketHandler implements Runnable {
     private int userId;
     private boolean stopped;
     private DeviceStorageService deviceStorage;
-    private long lastPingInterval = -1;
-    private long lastPingIssued = -1;
-    private ConnectionChecker checker = new ConnectionChecker();
-
-    public GateSocketHandler(Socket socket, DeviceStorageService deviceStorage) {
-        this.socket = socket;
-        this.deviceStorage = deviceStorage;
-        prepareReaderStream();
-        prepareWriterStream();
-    }
+    private GateTransport gateTransport;
 
     public long getLastPingInterval() {
         return lastPingInterval;
@@ -44,6 +35,18 @@ public class GateSocketHandler implements Runnable {
 
     public long getLastPingIssued() {
         return lastPingIssued;
+    }
+
+    private long lastPingInterval = -1;
+    private long lastPingIssued = -1;
+    private ConnectionChecker checker = new ConnectionChecker();
+
+    public GateSocketHandler(Socket socket, DeviceStorageService deviceStorage, GateTransport gateTransport) {
+        this.socket = socket;
+        this.deviceStorage = deviceStorage;
+        this.gateTransport = gateTransport;
+        prepareReaderStream();
+        prepareWriterStream();
     }
 
     private void prepareReaderStream() {
@@ -88,7 +91,10 @@ public class GateSocketHandler implements Runnable {
         try {
             output.writeObject(command);
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.warn("network failure " ,e);
+            checker.stop();
+            gateTransport.onConnectionFailure(userId);
+            stop();
         }
     }
 
