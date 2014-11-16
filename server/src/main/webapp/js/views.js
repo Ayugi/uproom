@@ -1,8 +1,14 @@
 define([
-    'exports', 'backbone', 'hbs!../templates/device-item', 'hbs!../templates/account-menu',
+    'exports', 'backbone', 'hbs!../templates/switch', 'hbs!../templates/account-menu',
     'hbs!../templates/auth', 'hbs!../templates/devices-list', 'hbs!../templates/sidebar', 'hbs!../templates/dimmer',
     'handlebars'
-], function (exports, Backbone, DeviceTpl, AccountMenuTpl, AuthTpl, DevicesListTpl, SidebarTpl, DimmerTpl) {
+], function (exports, Backbone, SwitchTpl, AccountMenuTpl, AuthTpl, DevicesListTpl, SidebarTpl, DimmerTpl) {
+    var deviceTypesToTemplates = {
+        MultilevelSwitch: DimmerTpl,
+        BinarySwitch: SwitchTpl,
+        BinarySensor: "senson_binary",
+        MultilevelSensor: "sensor_analog"
+    }
     var BaseView = Backbone.View.extend({
         initialize: function (options) {
             Backbone.View.prototype.initialize.call(this, options);
@@ -134,13 +140,17 @@ define([
             },
 
             add: function (model) {
-                console.log("add: function (model) ",model);
-                this.addItem(_.last(this.layout.items = this.layout.items.concat((new this.ItemView({
-                    model: model, template_type: "dimmer" //dimmer switch
-                })).render())).el);
+                console.log("add: function (model) ", model);
+                var template = deviceTypesToTemplates[model.get("type")];
+                if (!template)
+                    return this;
+                this.addItem(_.last(this.layout.items = this.layout.items.concat((
+                    new this.ItemView({
+                            model: model, template: template }
+                    )).render())).el);
 
-                $('#slider'+model.id).slider({
-                    formatter: function(value) {
+                $('#slider' + model.id).slider({
+                    formatter: function (value) {
                         return 'Current value: ' + value;
                     }
                 });
@@ -201,8 +211,7 @@ define([
 
                 initialize: function (options) {
                     Backbone.View.prototype.initialize.call(this, options);
-                    console.log('template_' + options.template_type, this['template_' + options.template_type]);
-                    this.template = this['template_' + options.template_type];
+                    this.template = options.template;
                     // Catch model change event
                     this.model.on('change', this.render, this);
                 },
@@ -227,11 +236,7 @@ define([
                     return this;
                 },
 
-                tagName: 'tr',
-                //template: DeviceTpl
-                template_switch: DeviceTpl,
-
-                template_dimmer: DimmerTpl
+                tagName: 'tr'
             }),
 
             reset: function (collection) {
