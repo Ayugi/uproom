@@ -66,6 +66,8 @@ public class Device {
     }
 
     public String getName() {
+        if (null == name)
+            name = "not named";
         return name;
     }
 
