@@ -1,5 +1,6 @@
 package ru.uproom.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
 import ru.uproom.gate.transport.dto.DeviceDTO;
@@ -20,7 +21,7 @@ import java.util.Map;
         @NamedQuery(name = "userDeviceByZId", query = "select d from Device d where d.user.id = :userId " +
                 " AND d.zid = :zid")
 })
-@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonIgnoreProperties(ignoreUnknown = true,value = {""})
 public class Device {
     @Id
     @Column(name = "id")
@@ -32,6 +33,7 @@ public class Device {
     private String name;
     @ManyToOne
     @JoinColumn(name = "user")
+    @JsonIgnore
     private User user;
     @Column(name = "type")
     private DeviceType type;

@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import ru.uproom.domain.Device;
 import ru.uproom.domain.DeviceState;
 import ru.uproom.gate.transport.command.SetDeviceParameterCommand;
+import ru.uproom.gate.transport.dto.DeviceType;
 import ru.uproom.gate.transport.dto.parameters.DeviceParametersNames;
 import ru.uproom.prsistence.DeviceDao;
 
@@ -52,6 +53,9 @@ public class DeviceStorageServiceImpl implements DeviceStorageService {
             devices.add(test);
             addDevices(userId, Collections.singletonList(test));
         }
+        Device next = devices.iterator().next();
+        //if (null == next.getType())
+            next.setType(DeviceType.BinarySwitch);
         return devices;
     }
 
