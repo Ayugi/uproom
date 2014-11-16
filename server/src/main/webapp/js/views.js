@@ -1,7 +1,14 @@
 define([
-    'exports', 'backbone', 'hbs!../templates/device-item', 'hbs!../templates/account-menu',
-    'hbs!../templates/auth', 'hbs!../templates/devices-list', 'hbs!../templates/sidebar', 'handlebars'
-], function (exports, Backbone, DeviceTpl, AccountMenuTpl, AuthTpl, DevicesListTpl, SidebarTpl) {
+    'exports', 'backbone', 'hbs!../templates/switch', 'hbs!../templates/account-menu',
+    'hbs!../templates/auth', 'hbs!../templates/devices-list', 'hbs!../templates/sidebar', 'hbs!../templates/dimmer',
+    'handlebars'
+], function (exports, Backbone, SwitchTpl, AccountMenuTpl, AuthTpl, DevicesListTpl, SidebarTpl, DimmerTpl) {
+    var deviceTypesToTemplates = {
+        MultilevelSwitch: DimmerTpl,
+        BinarySwitch: SwitchTpl,
+        BinarySensor: "senson_binary",
+        MultilevelSensor: "sensor_analog"
+    }
     var BaseView = Backbone.View.extend({
         initialize: function (options) {
             Backbone.View.prototype.initialize.call(this, options);
@@ -27,7 +34,7 @@ define([
                 this.$('[data-id=name]').html(user.name);
                 return this
             },
-            template: AccountMenuTpl,
+            template: AccountMenuTpl
         }),
 
         // Get username/password and pass to backend for validation
@@ -125,14 +132,28 @@ define([
             },
 
             sendAddDevice: function () {
-                    console.log("IN sendAddDevice");
-                    this.$.ajax("/devices/add");
+                console.log("IN sendAddDevice");
+                console.log("$=", $);
+                console.log("$.ajax=", $.ajax);
+
+                $.ajax(DEVICES_URL + "/add");
             },
 
             add: function (model) {
-                this.addItem(_.last(this.layout.items = this.layout.items.concat((new this.ItemView({
-                    model: model
-                })).render())).el);
+                console.log("add: function (model) ", model);
+                var template = deviceTypesToTemplates[model.get("type")];
+                if (!template)
+                    return this;
+                this.addItem(_.last(this.layout.items = this.layout.items.concat((
+                    new this.ItemView({
+                            model: model, template: template }
+                    )).render())).el);
+
+                $('#slider' + model.id).slider({
+                    formatter: function (value) {
+                        return 'Current value: ' + value;
+                    }
+                });
 
                 return this;
             },
@@ -154,7 +175,9 @@ define([
             ItemView: Backbone.View.extend({
 
                 events: {
-                    'click [data-id=switchCheck]': 'sendDevice'
+                    'click [data-id=switchCheck]': 'sendDevice',
+                    'slideStop [data-id=level]': 'sendLevel'
+
                 },
 
                 sendDevice: function () {
@@ -168,8 +191,8 @@ define([
 
                     model.switch();
 
-                    console.log("model.get(url)="+model.get("url"));
-                    console.log("model.url="+model.url);
+                    console.log("model.get(url)=" + model.get("url"));
+                    console.log("model.url=" + model.url);
 
 
                     model.save();
@@ -177,28 +200,43 @@ define([
 
                 },
 
+                sendLevel: function () {
+                    console.log("SEND LEVEL");
+                    var value = this.$('[data-id=level]').val();
+                    console.log(value);
+                    this.model.setLevel(value);
+                    this.model.save();
+                    console.log("LEVEL SENT");
+                },
 
                 initialize: function (options) {
                     Backbone.View.prototype.initialize.call(this, options);
-
+                    this.template = options.template;
                     // Catch model change event
                     this.model.on('change', this.render, this);
                 },
 
                 render: function () {
-                    console.log(" checked --- " + this.model.getState() == "On"?"checked":"")
+                    console.log(" checked --- " + this.model.getState() == "On" ? "checked" : "")
                     this.$el.html(this.template({
-                        state: this.model.getState() == "On"?"checked":"",
-                        title: this.model.getTitle()
+                        state: this.model.getState() == "On" ? "checked" : "",
+                        title: this.model.getTitle(),
+                        id: this.model.id,
+                        value: this.model.getLevel()
                     }));
 
                     this.$el.data('id', this.model.id);
 
+                    $('#slider' + this.model.id).slider({
+                        formatter: function (value) {
+                            return 'Current value: ' + value;
+                        }
+                    });
+
                     return this;
                 },
 
-                tagName: 'tr',
-                template: DeviceTpl
+                tagName: 'tr'
             }),
 
             reset: function (collection) {

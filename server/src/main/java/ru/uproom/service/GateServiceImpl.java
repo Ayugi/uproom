@@ -32,11 +32,17 @@ public class GateServiceImpl implements GateTransport {
     @Override
     public void sendCommand(Command command, int userId) {
         GateSocketHandler gateSocketHandler = activeSockets.get(userId);
-        if (null == gateSocketHandler){
+        if (null == gateSocketHandler) {
             LOG.error("gate offline for user " + userId);
             return;
         }
         gateSocketHandler.sendCommand(command);
+    }
+
+    @Override
+    public void onConnectionFailure(GateSocketHandler handler) {
+        if (activeSockets.get(handler.getUserId()) == handler)
+            activeSockets.remove(handler.getUserId());
     }
 
     @PostConstruct
@@ -44,7 +50,7 @@ public class GateServiceImpl implements GateTransport {
         LOG.info("INIT");
         try {
             ServerSocket serverSocket = new ServerSocket(port);
-            Thread listener = new Thread(new SocketListener(serverSocket));
+            Thread listener = new Thread(new SocketListener(serverSocket, this));
             listener.start();
         } catch (IOException e) {
             e.printStackTrace();
@@ -59,9 +65,11 @@ public class GateServiceImpl implements GateTransport {
 
         private ServerSocket serverSocket;
         private boolean running = true;
+        private GateTransport gateTransport;
 
-        private SocketListener(ServerSocket serverSocket) {
+        private SocketListener(ServerSocket serverSocket, GateTransport gateTransport) {
             this.serverSocket = serverSocket;
+            this.gateTransport = gateTransport;
         }
 
         public void stop() {
@@ -83,7 +91,7 @@ public class GateServiceImpl implements GateTransport {
         }
 
         private void handleConnection(Socket accept) throws IOException {
-            GateSocketHandler handler = new GateSocketHandler(accept, deviceStorage);
+            GateSocketHandler handler = new GateSocketHandler(accept, deviceStorage, gateTransport);
             int userId = handler.handshake();
             if (userId < 0) return;
             activeSockets.put(userId, handler);

@@ -2,7 +2,7 @@
     "name": "devices",
     "version": "0.0.0",
     "authors": [
-        "Artem Rudenko <gvidon@ottofeller.com>"
+        "Uproom Team"
     ],
     "license": "MIT",
     "private": true,
@@ -23,6 +23,7 @@
         "bootstrap-css": "2.3.2",
         "font-awesome-css": "~4.0.3",
         "requirejs-bower": "~2.1.15",
-        "require-handlebars-plugin": "~0.8.1"
+        "require-handlebars-plugin": "~0.8.1",
+        "seiyria-bootstrap-slider": "~4.0.8"
     }
 }

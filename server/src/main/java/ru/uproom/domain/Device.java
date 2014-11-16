@@ -1,5 +1,8 @@
 package ru.uproom.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonView;
 import ru.uproom.gate.transport.dto.DeviceDTO;
 import ru.uproom.gate.transport.dto.DeviceType;
 import ru.uproom.gate.transport.dto.parameters.DeviceParametersNames;
@@ -13,7 +16,12 @@ import java.util.Map;
  */
 @Entity
 @Table(name = "device")
-@NamedQuery(name = "userDevices", query = "select d from Device d where d.user = :user")
+@NamedQueries({
+        @NamedQuery(name = "userDevices", query = "select d from Device d where d.user = :user"),
+        @NamedQuery(name = "userDeviceByZId", query = "select d from Device d where d.user.id = :userId " +
+                " AND d.zid = :zid")
+})
+@JsonIgnoreProperties(ignoreUnknown = true,value = {""})
 public class Device {
     @Id
     @Column(name = "id")
@@ -25,6 +33,7 @@ public class Device {
     private String name;
     @ManyToOne
     @JoinColumn(name = "user")
+    @JsonIgnore
     private User user;
     @Column(name = "type")
     private DeviceType type;
@@ -44,8 +53,8 @@ public class Device {
         type = dto.getType();
     }
 
-    public DeviceDTO toDto (){
-        return new DeviceDTO(id,zid,type,new HashMap<>(parameters));
+    public DeviceDTO toDto() {
+        return new DeviceDTO(id, zid, type, new HashMap<>(parameters));
     }
 
     public int getId() {
@@ -111,4 +120,13 @@ public class Device {
             state = device.getState();
         parameters.putAll(device.getParameters());
     }
+
+    public void mergeByZId(Device device) {
+        if (0 != device.getId())
+            id = device.getZid();
+        if (null != device.getState())
+            state = device.getState();
+        parameters.putAll(device.getParameters());
+    }
+
 }

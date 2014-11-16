@@ -1,6 +1,4 @@
-package ru.uproom.gate.devices;
-
-import ru.uproom.gate.devices.zwave.ZWaveValue;
+package ru.uproom.gate.devices.zwave;
 
 /**
  * Created by osipenko on 17.08.14.

@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import ru.uproom.domain.Device;
 import ru.uproom.gate.transport.command.Command;
 import ru.uproom.gate.transport.command.HandshakeCommand;
+import ru.uproom.gate.transport.command.PingCommand;
 import ru.uproom.gate.transport.command.SendDeviceListCommand;
 import ru.uproom.gate.transport.dto.DeviceDTO;
 
@@ -26,10 +27,28 @@ public class GateSocketHandler implements Runnable {
     private int userId;
     private boolean stopped;
     private DeviceStorageService deviceStorage;
+    private GateTransport gateTransport;
 
-    public GateSocketHandler(Socket socket, DeviceStorageService deviceStorage) {
+    public long getLastPingInterval() {
+        return lastPingInterval;
+    }
+
+    public long getLastPingIssued() {
+        return lastPingIssued;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    private long lastPingInterval = -1;
+    private long lastPingIssued = -1;
+    private ConnectionChecker checker = new ConnectionChecker();
+
+    public GateSocketHandler(Socket socket, DeviceStorageService deviceStorage, GateTransport gateTransport) {
         this.socket = socket;
         this.deviceStorage = deviceStorage;
+        this.gateTransport = gateTransport;
         prepareReaderStream();
         prepareWriterStream();
     }
@@ -60,7 +79,9 @@ public class GateSocketHandler implements Runnable {
             }
             HandshakeCommand handshake = (HandshakeCommand) handshakeObj;
             userId = handshake.getGateId();
+            deviceStorage.onNewUser(userId);
             LOG.info("handshake successful userId " + userId);
+            new Thread(checker).start();
             return userId;
         } catch (IOException e) {
             throw new RuntimeException("Failed to receive handshake ", e);
@@ -74,7 +95,10 @@ public class GateSocketHandler implements Runnable {
         try {
             output.writeObject(command);
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.warn("network failure ", e);
+            checker.stop();
+            gateTransport.onConnectionFailure(this);
+            stop();
         }
     }
 
@@ -89,6 +113,13 @@ public class GateSocketHandler implements Runnable {
                 if (command instanceof SendDeviceListCommand)
                     deviceStorage.addDevices(userId,
                             transformDtosToDevices((SendDeviceListCommand) command));
+                if (command instanceof PingCommand){
+                    PingCommand ping = (PingCommand) command;
+                    lastPingInterval = System.currentTimeMillis()-ping.getIssued();
+                    lastPingIssued = -1;
+                    LOG.info("ping back " + lastPingInterval);
+                }
+
             } catch (IOException e) {
                 e.printStackTrace();
                 stopped = true;
@@ -108,5 +139,30 @@ public class GateSocketHandler implements Runnable {
 
     public void stop() {
         stopped = true;
+    }
+
+    private class ConnectionChecker implements Runnable{
+
+        private boolean stopped;
+
+        @Override
+        public void run() {
+            while (! stopped){
+                synchronized (this) {
+                    try {
+                        wait(5000);
+                    } catch (InterruptedException e) {
+                        LOG.error("unexpected interruption", e);
+                    }
+                }
+                sendCommand(new PingCommand());
+                lastPingIssued = System.currentTimeMillis();
+                LOG.info("ping issued");
+            }
+        }
+
+        public void stop(){
+            stopped = true;
+        }
     }
 }

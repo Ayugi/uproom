@@ -10,6 +10,7 @@ import ru.uproom.gate.notifications.zwave.NotificationWatcherImpl;
 import ru.uproom.gate.transport.command.Command;
 import ru.uproom.gate.transport.command.CommandType;
 
+import javax.annotation.PostConstruct;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -32,7 +33,6 @@ public class GateCommanderImpl implements GateCommander {
     private Map<CommandType, CommandHandler> commandHandlers =
             new EnumMap<CommandType, CommandHandler>(CommandType.class);
 
-    private boolean exit = false;
     @Autowired
     private GateDevicesSet home;
 
@@ -41,25 +41,40 @@ public class GateCommanderImpl implements GateCommander {
     //######    constructors
 
 
-    public GateCommanderImpl() {
-        prepareCommandHandlers();
+    @PostConstruct
+    private void prepareCommandHandlers() {
+
+        // todo : переделать с использованием варианта загрузки из jar-файла (пример: Пишем свой загрузчик JAVA-классов)
+        if (!getCommandHandlersFromPath())
+            getCommandHandlersFromJar();
+
+    }
+
+    private boolean getCommandHandlersFromPath() {
+
+        for (Class<?> handler : ClassesSearcher.getAnnotatedClasses(
+                CommandHandlerAnnotation.class
+        )) {
+            CommandHandlerAnnotation annotation =
+                    handler.getAnnotation(CommandHandlerAnnotation.class);
+            if (annotation == null) continue;
+            commandHandlers.put(
+                    annotation.value(),
+                    (CommandHandler) ClassesSearcher.instantiate(handler)
+            );
+        }
+
+        return commandHandlers.isEmpty();
+    }
+
+    private boolean getCommandHandlersFromJar() {
+
+        return commandHandlers.isEmpty();
     }
 
 
     //##############################################################################################################
     //######    getters / setters
-
-
-    //------------------------------------------------------------------------
-    //  sign to exit
-
-    public boolean isExit() {
-        return exit;
-    }
-
-    public void setExit(boolean exit) {
-        this.exit = exit;
-    }
 
 
     //------------------------------------------------------------------------
@@ -76,25 +91,6 @@ public class GateCommanderImpl implements GateCommander {
 
     //##############################################################################################################
     //######    methods-
-
-
-    //------------------------------------------------------------------------
-    //  command commands
-
-    private void prepareCommandHandlers() {
-        for (Class<?> handler : ClassesSearcher.getAnnotatedClasses(
-                "ru.uproom.gate.commands",
-                CommandHandlerAnnotation.class
-        )) {
-            CommandHandlerAnnotation annotation =
-                    handler.getAnnotation(CommandHandlerAnnotation.class);
-            if (annotation == null) continue;
-            commandHandlers.put(
-                    annotation.value(),
-                    (CommandHandler) ClassesSearcher.instantiate(handler)
-            );
-        }
-    }
 
 
     //------------------------------------------------------------------------

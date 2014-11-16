@@ -2,6 +2,7 @@ package ru.uproom.gate.notifications.zwave;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.zwave4j.Manager;
 import org.zwave4j.Notification;
 import org.zwave4j.NotificationType;
 import ru.uproom.gate.devices.GateDevicesSet;
@@ -21,8 +22,13 @@ public class NodeAddedNotificationHandler implements NotificationHandler {
 
         home.addGateDevice((int) notification.getNodeId());
 
-        LOG.debug("z-wave notification : {}; node ID : {}",
-                new Object[]{notification.getType(), notification.getNodeId()});
+        LOG.debug("z-wave notification : {}; node ID : {}; node type : {}",
+                new Object[]{
+                        notification.getType(),
+                        notification.getNodeId(),
+                        Manager.get().getNodeType(home.getHomeId(), notification.getNodeId())
+                }
+        );
 
         return true;
     }

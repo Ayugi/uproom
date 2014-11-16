@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
 /**
  * class with functionality of changing data with server
@@ -40,13 +41,8 @@ public class ServerTransportImpl implements ServerTransport {
     private int times = 0;
     @Value("${period_between_attempts}")
     private long periodBetweenAttempts = 0;
-    @Value("${period_connection_check}")
-    private long periodCheck = 0;
-    @Value("${period_connection_wait}")
-    private long periodWait = 0;
     @Value("${gateId}")
     private int gateId;
-
 
     private ServerTransportReader reader;
     private Thread threadReader;
@@ -165,10 +161,12 @@ public class ServerTransportImpl implements ServerTransport {
             socket = new Socket(this.host, this.port);
             output = new ObjectOutputStream(socket.getOutputStream());
             return true;
+        } catch (UnknownHostException e) {
+            LOG.error("[UnknownHostException] - " + e.getMessage());
         } catch (IOException e) {
-            LOG.error(e.getMessage());
-            return false;
+            LOG.error("[IOException] - " + e.getMessage());
         }
+        return false;
     }
 
 
@@ -179,9 +177,20 @@ public class ServerTransportImpl implements ServerTransport {
     public void sendCommand(Command command) {
         try {
             if (output != null) output.writeObject(command);
+            LOG.debug("Send command to server : " + command.getType().name());
         } catch (IOException e) {
             LOG.error(e.getMessage());
         }
+    }
+
+
+    //------------------------------------------------------------------------
+    //  restart connection from outside
+
+    @Override
+    public void restartLink() {
+        stop();
+        reader.setReaderWork(false);
     }
 
 
@@ -190,19 +199,25 @@ public class ServerTransportImpl implements ServerTransport {
 
     public class ServerTransportReader implements Runnable {
 
+        private boolean isReaderWork;
+
+        public void setReaderWork(boolean isReaderWork) {
+            this.isReaderWork = isReaderWork;
+        }
+
         @Override
         public void run() {
 
             // set connections
-            boolean work = open();
-            if (work) {
+            isReaderWork = open();
+            if (isReaderWork) {
                 sendCommand(new HandshakeCommand(gateId));
-                work = getInputStream();
+                isReaderWork = getInputStream();
             }
 
             // read commands
             Command command = null;
-            while (work) {
+            while (isReaderWork) {
                 LOG.debug("Waiting for next command from server");
 
                 // get next command
@@ -210,17 +225,17 @@ public class ServerTransportImpl implements ServerTransport {
                     if (input != null)
                         command = (Command) input.readObject();
                 } catch (IOException e) {
-                    work = false;
+                    isReaderWork = false;
                     LOG.error(e.getMessage());
                 } catch (ClassNotFoundException e) {
-                    work = false;
+                    isReaderWork = false;
                     LOG.error(e.getMessage());
                 }
 
                 if (command != null) {
                     LOG.debug("receive command : {}", command.getType().name());
                     if (commander != null) commander.execute(command);
-                } else work = false;
+                } else isReaderWork = false;
             }
 
             if (Thread.currentThread().isInterrupted()) return;

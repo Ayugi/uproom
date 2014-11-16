@@ -4,8 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.uproom.domain.Device;
 import ru.uproom.domain.DeviceState;
-import ru.uproom.gate.transport.command.SendDeviceListCommand;
 import ru.uproom.gate.transport.command.SetDeviceParameterCommand;
+import ru.uproom.gate.transport.dto.DeviceType;
 import ru.uproom.gate.transport.dto.parameters.DeviceParametersNames;
 import ru.uproom.prsistence.DeviceDao;
 
@@ -28,7 +28,7 @@ public class DeviceStorageServiceImpl implements DeviceStorageService {
     public void onNewUser(int userId) {
         if (userStorage.containsKey(userId))
             return;
-        UserDeviceStorage storage = new UserDeviceStorage(deviceDao);
+        UserDeviceStorage storage = new UserDeviceStorage(deviceDao, userId);
         userStorage.put(userId, storage);
         storage.addDevices(deviceDao.fetchUserDevices(userId));
     }
@@ -61,10 +61,16 @@ public class DeviceStorageServiceImpl implements DeviceStorageService {
         Device stored = userStorage.get(userId).getDeviceById(device.getId());
         if (!stored.getName().equals(device.getName())) {
             stored.setName(device.getName());
-            deviceDao.saveDevice(stored);
+            deviceDao.saveDevice(stored, userId);
         }
         if (null != device.getState())
             device.getParameters().put(DeviceParametersNames.State, device.getState().name());
+        if (device.getParameters().containsKey(DeviceParametersNames.State))
+            device.getParameters().put(DeviceParametersNames.Switch,
+                    "On".equals(device.getParameters().get(DeviceParametersNames.State))
+                            ? "true"
+                            : "false"
+            );
         if (handleParams(device, stored))
             gateTransport.sendCommand(new SetDeviceParameterCommand(stored.toDto()), userId);
 

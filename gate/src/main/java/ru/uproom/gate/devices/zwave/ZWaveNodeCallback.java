@@ -1,7 +1,6 @@
-package ru.uproom.gate.devices;
+package ru.uproom.gate.devices.zwave;
 
 import org.zwave4j.Notification;
-import ru.uproom.gate.devices.zwave.ZWaveNode;
 
 /**
  * Created by osipenko on 19.08.14.
