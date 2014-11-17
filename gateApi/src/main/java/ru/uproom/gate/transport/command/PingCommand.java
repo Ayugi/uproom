@@ -6,6 +6,7 @@ package ru.uproom.gate.transport.command;
  * Created by osipenko on 10.09.14.
  */
 public class PingCommand extends Command {
+    private static final long serialVersionUID = -8252608478060876864L;
     private long issued;
 
     public PingCommand() {
