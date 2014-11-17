@@ -69,6 +69,15 @@ public class DeviceDTO implements Serializable {
         return parameters;
     }
 
+    @Override
+    public String toString() {
+        return "DeviceDTO{" +
+                "id=" + id +
+                ", zId=" + zId +
+                ", type=" + type +
+                ", parameters=" + parameters +
+                '}';
+    }
 }
 
 
