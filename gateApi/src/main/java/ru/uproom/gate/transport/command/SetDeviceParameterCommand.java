@@ -17,4 +17,11 @@ public class SetDeviceParameterCommand extends Command {
     public DeviceDTO getDevice() {
         return device;
     }
+
+    @Override
+    public String toString() {
+        return "SetDeviceParameterCommand{" +
+                "device=" + device +
+                '}';
+    }
 }
