@@ -7,6 +7,8 @@ package ru.uproom.gate.transport.command;
  */
 public class AddModeOnCommand extends Command {
 
+    private static final long serialVersionUID = 6648138578201360144L;
+
     public AddModeOnCommand() {
         super(CommandType.AddModeOn);
     }

@@ -7,6 +7,7 @@ package ru.uproom.gate.transport.command;
  */
 public class GetDeviceListCommand extends Command {
 
+    private static final long serialVersionUID = -3301266621328124248L;
     private int gateId;
 
     public GetDeviceListCommand() {

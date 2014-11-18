@@ -1,0 +1,13 @@
+
+/* customize Slider */
+
+.slider.slider-horizontal {
+  width: 100px;
+  height: 20px;
+}
+
+/* customize Bootstrap */
+
+.u-block {
+border: none;
+}
