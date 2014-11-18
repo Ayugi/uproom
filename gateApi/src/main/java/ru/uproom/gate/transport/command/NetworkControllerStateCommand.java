@@ -8,6 +8,7 @@ import ru.uproom.gate.transport.dto.parameters.DeviceStateEnum;
  * Time: 16:10
  */
 public class NetworkControllerStateCommand extends Command {
+    private static final long serialVersionUID = -6578947392045447679L;
     private DeviceStateEnum state;
 
     public NetworkControllerStateCommand(DeviceStateEnum state) {
