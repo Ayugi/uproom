@@ -7,6 +7,7 @@ import ru.uproom.gate.transport.dto.DeviceDTO;
  */
 public class SetDeviceParameterCommand extends Command {
 
+    private static final long serialVersionUID = -1274353867412672286L;
     private DeviceDTO device;
 
     public SetDeviceParameterCommand(DeviceDTO device) {

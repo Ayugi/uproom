@@ -7,6 +7,8 @@ package ru.uproom.gate.transport.command;
  */
 public class CancelCommand extends Command {
 
+    private static final long serialVersionUID = 6835831035960920159L;
+
     public CancelCommand() {
         super(CommandType.Cancel);
     }
