@@ -155,6 +155,16 @@ define([
                     }
                 });
 
+                function onEdit(response, newValue){
+                    model.setName(newValue)
+                    model.save();
+                }
+
+                $('#devicename' + model.id).editable({
+                    success: onEdit
+                });
+
+
                 return this;
             },
 
@@ -176,8 +186,7 @@ define([
 
                 events: {
                     'click [data-id=switchCheck]': 'sendDevice',
-                    'slideStop [data-id=level]': 'sendLevel'
-
+                    'slideStop [data-id=level]': 'sendLevel',
                 },
 
                 sendDevice: function () {
@@ -217,20 +226,33 @@ define([
                 },
 
                 render: function () {
-                    console.log(" checked --- " + this.model.getState() == "On" ? "checked" : "")
+                    var model = this.model;
+                    console.log(" checked --- " + model.getState() == "On" ? "checked" : "")
                     this.$el.html(this.template({
-                        state: this.model.getState() == "On" ? "checked" : "",
-                        title: this.model.getTitle(),
-                        id: this.model.id,
-                        value: this.model.getLevel()
+                        state: model.getState() == "On" ? "checked" : "",
+                        name: model.getName(),
+                        id: model.id,
+                        value: model.getLevel(),
+                        zid: model.getZId()
                     }));
 
-                    this.$el.data('id', this.model.id);
+                    this.$el.data('id', model.id);
 
-                    $('#slider' + this.model.id).slider({
+                    $('#slider' + model.id).slider({
                         formatter: function (value) {
                             return 'Current value: ' + value;
                         }
+                    });
+
+
+
+                    function onEdit(response, newValue){
+                        model.setName(newValue)
+                        model.save();
+                    }
+
+                    $('#devicename' + model.id).editable({
+                        success: onEdit
                     });
 
                     return this;
