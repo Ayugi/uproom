@@ -71,6 +71,12 @@ define(['exports', 'backbone'], function (exports, Backbone) {
                 p = {};
                 this.set("parameters", p);
             }
+            if (level > 0 && !this.getStateFlag())
+                this.setState("On")
+
+            if (level == 0 && this.getStateFlag())
+                this.setState("Off")
+
             p.Level = level;
         },
 
