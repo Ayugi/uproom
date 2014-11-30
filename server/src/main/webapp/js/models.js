@@ -1,8 +1,13 @@
 define(['exports', 'backbone'], function (exports, Backbone) {
     exports.DeviceModel = Backbone.Model.extend({
-        getTitle: function () {
-            console.log("getTitle");
-            return '*' + this.get('name') + "(" + this.get('zid') + ")"
+        getName: function () {
+            return this.get('name');
+        },
+        setName: function (name) {
+            this.set('name', name);
+        },
+        getZId: function(){
+            return this.get('zid');
         },
         switch: function () {
             console.log("switch: function () {");
@@ -22,7 +27,7 @@ define(['exports', 'backbone'], function (exports, Backbone) {
 //            console.log("set " +  this.set );
 
             var st = this.getState() == "On" ? "Off" : "On";
-            if ("Off" == st){
+            if ("Off" == st) {
                 this.set("levelBackup", p.Level)
                 p.Level = 0;
             }
@@ -66,6 +71,12 @@ define(['exports', 'backbone'], function (exports, Backbone) {
                 p = {};
                 this.set("parameters", p);
             }
+            if (level > 0 && !this.getStateFlag())
+                this.setState("On")
+
+            if (level == 0 && this.getStateFlag())
+                this.setState("Off")
+
             p.Level = level;
         },
 
