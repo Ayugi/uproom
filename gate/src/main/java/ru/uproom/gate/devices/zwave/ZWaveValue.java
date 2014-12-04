@@ -23,6 +23,7 @@ public class ZWaveValue {
     private int id;
     private ValueId valueId;
     private DeviceParametersNames valueName;
+    private boolean readOnly;
 
 
     //=============================================================================================================
@@ -33,6 +34,7 @@ public class ZWaveValue {
         this.valueId = valueId;
         this.id = ZWaveValueIndexFactory.createIndex(valueId);
         this.valueName = DeviceParametersNames.byZWaveCode(this.id);
+        this.readOnly = Manager.get().isValueReadOnly(valueId);
     }
 
 
@@ -132,6 +134,9 @@ public class ZWaveValue {
     //  set parameter value as string
 
     public boolean setValue(String value) {
+
+        if (this.readOnly) return false;
+        if (getValueAsString().equalsIgnoreCase(value)) return false;
 
         if (valueName == DeviceParametersNames.Level) {
             // range of level are number 0-99 and 255

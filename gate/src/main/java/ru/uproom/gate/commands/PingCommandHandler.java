@@ -21,8 +21,6 @@ public class PingCommandHandler implements CommandHandler {
 
         home.ping();
 
-        LOG.debug("Receive command {}", command.getType());
-
         return true;
     }
 

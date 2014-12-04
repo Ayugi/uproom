@@ -368,6 +368,12 @@ public class ZWaveHome implements GateDevicesSet {
         }
 
         public void setWatchDogOn(boolean isWatchDogOn) {
+            // debug information
+            if (isWatchDogOn && !this.isWatchDogOn)
+                LOG.info("gate have a ping command from server - LINK SET ON");
+            else if (!isWatchDogOn && this.isWatchDogOn)
+                LOG.error("gate have not a ping command from server - LINK SET OFF");
+            // set WatchDog flag
             this.isWatchDogOn = isWatchDogOn;
         }
 
@@ -378,7 +384,7 @@ public class ZWaveHome implements GateDevicesSet {
 
             while (watchDogWork) {
                 if (isWatchDogOn && watchDogCounter == watchDogCounterPrevious) {
-                    isWatchDogOn = false;
+                    setWatchDogOn(false);
                     transport.restartLink();
                 }
                 watchDogCounterPrevious = watchDogCounter;
