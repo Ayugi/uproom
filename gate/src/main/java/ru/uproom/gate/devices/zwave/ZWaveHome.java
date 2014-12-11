@@ -347,7 +347,8 @@ public class ZWaveHome implements GateDevicesSet {
         @Override
         public void run() {
             Manager.get().addDriver(zWaveStick);
-            while (!isFailed() && !Thread.currentThread().isInterrupted()) DelayTimer.sleep(100);
+            while (!isFailed() && !Thread.currentThread().isInterrupted())
+                DelayTimer.sleep(100);
             Manager.get().removeDriver(zWaveStick);
             DelayTimer.sleep(5000);
             startDriver();
