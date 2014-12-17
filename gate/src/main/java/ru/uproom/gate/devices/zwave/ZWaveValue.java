@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.zwave4j.Manager;
 import org.zwave4j.ValueId;
 import ru.uproom.gate.notifications.zwave.NotificationWatcherImpl;
+import ru.uproom.gate.transport.dto.parameters.DeviceParametersNames;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -21,6 +22,8 @@ public class ZWaveValue {
 
     private int id;
     private ValueId valueId;
+    private DeviceParametersNames valueName;
+    private boolean readOnly;
 
 
     //=============================================================================================================
@@ -30,6 +33,8 @@ public class ZWaveValue {
     public ZWaveValue(ValueId valueId) {
         this.valueId = valueId;
         this.id = ZWaveValueIndexFactory.createIndex(valueId);
+        this.valueName = DeviceParametersNames.byZWaveCode(this.id);
+        this.readOnly = Manager.get().isValueReadOnly(valueId);
     }
 
 
@@ -129,6 +134,17 @@ public class ZWaveValue {
     //  set parameter value as string
 
     public boolean setValue(String value) {
+
+        if (this.readOnly) return false;
+        if (getValueAsString().equalsIgnoreCase(value)) return false;
+
+        if (valueName == DeviceParametersNames.Level) {
+            // range of level are number 0-99 and 255
+            int iValue = Integer.parseInt(value);
+            if (iValue <= 0) value = "0";
+            else if (iValue >= 99) value = "99";
+        }
+
         LOG.debug(">>>> set value : " + this.toString() + " to value : " + value);
         return Manager.get().setValueAsString(valueId, value);
     }

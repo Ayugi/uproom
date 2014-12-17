@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import ru.uproom.gate.commands.GateCommander;
 import ru.uproom.gate.domain.DelayTimer;
 import ru.uproom.gate.transport.command.Command;
+import ru.uproom.gate.transport.command.CommandType;
 import ru.uproom.gate.transport.command.HandshakeCommand;
 
 import javax.annotation.PostConstruct;
@@ -177,7 +178,13 @@ public class ServerTransportImpl implements ServerTransport {
     public void sendCommand(Command command) {
         try {
             if (output != null) output.writeObject(command);
-            LOG.debug("Send command to server : " + command.getType().name());
+//            if (!(command instanceof PingCommand)) {
+            if (command instanceof HandshakeCommand) {
+                LOG.debug("Done handshake with server ( Gate ID = " +
+                        ((HandshakeCommand) command).getGateId() + " )");
+            } else
+                LOG.debug("Send command to server : " + command.getType().name());
+//            }
         } catch (IOException e) {
             LOG.error(e.getMessage());
         }
@@ -189,6 +196,7 @@ public class ServerTransportImpl implements ServerTransport {
 
     @Override
     public void restartLink() {
+        LOG.error("link with server must be restarted");
         stop();
         reader.setReaderWork(false);
     }
@@ -218,22 +226,19 @@ public class ServerTransportImpl implements ServerTransport {
             // read commands
             Command command = null;
             while (isReaderWork) {
-                LOG.debug("Waiting for next command from server");
 
                 // get next command
                 try {
                     if (input != null)
                         command = (Command) input.readObject();
-                } catch (IOException e) {
-                    isReaderWork = false;
-                    LOG.error(e.getMessage());
-                } catch (ClassNotFoundException e) {
+                } catch (IOException | ClassNotFoundException e) {
                     isReaderWork = false;
                     LOG.error(e.getMessage());
                 }
 
                 if (command != null) {
-                    LOG.debug("receive command : {}", command.getType().name());
+                    if (command.getType() != CommandType.Ping)
+                        LOG.debug("receive command : {}", command.getType().name());
                     if (commander != null) commander.execute(command);
                 } else isReaderWork = false;
             }

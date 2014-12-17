@@ -19,9 +19,7 @@ public class PingCommandHandler implements CommandHandler {
     @Override
     public boolean execute(Command command, GateDevicesSet home) {
 
-        home.ping();
-
-        LOG.debug("Receive command {}", command.getType());
+        home.ping(command);
 
         return true;
     }
