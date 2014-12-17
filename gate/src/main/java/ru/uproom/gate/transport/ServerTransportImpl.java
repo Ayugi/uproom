@@ -179,11 +179,11 @@ public class ServerTransportImpl implements ServerTransport {
         try {
             if (output != null) output.writeObject(command);
 //            if (!(command instanceof PingCommand)) {
-                if (command instanceof HandshakeCommand) {
-                    LOG.debug("Done handshake with server ( Gate ID = " +
-                            ((HandshakeCommand) command).getGateId() + " )");
-                } else
-                    LOG.debug("Send command to server : " + command.getType().name());
+            if (command instanceof HandshakeCommand) {
+                LOG.debug("Done handshake with server ( Gate ID = " +
+                        ((HandshakeCommand) command).getGateId() + " )");
+            } else
+                LOG.debug("Send command to server : " + command.getType().name());
 //            }
         } catch (IOException e) {
             LOG.error(e.getMessage());
