@@ -9,10 +9,7 @@ import org.zwave4j.*;
 import ru.uproom.gate.devices.GateDevicesSet;
 import ru.uproom.gate.domain.DelayTimer;
 import ru.uproom.gate.transport.ServerTransport;
-import ru.uproom.gate.transport.command.NetworkControllerStateCommand;
-import ru.uproom.gate.transport.command.PingCommand;
-import ru.uproom.gate.transport.command.SendDeviceListCommand;
-import ru.uproom.gate.transport.command.SetDeviceParameterCommand;
+import ru.uproom.gate.transport.command.*;
 import ru.uproom.gate.transport.dto.DeviceDTO;
 import ru.uproom.gate.transport.dto.parameters.DeviceParametersNames;
 import ru.uproom.gate.transport.dto.parameters.DeviceStateEnum;
@@ -290,6 +287,9 @@ public class ZWaveHome implements GateDevicesSet {
         for (Map.Entry<Integer, ZWaveNode> entry : nodes.entrySet()) {
             devices.add(entry.getValue().getDeviceDTO());
         }
+        String logging = "";
+        for (DeviceDTO dto : devices) logging += ("\n\t" + dto.toString());
+        LOG.debug("SendDeviceListCommand inner : {}", logging);
         transport.sendCommand(new SendDeviceListCommand(devices));
         return devices;
     }
@@ -319,12 +319,12 @@ public class ZWaveHome implements GateDevicesSet {
     //  gate receive ping from server
 
     @Override
-    public void ping() {
+    public void ping(Command pingCommand) {
 
         watchdog.setWatchDogOn(true);
         watchDogCounter++;
         if (watchDogCounter > 99999) watchDogCounter = 0;
-        transport.sendCommand(new PingCommand());
+        transport.sendCommand(pingCommand != null ? pingCommand : new PingCommand());
 
     }
 

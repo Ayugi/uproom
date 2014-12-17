@@ -10,7 +10,6 @@ import ru.uproom.gate.domain.DelayTimer;
 import ru.uproom.gate.transport.command.Command;
 import ru.uproom.gate.transport.command.CommandType;
 import ru.uproom.gate.transport.command.HandshakeCommand;
-import ru.uproom.gate.transport.command.PingCommand;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -179,13 +178,13 @@ public class ServerTransportImpl implements ServerTransport {
     public void sendCommand(Command command) {
         try {
             if (output != null) output.writeObject(command);
-            if (!(command instanceof PingCommand)) {
+//            if (!(command instanceof PingCommand)) {
                 if (command instanceof HandshakeCommand) {
                     LOG.debug("Done handshake with server ( Gate ID = " +
                             ((HandshakeCommand) command).getGateId() + " )");
                 } else
                     LOG.debug("Send command to server : " + command.getType().name());
-            }
+//            }
         } catch (IOException e) {
             LOG.error(e.getMessage());
         }

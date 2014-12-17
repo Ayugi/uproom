@@ -96,10 +96,9 @@ public class ZWaveNode {
         if ((int) Manager.get().getControllerNodeId(home.getHomeId()) == zId)
             params.put(DeviceParametersNames.ServerDeviceType, DeviceType.Controller);
         else {
-            params.put(
-                    DeviceParametersNames.ServerDeviceType,
-                    DeviceType.byStringKey(Manager.get().getNodeType(home.getHomeId(), (short) zId))
-            );
+            DeviceType type = DeviceType.byStringKey(Manager.get().getNodeType(home.getHomeId(), (short) zId));
+            //if ()
+            params.put(DeviceParametersNames.ServerDeviceType, type);
         }
     }
 

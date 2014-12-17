@@ -84,6 +84,11 @@ public enum DeviceType {
             "Multilevel Toggle Remote Switch"
     ),
 
+    // not from library, additional type
+    Rgbw(
+            "Multilevel Power RGBW Switch"
+    ),
+
     // Z-IP System
     ZipGateway(
             "Z/IP Gateway",
