@@ -1,5 +1,7 @@
 package ru.uproom.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.uproom.domain.Device;
@@ -16,6 +18,7 @@ import java.util.*;
  */
 @Service
 public class DeviceStorageServiceImpl implements DeviceStorageService {
+    private static final Logger LOG = LoggerFactory.getLogger(GateSocketHandler.class);
     private Map<Integer, UserDeviceStorage> userStorage = new HashMap<>();
 
     @Autowired
@@ -35,6 +38,7 @@ public class DeviceStorageServiceImpl implements DeviceStorageService {
 
     @Override
     public void addDevices(int userId, List<Device> devices) {
+        LOG.info("addDevices userId " + userId + " devices " + devices);
         userStorage.get(userId).addDevices(devices);
     }
 
