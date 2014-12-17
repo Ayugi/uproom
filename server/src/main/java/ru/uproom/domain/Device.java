@@ -131,4 +131,16 @@ public class Device {
         parameters.putAll(device.getParameters());
     }
 
+    @Override
+    public String toString() {
+        return "Device{" +
+                "id=" + id +
+                ", zid=" + zid +
+                ", name='" + name + '\'' +
+                ", user=" + user +
+                ", type=" + type +
+                ", state=" + state +
+                ", parameters=" + parameters +
+                '}';
+    }
 }

@@ -134,6 +134,7 @@ public class GateSocketHandler implements Runnable {
         for (DeviceDTO dto : listCommand.getDevices()) {
             devices.add(new Device(dto));
         }
+        LOG.info("devices " + devices);
         return devices;
     }
 
