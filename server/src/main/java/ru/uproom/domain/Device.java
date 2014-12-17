@@ -21,7 +21,7 @@ import java.util.Map;
         @NamedQuery(name = "userDeviceByZId", query = "select d from Device d where d.user.id = :userId " +
                 " AND d.zid = :zid")
 })
-@JsonIgnoreProperties(ignoreUnknown = true,value = {""})
+@JsonIgnoreProperties(ignoreUnknown = true, value = {""})
 public class Device {
     @Id
     @Column(name = "id")
@@ -129,6 +129,8 @@ public class Device {
         if (null != device.getState())
             state = device.getState();
         parameters.putAll(device.getParameters());
+        if (null != device.getName())
+            name = device.getName();
     }
 
     @Override
