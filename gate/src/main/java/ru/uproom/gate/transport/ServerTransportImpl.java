@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.uproom.gate.commands.GateCommander;
+import ru.uproom.gate.domain.DelayTimer;
 import ru.uproom.gate.transport.command.Command;
 
 import javax.annotation.PostConstruct;
@@ -73,10 +74,10 @@ public class ServerTransportImpl implements ServerTransport {
 
         switch (linkId) {
             case 1:
-                transportUnits.put(linkId, new ServerTransportUnit(host, port, gateId, this, 2));
+                transportUnits.put(linkId, new ServerTransportUnit(host, port, gateId, this, linkId));
                 break;
             case 2:
-                transportUnits.put(linkId, new ServerTransportUnit("127.0.0.1", 8999, gateId, this, 1));
+                transportUnits.put(linkId, new ServerTransportUnit("127.0.0.1", 8999, gateId, this, linkId));
                 break;
             default:
                 return;
@@ -146,6 +147,7 @@ public class ServerTransportImpl implements ServerTransport {
 
         ServerTransportUnit unit = transportUnits.get(linkId);
         if (unit != null) unit.setWork(false);
+        DelayTimer.sleep(periodBetweenAttempts);
         init(linkId);
 
     }
