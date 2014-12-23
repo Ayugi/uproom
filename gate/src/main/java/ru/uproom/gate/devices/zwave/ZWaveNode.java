@@ -97,7 +97,8 @@ public class ZWaveNode {
             params.put(DeviceParametersNames.ServerDeviceType, DeviceType.Controller);
         else {
             DeviceType type = DeviceType.byStringKey(Manager.get().getNodeType(home.getHomeId(), (short) zId));
-            //if ()
+            if (Manager.get().getNodeProductName(home.getHomeId(), (short) zId).contains("RGBW"))
+                type = DeviceType.Rgbw;
             params.put(DeviceParametersNames.ServerDeviceType, type);
         }
     }

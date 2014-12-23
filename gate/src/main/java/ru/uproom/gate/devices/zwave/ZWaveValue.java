@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zwave4j.Manager;
 import org.zwave4j.ValueId;
+import ru.uproom.gate.domain.DelayTimer;
 import ru.uproom.gate.notifications.zwave.NotificationWatcherImpl;
 import ru.uproom.gate.transport.dto.parameters.DeviceParametersNames;
 
@@ -24,6 +25,9 @@ public class ZWaveValue {
     private ValueId valueId;
     private DeviceParametersNames valueName;
     private boolean readOnly;
+
+    private ZWaveValueSetLevel setLevel;
+    private Thread threadSetLevel;
 
 
     //=============================================================================================================
@@ -59,11 +63,11 @@ public class ZWaveValue {
 
 
     //=============================================================================================================
-    //======    methods
+    //======    inner classes
 
 
     //------------------------------------------------------------------------
-    //  get parameter value
+    //  change value "level" smoothing
 
     private Object getValue() {
         switch (valueId.getType()) {
@@ -107,8 +111,12 @@ public class ZWaveValue {
     }
 
 
+    //=============================================================================================================
+    //======    methods
+
+
     //------------------------------------------------------------------------
-    //  get parameter value as string
+    //  get parameter value
 
     public String getValueAsString() {
         Object obj = getValue();
@@ -117,7 +125,7 @@ public class ZWaveValue {
 
 
     //------------------------------------------------------------------------
-    //  parameter information as string
+    //  get parameter value as string
 
     @Override
     public String toString() {
@@ -131,21 +139,79 @@ public class ZWaveValue {
 
 
     //------------------------------------------------------------------------
-    //  set parameter value as string
+    //  parameter information as string
+
+    private boolean setLevelInit(String value) {
+
+        // stop previous instance
+        if (setLevel != null) setLevel.setWork(false);
+        // create new instance
+        setLevel = new ZWaveValueSetLevel(Integer.parseInt(value));
+        threadSetLevel = new Thread(setLevel);
+        threadSetLevel.start();
+
+        return true;
+    }
+
+
+    //------------------------------------------------------------------------
+    //  initialize method for smoothing set value "level"
 
     public boolean setValue(String value) {
 
         if (this.readOnly) return false;
         if (getValueAsString().equalsIgnoreCase(value)) return false;
 
+        boolean result = false;
+
         if (valueName == DeviceParametersNames.Level) {
             // range of level are number 0-99 and 255
             int iValue = Integer.parseInt(value);
             if (iValue <= 0) value = "0";
             else if (iValue >= 99) value = "99";
+            // smoothing set for level
+            result = setLevelInit(value);
+            LOG.debug(">>>> set level : " + this.toString() + " to value : " + value);
+
+        } else
+            result = Manager.get().setValueAsString(valueId, value);
+
+        return result;
+    }
+
+
+    //------------------------------------------------------------------------
+    //  set parameter value as string
+
+    public class ZWaveValueSetLevel implements Runnable {
+
+        private boolean work = true;
+        private int setLevelJitter = 2;
+        private int setLevelJitterTime = 100; //ms
+        private int level;
+
+        ZWaveValueSetLevel(int level) {
+            this.level = level;
         }
 
-        LOG.debug(">>>> set value : " + this.toString() + " to value : " + value);
-        return Manager.get().setValueAsString(valueId, value);
+        public void setWork(boolean work) {
+            this.work = work;
+        }
+
+        @Override
+        public void run() {
+
+            int value = Integer.parseInt(getValueAsString());
+            int multiplier = 1;
+            if (value > level) multiplier = -1;
+
+            while (work && (level - value) * multiplier > 0) {
+                Manager.get().setValueAsString(valueId, String.format("%d", value));
+                value += (setLevelJitter * multiplier);
+                DelayTimer.sleep(setLevelJitterTime);
+            }
+
+        }
+
     }
 }

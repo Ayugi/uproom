@@ -29,4 +29,9 @@ public class CancelCommandHandler implements CommandHandler {
         return true;
     }
 
+    @Override
+    public void stop() {
+
+    }
+
 }
