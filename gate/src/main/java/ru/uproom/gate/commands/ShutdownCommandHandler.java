@@ -16,4 +16,9 @@ public class ShutdownCommandHandler implements CommandHandler {
     public boolean execute(Command command, GateDevicesSet home) {
         return true;
     }
+
+    @Override
+    public void stop() {
+
+    }
 }

@@ -1,6 +1,6 @@
 package ru.uproom.gate.devices;
 
-import ru.uproom.gate.transport.command.Command;
+import ru.uproom.gate.transport.ServerTransport;
 import ru.uproom.gate.transport.dto.DeviceDTO;
 import ru.uproom.gate.transport.dto.parameters.DeviceParametersNames;
 import ru.uproom.gate.transport.dto.parameters.DeviceStateEnum;
@@ -44,6 +44,6 @@ public interface GateDevicesSet {
 
     public DeviceStateEnum getRequestedMode();
 
-    public void ping(Command pingCommand);
+    public ServerTransport getTransport();
 
 }
