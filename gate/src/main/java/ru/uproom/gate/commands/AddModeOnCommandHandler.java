@@ -29,4 +29,9 @@ public class AddModeOnCommandHandler implements CommandHandler {
         return true;
     }
 
+    @Override
+    public void stop() {
+
+    }
+
 }

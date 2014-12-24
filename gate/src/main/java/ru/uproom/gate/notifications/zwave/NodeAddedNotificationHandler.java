@@ -22,11 +22,19 @@ public class NodeAddedNotificationHandler implements NotificationHandler {
 
         home.addGateDevice((int) notification.getNodeId());
 
-        LOG.debug("z-wave notification : {}; node ID : {}; node type : {}",
+        LOG.debug("z-wave notification : {};" +
+                        "\n\tnode ID : {}; node type : {};" +
+                        "\n\tproduct ID : {}; product type : {}; product name : {};" +
+                        "\n\tmanufacturer ID : {}; manufacturer name : {}",
                 new Object[]{
                         notification.getType(),
                         notification.getNodeId(),
-                        Manager.get().getNodeType(home.getHomeId(), notification.getNodeId())
+                        Manager.get().getNodeType(home.getHomeId(), notification.getNodeId()),
+                        Manager.get().getNodeProductId(home.getHomeId(), notification.getNodeId()),
+                        Manager.get().getNodeProductType(home.getHomeId(), notification.getNodeId()),
+                        Manager.get().getNodeProductName(home.getHomeId(), notification.getNodeId()),
+                        Manager.get().getNodeManufacturerId(home.getHomeId(), notification.getNodeId()),
+                        Manager.get().getNodeManufacturerName(home.getHomeId(), notification.getNodeId())
                 }
         );
 

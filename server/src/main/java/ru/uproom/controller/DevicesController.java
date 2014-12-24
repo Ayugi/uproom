@@ -1,5 +1,7 @@
 package ru.uproom.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -27,11 +29,15 @@ public class DevicesController {
     @Autowired
     private GateTransport gateTransport;
 
+    private static final Logger LOG = LoggerFactory.getLogger(DevicesController.class);
+
     private SessionHolder sessionHolder = SessionHolderImpl.getInstance();
 
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
     public Collection<Device> listDevices() {
+        LOG.info("listDevices");
+        LOG.info("storageService " + storageService + " sessionHolder.currentUser() " + sessionHolder.currentUser());
         return storageService.fetchDevices(sessionHolder.currentUser().getId());
     }
 

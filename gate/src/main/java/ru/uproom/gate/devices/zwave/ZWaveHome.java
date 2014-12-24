@@ -56,12 +56,6 @@ public class ZWaveHome implements GateDevicesSet {
 
     private DeviceStateEnum requestState;
 
-    private ServerTransportWatchDog watchdog;
-    private Thread threadWatchdog;
-    private int watchDogCounter;
-    @Value("${period_wait_ping}")
-    private int periodWaitPing;
-
 
     //##############################################################################################################
     //######    constructors
@@ -93,12 +87,12 @@ public class ZWaveHome implements GateDevicesSet {
         Manager.create();
         Manager.get().addWatcher(watcher, this);
         startDriver();
+
     }
 
     @PreDestroy
     public void close() {
         threadDriver.interrupt();
-        watchdog.setWatchDogWork(false);
         Manager.get().removeWatcher(watcher, this);
         Manager.get().removeDriver(zWaveStick);
         Manager.destroy();
@@ -228,6 +222,15 @@ public class ZWaveHome implements GateDevicesSet {
 
 
     //------------------------------------------------------------------------
+    // give transport object for all interested
+
+    @Override
+    public ServerTransport getTransport() {
+        return transport;
+    }
+
+
+    //------------------------------------------------------------------------
     // state of Z-Wave Network Controller
 
     @Override
@@ -268,16 +271,6 @@ public class ZWaveHome implements GateDevicesSet {
     //##############################################################################################################
     //######    inner classes
 
-    private void startDriver() {
-        ZWaveHomeDriver driver = new ZWaveHomeDriver();
-        threadDriver = new Thread(driver);
-        threadDriver.start();
-    }
-
-
-    //##############################################################################################################
-    //######    methods
-
 
     //------------------------------------------------------------------------
     // create Z-Wave driver and keep it work
@@ -287,13 +280,20 @@ public class ZWaveHome implements GateDevicesSet {
         for (Map.Entry<Integer, ZWaveNode> entry : nodes.entrySet()) {
             devices.add(entry.getValue().getDeviceDTO());
         }
+        String logging = "";
+        for (DeviceDTO dto : devices) logging += ("\n\t" + dto.toString());
+        LOG.debug("SendDeviceListCommand devices : {}", logging);
         transport.sendCommand(new SendDeviceListCommand(devices));
         return devices;
     }
 
 
+    //##############################################################################################################
+    //######    methods
+
+
     //------------------------------------------------------------------------
-    //  find node by ServerID
+    // get device list for data transfer to server
 
     @Override
     public void setDeviceDTO(DeviceDTO dto) {
@@ -304,68 +304,37 @@ public class ZWaveHome implements GateDevicesSet {
 
 
     //------------------------------------------------------------------------
-    //  create device list as list of serializable objects
+    //  find node by ServerID
 
     @Override
     public String toString() {
         return String.format("{\"id\":\"%d\"", homeId);
     }
 
-    @Override
-    public void ping() {
 
-        watchdog.setWatchDogOn(true);
-        watchDogCounter++;
-        if (watchDogCounter > 99999) watchDogCounter = 0;
+    //------------------------------------------------------------------------
+    //  create device list as list of serializable objects
 
+    private void startDriver() {
+        ZWaveHomeDriver driver = new ZWaveHomeDriver();
+        threadDriver = new Thread(driver);
+        threadDriver.start();
     }
 
 
     //------------------------------------------------------------------------
-    //  gate receive ping from server
+    //  (re)start z-wave library driver
 
     public class ZWaveHomeDriver implements Runnable {
 
         @Override
         public void run() {
             Manager.get().addDriver(zWaveStick);
-            while (!isFailed() && !Thread.currentThread().isInterrupted()) DelayTimer.sleep(100);
+            while (!isFailed() && !Thread.currentThread().isInterrupted())
+                DelayTimer.sleep(100);
             Manager.get().removeDriver(zWaveStick);
             DelayTimer.sleep(5000);
             startDriver();
-        }
-    }
-
-
-    //------------------------------------------------------------------------
-    //  send command from gate to server
-
-    public class ServerTransportWatchDog implements Runnable {
-
-        private boolean watchDogWork = true;
-        private boolean isWatchDogOn;
-
-        public void setWatchDogWork(boolean watchDogWork) {
-            this.watchDogWork = watchDogWork;
-        }
-
-        public void setWatchDogOn(boolean isWatchDogOn) {
-            this.isWatchDogOn = isWatchDogOn;
-        }
-
-        @Override
-        public void run() {
-
-            int watchDogCounterPrevious = watchDogCounter;
-
-            while (watchDogWork) {
-                if (isWatchDogOn && watchDogCounter == watchDogCounterPrevious) {
-                    isWatchDogOn = false;
-                    transport.restartLink();
-                }
-                DelayTimer.sleep(periodWaitPing);
-            }
-
         }
     }
 
