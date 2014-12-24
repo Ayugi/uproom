@@ -8,6 +8,7 @@ package ru.uproom.gate.transport.command;
 public class PingCommand extends Command {
     private static final long serialVersionUID = -8252608478060876864L;
     private long issued;
+    private int linkId;
 
     public PingCommand() {
         super(CommandType.Ping);
@@ -16,5 +17,13 @@ public class PingCommand extends Command {
 
     public long getIssued() {
         return issued;
+    }
+
+    public int getLinkId() {
+        return linkId;
+    }
+
+    public void setLinkId(int linkId) {
+        this.linkId = linkId;
     }
 }

@@ -29,4 +29,9 @@ public class RemoveModeOnCommandHandler implements CommandHandler {
         return true;
     }
 
+    @Override
+    public void stop() {
+
+    }
+
 }
