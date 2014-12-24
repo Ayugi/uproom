@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import ru.uproom.domain.Device;
 import ru.uproom.domain.DeviceState;
+import ru.uproom.domain.User;
 import ru.uproom.gate.transport.command.AddModeOnCommand;
 import ru.uproom.gate.transport.command.CancelCommand;
 import ru.uproom.gate.transport.command.RemoveModeOnCommand;
@@ -33,7 +34,10 @@ public class DevicesController {
     @RequestMapping(method = RequestMethod.GET, value = "status")
     @ResponseBody
     public GateTransportStatus gateStatus(){
-        GateSocketHandler handler = gateTransport.getHandler(sessionHolder.currentUser().getId());
+        User user = sessionHolder.currentUser();
+        if (null == user)
+            return null;
+        GateSocketHandler handler = gateTransport.getHandler(user.getId());
         if (null == handler)
             return GateTransportStatus.Red;
         return handler.getStatus();

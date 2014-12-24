@@ -10,17 +10,18 @@ define([
         MultilevelSensor: "sensor_analog"
     }
     var BaseView = Backbone.View.extend({
-        initialize: function (options) {
-            Backbone.View.prototype.initialize.call(this, options);
-            this.app = options.app;
-            this.layout = {};
-        },
+            initialize: function (options) {
+                Backbone.View.prototype.initialize.call(this, options);
+                this.app = options.app;
+                this.layout = {};
+            },
 
-        render: function () {
-            this.$el.html(this.template());
-            return this
-        }
-    });
+            render: function () {
+                this.$el.html(this.template());
+                return this
+            }
+        })
+        ;
 
     _.extend(exports, {
         AccountMenuView: BaseView.extend({
@@ -121,6 +122,7 @@ define([
                 this.layout.auth = (new exports.AuthView({el: '#auth'})).render();
                 this.layout.list = (new exports.ListView({el: '#list'})).render();
                 this.layout.sidebar = (new exports.SidebarView({el: '#sidebar'})).render();
+
                 return this;
             }
         }),
@@ -137,6 +139,17 @@ define([
                 console.log("$.ajax=", $.ajax);
 
                 $.ajax(DEVICES_URL + "/add");
+
+                $("#gateStatusSpan")[0].innerHTML = "test";
+                $.ajax({
+                    type: "GET",
+                    url: "http://localhost:8080/rest/devices/status",
+
+                    success: function (data) {
+                        $("#gateStatusSpan")[0].innerHTML = data;
+                    }
+                });
+
             },
 
             add: function (model) {
@@ -155,7 +168,7 @@ define([
                     }
                 });
 
-                function onEdit(response, newValue){
+                function onEdit(response, newValue) {
                     model.setName(newValue)
                     model.save();
                 }
@@ -186,7 +199,7 @@ define([
 
                 events: {
                     'click [data-id=switchCheck]': 'sendDevice',
-                    'slideStop [data-id=level]': 'sendLevel',
+                    'slideStop [data-id=level]': 'sendLevel'
                 },
 
                 sendDevice: function () {
@@ -245,8 +258,7 @@ define([
                     });
 
 
-
-                    function onEdit(response, newValue){
+                    function onEdit(response, newValue) {
                         model.setName(newValue)
                         model.save();
                     }
