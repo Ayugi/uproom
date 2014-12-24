@@ -17,4 +17,9 @@ public class GetDeviceListCommandHandler implements CommandHandler {
         home.getDeviceDTOList();
         return true;
     }
+
+    @Override
+    public void stop() {
+
+    }
 }

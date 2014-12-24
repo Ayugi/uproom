@@ -9,7 +9,9 @@ import org.zwave4j.*;
 import ru.uproom.gate.devices.GateDevicesSet;
 import ru.uproom.gate.domain.DelayTimer;
 import ru.uproom.gate.transport.ServerTransport;
-import ru.uproom.gate.transport.command.*;
+import ru.uproom.gate.transport.command.NetworkControllerStateCommand;
+import ru.uproom.gate.transport.command.SendDeviceListCommand;
+import ru.uproom.gate.transport.command.SetDeviceParameterCommand;
 import ru.uproom.gate.transport.dto.DeviceDTO;
 import ru.uproom.gate.transport.dto.parameters.DeviceParametersNames;
 import ru.uproom.gate.transport.dto.parameters.DeviceStateEnum;
@@ -54,12 +56,6 @@ public class ZWaveHome implements GateDevicesSet {
 
     private DeviceStateEnum requestState;
 
-    private ServerTransportWatchDog watchdog;
-    private Thread threadWatchdog;
-    private int watchDogCounter;
-    @Value("${period_wait_ping}")
-    private int periodWaitPing;
-
 
     //##############################################################################################################
     //######    constructors
@@ -92,13 +88,11 @@ public class ZWaveHome implements GateDevicesSet {
         Manager.get().addWatcher(watcher, this);
         startDriver();
 
-        startWatchDog();
     }
 
     @PreDestroy
     public void close() {
         threadDriver.interrupt();
-        watchdog.setWatchDogWork(false);
         Manager.get().removeWatcher(watcher, this);
         Manager.get().removeDriver(zWaveStick);
         Manager.destroy();
@@ -228,6 +222,15 @@ public class ZWaveHome implements GateDevicesSet {
 
 
     //------------------------------------------------------------------------
+    // give transport object for all interested
+
+    @Override
+    public ServerTransport getTransport() {
+        return transport;
+    }
+
+
+    //------------------------------------------------------------------------
     // state of Z-Wave Network Controller
 
     @Override
@@ -268,16 +271,6 @@ public class ZWaveHome implements GateDevicesSet {
     //##############################################################################################################
     //######    inner classes
 
-    private void startDriver() {
-        ZWaveHomeDriver driver = new ZWaveHomeDriver();
-        threadDriver = new Thread(driver);
-        threadDriver.start();
-    }
-
-
-    //##############################################################################################################
-    //######    methods
-
 
     //------------------------------------------------------------------------
     // create Z-Wave driver and keep it work
@@ -289,14 +282,18 @@ public class ZWaveHome implements GateDevicesSet {
         }
         String logging = "";
         for (DeviceDTO dto : devices) logging += ("\n\t" + dto.toString());
-        LOG.debug("SendDeviceListCommand inner : {}", logging);
+        LOG.debug("SendDeviceListCommand devices : {}", logging);
         transport.sendCommand(new SendDeviceListCommand(devices));
         return devices;
     }
 
 
+    //##############################################################################################################
+    //######    methods
+
+
     //------------------------------------------------------------------------
-    //  find node by ServerID
+    // get device list for data transfer to server
 
     @Override
     public void setDeviceDTO(DeviceDTO dto) {
@@ -307,7 +304,7 @@ public class ZWaveHome implements GateDevicesSet {
 
 
     //------------------------------------------------------------------------
-    //  create device list as list of serializable objects
+    //  find node by ServerID
 
     @Override
     public String toString() {
@@ -316,31 +313,17 @@ public class ZWaveHome implements GateDevicesSet {
 
 
     //------------------------------------------------------------------------
-    //  gate receive ping from server
+    //  create device list as list of serializable objects
 
-    @Override
-    public void ping(Command pingCommand) {
-
-        watchdog.setWatchDogOn(true);
-        watchDogCounter++;
-        if (watchDogCounter > 99999) watchDogCounter = 0;
-        transport.sendCommand(pingCommand != null ? pingCommand : new PingCommand());
-
+    private void startDriver() {
+        ZWaveHomeDriver driver = new ZWaveHomeDriver();
+        threadDriver = new Thread(driver);
+        threadDriver.start();
     }
 
 
     //------------------------------------------------------------------------
-    //  listener for check data exchange
-
-    private void startWatchDog() {
-        watchdog = new ServerTransportWatchDog();
-        threadWatchdog = new Thread(watchdog);
-        threadWatchdog.start();
-    }
-
-
-    //------------------------------------------------------------------------
-    //  listener for check data exchange
+    //  (re)start z-wave library driver
 
     public class ZWaveHomeDriver implements Runnable {
 
@@ -352,46 +335,6 @@ public class ZWaveHome implements GateDevicesSet {
             Manager.get().removeDriver(zWaveStick);
             DelayTimer.sleep(5000);
             startDriver();
-        }
-    }
-
-
-    //------------------------------------------------------------------------
-    //  check data exchange between gate and server
-
-    public class ServerTransportWatchDog implements Runnable {
-
-        private boolean watchDogWork = true;
-        private boolean isWatchDogOn;
-
-        public void setWatchDogWork(boolean watchDogWork) {
-            this.watchDogWork = watchDogWork;
-        }
-
-        public void setWatchDogOn(boolean isWatchDogOn) {
-            // debug information
-            if (isWatchDogOn && !this.isWatchDogOn)
-                LOG.info("gate have a ping command from server - LINK SET ON");
-            else if (!isWatchDogOn && this.isWatchDogOn)
-                LOG.error("gate have not a ping command from server - LINK SET OFF");
-            // set WatchDog flag
-            this.isWatchDogOn = isWatchDogOn;
-        }
-
-        @Override
-        public void run() {
-
-            int watchDogCounterPrevious = -1;
-
-            while (watchDogWork) {
-                if (isWatchDogOn && watchDogCounter == watchDogCounterPrevious) {
-                    setWatchDogOn(false);
-                    transport.restartLink();
-                }
-                watchDogCounterPrevious = watchDogCounter;
-                DelayTimer.sleep(periodWaitPing);
-            }
-
         }
     }
 
