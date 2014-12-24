@@ -10,10 +10,7 @@ import ru.uproom.domain.DeviceState;
 import ru.uproom.gate.transport.command.AddModeOnCommand;
 import ru.uproom.gate.transport.command.CancelCommand;
 import ru.uproom.gate.transport.command.RemoveModeOnCommand;
-import ru.uproom.service.DeviceStorageService;
-import ru.uproom.service.GateTransport;
-import ru.uproom.service.SessionHolder;
-import ru.uproom.service.SessionHolderImpl;
+import ru.uproom.service.*;
 
 import java.util.Collection;
 
@@ -32,6 +29,15 @@ public class DevicesController {
     private static final Logger LOG = LoggerFactory.getLogger(DevicesController.class);
 
     private SessionHolder sessionHolder = SessionHolderImpl.getInstance();
+
+    @RequestMapping(method = RequestMethod.GET, value = "status")
+    @ResponseBody
+    public GateTransportStatus gateStatus(){
+        GateSocketHandler handler = gateTransport.getHandler(sessionHolder.currentUser().getId());
+        if (null == handler)
+            return GateTransportStatus.Red;
+        return handler.getStatus();
+    }
 
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
