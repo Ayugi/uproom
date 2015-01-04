@@ -220,7 +220,7 @@ public class ZWaveNode {
                 params.put(entry.getKey(), entry.getValue());
         }
         // some hard code
-        id = dto.getId();
+        if (dto.getId() > 0) id = dto.getId();
 
         return true;
     }

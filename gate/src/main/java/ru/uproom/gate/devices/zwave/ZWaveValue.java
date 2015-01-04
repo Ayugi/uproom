@@ -4,8 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zwave4j.Manager;
 import org.zwave4j.ValueId;
-import ru.uproom.gate.domain.DelayTimer;
 import ru.uproom.gate.notifications.zwave.NotificationWatcherImpl;
+import ru.uproom.gate.transport.domain.DelayTimer;
 import ru.uproom.gate.transport.dto.parameters.DeviceParametersNames;
 
 import java.util.concurrent.atomic.AtomicReference;

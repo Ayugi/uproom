@@ -3,7 +3,7 @@ package ru.uproom.gate.transport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.uproom.gate.devices.GateDevicesSet;
-import ru.uproom.gate.domain.DelayTimer;
+import ru.uproom.gate.transport.domain.DelayTimer;
 
 /**
  * Created by osipenko on 22.12.14.

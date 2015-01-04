@@ -6,8 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.uproom.gate.commands.GateCommander;
-import ru.uproom.gate.domain.DelayTimer;
 import ru.uproom.gate.transport.command.Command;
+import ru.uproom.gate.transport.command.PingCommand;
+import ru.uproom.gate.transport.domain.DelayTimer;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -33,6 +34,8 @@ public class ServerTransportImpl implements ServerTransport {
     private String host;
     @Value("${cloud_port}")
     private int port;
+    @Value("${local_port}")
+    private int localPort;
     @Value("${connection_attempts}")
     private int times = 0;
     @Value("${period_between_attempts}")
@@ -77,7 +80,7 @@ public class ServerTransportImpl implements ServerTransport {
                 transportUnits.put(linkId, new ServerTransportUnit(host, port, gateId, this, linkId));
                 break;
             case 2:
-                transportUnits.put(linkId, new ServerTransportUnit("127.0.0.1", 8999, gateId, this, linkId));
+                transportUnits.put(linkId, new ServerTransportUnit("127.0.0.1", localPort, gateId, this, linkId));
                 break;
             default:
                 return;
@@ -133,9 +136,20 @@ public class ServerTransportImpl implements ServerTransport {
 
     @Override
     public void sendCommand(Command command) {
-        for (Map.Entry<Integer, ServerTransportUnit> entry : transportUnits.entrySet()) {
-            entry.getValue().sendCommand(command);
+
+        // if command has a link ID
+        if (command instanceof PingCommand) {
+            ServerTransportUnit unit = transportUnits.get(((PingCommand) command).getLinkId());
+            if (unit != null)
+                unit.sendCommand(command);
+
+            // another commands
+        } else {
+            for (Map.Entry<Integer, ServerTransportUnit> entry : transportUnits.entrySet()) {
+                entry.getValue().sendCommand(command);
+            }
         }
+
     }
 
 

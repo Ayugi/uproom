@@ -1,10 +1,10 @@
 package ru.uproom.gate.test;
 
-import ru.uproom.gate.domain.DelayTimer;
 import ru.uproom.gate.transport.command.Command;
 import ru.uproom.gate.transport.command.HandshakeCommand;
 import ru.uproom.gate.transport.command.SetDeviceParameterCommand;
 import ru.uproom.gate.transport.command.ShutdownCommand;
+import ru.uproom.gate.transport.domain.DelayTimer;
 import ru.uproom.gate.transport.dto.DeviceDTO;
 import ru.uproom.gate.transport.dto.DeviceType;
 import ru.uproom.gate.transport.dto.parameters.DeviceParametersNames;
