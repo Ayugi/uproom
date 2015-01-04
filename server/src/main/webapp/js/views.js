@@ -168,6 +168,14 @@ define([
                     }
                 });
 
+                $('#switch' + model.id).bootstrapSwitch();
+
+                $('#switch' + model.id).on('switchChange.bootstrapSwitch', function(event, state) {
+                    console.log(this); // DOM element
+                    console.log(event); // jQuery event
+                    console.log(state); // true | false
+                });
+
                 function onEdit(response, newValue) {
                     model.setName(newValue)
                     model.save();
@@ -198,7 +206,7 @@ define([
             ItemView: Backbone.View.extend({
 
                 events: {
-                    'click [data-id=switchCheck]': 'sendDevice',
+                    'switchChange.bootstrapSwitch [data-id=switchCheck]': 'sendDevice',
                     'slideStop [data-id=level]': 'sendLevel'
                 },
 
@@ -257,6 +265,13 @@ define([
                         }
                     });
 
+                    $('#switch' + model.id).bootstrapSwitch();
+
+                    $('#switch' + model.id).on('switchChange.bootstrapSwitch', function(event, state) {
+                        console.log(this); // DOM element
+                        console.log(event); // jQuery event
+                        console.log(state); // true | false
+                    });
 
                     function onEdit(response, newValue) {
                         model.setName(newValue)

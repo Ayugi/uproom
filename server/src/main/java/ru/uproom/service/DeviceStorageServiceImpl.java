@@ -57,6 +57,9 @@ public class DeviceStorageServiceImpl implements DeviceStorageService {
             devices.add(test);
             addDevices(userId, Collections.singletonList(test));
         }
+        Device temp = new Device();
+        temp.setType(DeviceType.BinarySwitch);
+        devices.add(temp);
         return devices;
     }
 
