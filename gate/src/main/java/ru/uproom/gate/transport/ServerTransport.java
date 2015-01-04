@@ -1,5 +1,6 @@
 package ru.uproom.gate.transport;
 
+import ru.uproom.gate.commands.GateCommander;
 import ru.uproom.gate.transport.command.Command;
 
 /**
@@ -7,8 +8,12 @@ import ru.uproom.gate.transport.command.Command;
  */
 public interface ServerTransport {
 
+    public GateCommander getCommander();
+
     public void sendCommand(Command command);
 
-    public void restartLink();
+    public void restartLink(int linkId);
+
+    public long getPingPeriod();
 
 }

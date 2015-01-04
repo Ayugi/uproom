@@ -8,4 +8,5 @@ import ru.uproom.gate.transport.command.Command;
 public interface GateTransport {
     void sendCommand(Command command, int userId);
     void onConnectionFailure(GateSocketHandler handler);
+    GateSocketHandler getHandler(int userId);
 }

@@ -9,5 +9,9 @@ import ru.uproom.gate.transport.command.Command;
  * Created by osipenko on 30.08.14.
  */
 public interface CommandHandler {
+
     public boolean execute(Command command, GateDevicesSet home);
+
+    public void stop();
+
 }

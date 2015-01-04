@@ -31,6 +31,7 @@ public class GateServiceImpl implements GateTransport {
 
     @Override
     public void sendCommand(Command command, int userId) {
+        LOG.info("sendCommand userId " + userId + " " + command );
         GateSocketHandler gateSocketHandler = activeSockets.get(userId);
         if (null == gateSocketHandler) {
             LOG.error("gate offline for user " + userId);
@@ -56,6 +57,8 @@ public class GateServiceImpl implements GateTransport {
             e.printStackTrace();
         }
     }
+
+
 
     public GateSocketHandler getHandler(int userId) {
         return activeSockets.get(userId);

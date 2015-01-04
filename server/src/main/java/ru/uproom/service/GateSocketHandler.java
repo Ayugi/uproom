@@ -29,20 +29,24 @@ public class GateSocketHandler implements Runnable {
     private DeviceStorageService deviceStorage;
     private GateTransport gateTransport;
 
-    public long getLastPingInterval() {
-        return lastPingInterval;
-    }
-
     public long getLastPingIssued() {
         return lastPingIssued;
+    }
+
+    public GateTransportStatus getStatus() {
+        if (lastPingIssued > 0 && System.currentTimeMillis() - lastPingIssued > 10000)
+            return GateTransportStatus.Red;
+        return averagePing <= 1000
+                ? GateTransportStatus.Green
+                : averagePing <= 10000 ? GateTransportStatus.Yellow : GateTransportStatus.Red;
     }
 
     public int getUserId() {
         return userId;
     }
 
-    private long lastPingInterval = -1;
     private long lastPingIssued = -1;
+    private long averagePing = 0;
     private ConnectionChecker checker = new ConnectionChecker();
 
     public GateSocketHandler(Socket socket, DeviceStorageService deviceStorage, GateTransport gateTransport) {
@@ -113,11 +117,14 @@ public class GateSocketHandler implements Runnable {
                 if (command instanceof SendDeviceListCommand)
                     deviceStorage.addDevices(userId,
                             transformDtosToDevices((SendDeviceListCommand) command));
-                if (command instanceof PingCommand){
+                if (command instanceof PingCommand) {
+
                     PingCommand ping = (PingCommand) command;
-                    lastPingInterval = System.currentTimeMillis()-ping.getIssued();
+                    long lastPingInterval = System.currentTimeMillis() - ping.getIssued();
                     lastPingIssued = -1;
+                    updateAveragePing(lastPingInterval);
                     LOG.info("ping back " + lastPingInterval);
+                    checker.notify();
                 }
 
             } catch (IOException e) {
@@ -129,11 +136,19 @@ public class GateSocketHandler implements Runnable {
         }
     }
 
+    private void updateAveragePing(long lastPingInterval) {
+        if (0 == averagePing)
+            averagePing = lastPingInterval;
+        else
+            averagePing = (averagePing * 9 + lastPingInterval) / 10;
+    }
+
     private List<Device> transformDtosToDevices(SendDeviceListCommand listCommand) {
         List<Device> devices = new ArrayList<>();
         for (DeviceDTO dto : listCommand.getDevices()) {
             devices.add(new Device(dto));
         }
+        LOG.info("devices " + devices);
         return devices;
     }
 
@@ -141,27 +156,40 @@ public class GateSocketHandler implements Runnable {
         stopped = true;
     }
 
-    private class ConnectionChecker implements Runnable{
+    private class ConnectionChecker implements Runnable {
 
         private boolean stopped;
 
         @Override
         public void run() {
-            while (! stopped){
+            while (!stopped) {
                 synchronized (this) {
-                    try {
-                        wait(5000);
-                    } catch (InterruptedException e) {
-                        LOG.error("unexpected interruption", e);
-                    }
+                    wait5sec();
+                    sendCommand(new PingCommand());
+                    lastPingIssued = System.currentTimeMillis();
+                    waitForNotify();
                 }
-                sendCommand(new PingCommand());
-                lastPingIssued = System.currentTimeMillis();
                 LOG.info("ping issued");
             }
         }
 
-        public void stop(){
+        private void waitForNotify() {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        private void wait5sec() {
+            try {
+                wait(5000);
+            } catch (InterruptedException e) {
+                LOG.error("unexpected interruption", e);
+            }
+        }
+
+        public void stop() {
             stopped = true;
         }
     }

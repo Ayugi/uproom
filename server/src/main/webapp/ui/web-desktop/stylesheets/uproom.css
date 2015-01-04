@@ -11,3 +11,33 @@
 .u-block {
 border: none;
 }
+
+/*.showping a:hover {*/
+    /*cursor: default;*/
+    /*background-color: transparent;*/
+/*}*/
+
+/*.navbar .nav > li > a.showping:focus,*/
+/*.navbar .nav > li > a:hover {*/
+    /*color: #333333;*/
+    /*text-decoration: none;*/
+    /*background-color: transparent;*/
+/*}*/
+
+.showping:hover {
+    cursor: default;
+
+    background: #4d5b76;
+    background: -webkit-gradient(linear, left bottom, left top, color-stop(0, #4d5b76), color-stop(1, #6c7a95));
+    background: -ms-linear-gradient(bottom, #4d5b76, #6c7a95);
+    background: -moz-linear-gradient(center bottom, #4d5b76 0%, #6c7a95 100%);
+    background: -o-linear-gradient(bottom, #4d5b76, #6c7a95);
+    filter: progid:dximagetransform.microsoft.gradient(startColorStr='#4d5b76', EndColorStr='#6c7a95');
+    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorStr='#6c7a95',EndColorStr='#4d5b76')";
+    -moz-background-clip: padding;
+    -webkit-background-clip: padding-box;
+    background-clip: padding-box;
+    border: 0px none;
+    border-collapse: collapse;
+}
+

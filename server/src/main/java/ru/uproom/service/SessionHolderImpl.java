@@ -1,5 +1,7 @@
 package ru.uproom.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import ru.uproom.domain.User;
 
@@ -19,8 +21,11 @@ public class SessionHolderImpl implements SessionHolder{
     private ThreadLocal<User> user = new ThreadLocal<>();
     Map<String, User> userSessions= new HashMap<>();
 
+    private static final Logger LOG = LoggerFactory.getLogger(SessionHolderImpl.class);
+
     @Override
     public void touchSession(String sid) {
+        LOG.info("touchSession "+ sid);
         user.set(userSessions.get(sid));
     }
 

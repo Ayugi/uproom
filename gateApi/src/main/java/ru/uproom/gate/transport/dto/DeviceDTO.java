@@ -12,6 +12,7 @@ import java.util.Map;
  * Created by osipenko on 09.09.14.
  */
 public class DeviceDTO implements Serializable {
+    private static final long serialVersionUID = 8267730517145621555L;
 
 
     //##############################################################################################################
@@ -69,6 +70,15 @@ public class DeviceDTO implements Serializable {
         return parameters;
     }
 
+    @Override
+    public String toString() {
+        return "DeviceDTO{" +
+                "id=" + id +
+                ", zId=" + zId +
+                ", type=" + type +
+                ", parameters=" + parameters +
+                '}';
+    }
 }
 
 

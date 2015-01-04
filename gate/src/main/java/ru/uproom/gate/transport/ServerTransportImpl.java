@@ -6,17 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.uproom.gate.commands.GateCommander;
-import ru.uproom.gate.domain.DelayTimer;
 import ru.uproom.gate.transport.command.Command;
-import ru.uproom.gate.transport.command.HandshakeCommand;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.Socket;
-import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * class with functionality of changing data with server
@@ -44,11 +39,11 @@ public class ServerTransportImpl implements ServerTransport {
     @Value("${gateId}")
     private int gateId;
 
-    private ServerTransportReader reader;
-    private Thread threadReader;
-    private Socket socket;
-    private ObjectInputStream input;
-    private ObjectOutputStream output;
+    @Value("${period_wait_ping}")
+    private int periodWaitPing;
+
+    private Map<Integer, ServerTransportUnit> transportUnits = new HashMap<>();
+    private Map<Integer, Thread> threadTransportUnits = new HashMap<>();
 
     private boolean running = false;
     private boolean failed = false;
@@ -70,9 +65,25 @@ public class ServerTransportImpl implements ServerTransport {
 
     @PostConstruct
     public void init() {
-        reader = new ServerTransportReader();
-        threadReader = new Thread(reader);
-        threadReader.start();
+        init(1);
+        init(2);
+    }
+
+    public void init(int linkId) {
+
+        switch (linkId) {
+            case 1:
+                transportUnits.put(linkId, new ServerTransportUnit(host, port, gateId, this, 2));
+                break;
+            case 2:
+                transportUnits.put(linkId, new ServerTransportUnit("127.0.0.1", 8999, gateId, this, 1));
+                break;
+            default:
+                return;
+        }
+
+        threadTransportUnits.put(linkId, new Thread(transportUnits.get(linkId)));
+        threadTransportUnits.get(linkId).start();
     }
 
 
@@ -81,48 +92,20 @@ public class ServerTransportImpl implements ServerTransport {
 
 
     //------------------------------------------------------------------------
-    //  is connection established ?
+    //  get commander class for some business
 
-    public boolean isRunning() {
-        return running;
+    @Override
+    public GateCommander getCommander() {
+        return commander;
     }
 
 
     //------------------------------------------------------------------------
-    //  is connection failed ?
+    //  get period for wait ping command
 
-    public boolean isFailed() {
-        boolean temp = failed;
-        setFailed(false);
-        return temp;
-    }
-
-    public void setFailed(boolean failed) {
-        this.failed = failed;
-        if (failed) this.running = false;
-    }
-
-
-    //##############################################################################################################
-    //######    inner classes
-
-
-    //------------------------------------------------------------------------
-    //  read commands from server
-
-    private void stop() {
-
-        try {
-            if (input != null) input.close();
-            if (output != null) output.close();
-            if (socket != null) socket.close();
-        } catch (IOException e) {
-            LOG.error(e.getMessage());
-        }
-
-        socket = null;
-        input = null;
-        output = null;
+    @Override
+    public long getPingPeriod() {
+        return periodWaitPing;
     }
 
 
@@ -135,51 +118,22 @@ public class ServerTransportImpl implements ServerTransport {
 
     @PreDestroy
     public void close() {
-        threadReader.interrupt();
-    }
-
-
-    //------------------------------------------------------------------------
-    //  close connection
-
-    public boolean getInputStream() {
-        try {
-            input = new ObjectInputStream(socket.getInputStream());
-            return true;
-        } catch (IOException e) {
-            LOG.error(e.getMessage());
+        for (Map.Entry<Integer, ServerTransportUnit> entry : transportUnits.entrySet()) {
+            entry.getValue().setWork(false);
         }
-        return false;
-    }
-
-
-    //------------------------------------------------------------------------
-    //  create input stream
-
-    public boolean open() {
-        try {
-            socket = new Socket(this.host, this.port);
-            output = new ObjectOutputStream(socket.getOutputStream());
-            return true;
-        } catch (UnknownHostException e) {
-            LOG.error("[UnknownHostException] - " + e.getMessage());
-        } catch (IOException e) {
-            LOG.error("[IOException] - " + e.getMessage());
+        for (Map.Entry<Integer, Thread> entry : threadTransportUnits.entrySet()) {
+            entry.getValue().interrupt();
         }
-        return false;
     }
 
 
     //------------------------------------------------------------------------
-    //  open connections
+    //  send command to all interesting servers
 
     @Override
     public void sendCommand(Command command) {
-        try {
-            if (output != null) output.writeObject(command);
-            LOG.debug("Send command to server : " + command.getType().name());
-        } catch (IOException e) {
-            LOG.error(e.getMessage());
+        for (Map.Entry<Integer, ServerTransportUnit> entry : transportUnits.entrySet()) {
+            entry.getValue().sendCommand(command);
         }
     }
 
@@ -188,62 +142,12 @@ public class ServerTransportImpl implements ServerTransport {
     //  restart connection from outside
 
     @Override
-    public void restartLink() {
-        stop();
-        reader.setReaderWork(false);
-    }
+    public void restartLink(int linkId) {
 
+        ServerTransportUnit unit = transportUnits.get(linkId);
+        if (unit != null) unit.setWork(false);
+        init(linkId);
 
-    //------------------------------------------------------------------------
-    //  send command from gate to server
-
-    public class ServerTransportReader implements Runnable {
-
-        private boolean isReaderWork;
-
-        public void setReaderWork(boolean isReaderWork) {
-            this.isReaderWork = isReaderWork;
-        }
-
-        @Override
-        public void run() {
-
-            // set connections
-            isReaderWork = open();
-            if (isReaderWork) {
-                sendCommand(new HandshakeCommand(gateId));
-                isReaderWork = getInputStream();
-            }
-
-            // read commands
-            Command command = null;
-            while (isReaderWork) {
-                LOG.debug("Waiting for next command from server");
-
-                // get next command
-                try {
-                    if (input != null)
-                        command = (Command) input.readObject();
-                } catch (IOException e) {
-                    isReaderWork = false;
-                    LOG.error(e.getMessage());
-                } catch (ClassNotFoundException e) {
-                    isReaderWork = false;
-                    LOG.error(e.getMessage());
-                }
-
-                if (command != null) {
-                    LOG.debug("receive command : {}", command.getType().name());
-                    if (commander != null) commander.execute(command);
-                } else isReaderWork = false;
-            }
-
-            if (Thread.currentThread().isInterrupted()) return;
-            // restart connection
-            stop();
-            DelayTimer.sleep(periodBetweenAttempts);
-            init();
-        }
     }
 
 }
