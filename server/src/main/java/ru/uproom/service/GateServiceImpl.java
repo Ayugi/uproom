@@ -58,6 +58,8 @@ public class GateServiceImpl implements GateTransport {
         }
     }
 
+
+
     public GateSocketHandler getHandler(int userId) {
         return activeSockets.get(userId);
     }
