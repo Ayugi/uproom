@@ -75,9 +75,15 @@ public class ServerTransportUnit implements Runnable {
             output = new ObjectOutputStream(socket.getOutputStream());
             return true;
         } catch (UnknownHostException e) {
-            LOG.error("[UnknownHostException] - " + e.getMessage());
+            LOG.error("[UnknownHostException] - link id : {} - {}", new Object[]{
+                    linkId,
+                    e.getMessage()
+            });
         } catch (IOException e) {
-            LOG.error("[IOException] - " + e.getMessage());
+            LOG.error("[IOException] - link id : {} - {}", new Object[]{
+                    linkId,
+                    e.getMessage()
+            });
         }
         return false;
     }
@@ -94,7 +100,10 @@ public class ServerTransportUnit implements Runnable {
             if (output != null) output.close();
             if (socket != null) socket.close();
         } catch (IOException e) {
-            LOG.error(e.getMessage());
+            LOG.error("[IOException] - link id : {} - {}", new Object[]{
+                    linkId,
+                    e.getMessage()
+            });
         }
         socket = null;
         input = null;
@@ -111,13 +120,21 @@ public class ServerTransportUnit implements Runnable {
             if (output != null) output.writeObject(command);
             if (!(command instanceof PingCommand)) {
                 if (command instanceof HandshakeCommand) {
-                    LOG.debug("Done handshake with server ( Gate ID = " +
-                            ((HandshakeCommand) command).getGateId() + " )");
+                    LOG.debug("link id : {} - Done handshake with server ( Gate ID = {} )", new Object[]{
+                            linkId,
+                            ((HandshakeCommand) command).getGateId()
+                    });
                 } else
-                    LOG.debug("Send command to server : " + command.getType().name());
+                    LOG.debug("link id : {} - Send command to server : {}", new Object[]{
+                            linkId,
+                            command.getType().name()
+                    });
             }
         } catch (IOException e) {
-            LOG.error(e.getMessage());
+            LOG.error("[IOException] - link id : {} - {}", new Object[]{
+                    linkId,
+                    e.getMessage()
+            });
         }
     }
 
@@ -159,12 +176,18 @@ public class ServerTransportUnit implements Runnable {
                     command = (Command) input.readObject();
             } catch (IOException | ClassNotFoundException e) {
                 work = false;
-                LOG.error(e.getMessage());
+                LOG.error("link id : {} - {}", new Object[]{
+                        linkId,
+                        e.getMessage()
+                });
             }
 
             if (command != null) {
                 if (command.getType() != CommandType.Ping)
-                    LOG.debug("receive command : {}", command.getType().name());
+                    LOG.debug("link id : {} - receive command : {}", new Object[]{
+                            linkId,
+                            command.getType().name()
+                    });
                 else
                     ((PingCommand) command).setLinkId(linkId);
                 if (transport.getCommander() != null) transport.getCommander().execute(command);

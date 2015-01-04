@@ -53,11 +53,15 @@ public class ServerTransportWatchDog implements Runnable {
     //  activate watch dog
 
     public void setWatchDogOn(boolean isWatchDogOn) {
-        // debug information
+        // log information
         if (isWatchDogOn && !this.isWatchDogOn)
-            LOG.info("gate have a ping command from server - LINK SET ON");
+            LOG.info("watchdog id : {} - gate have a ping command from server - LINK SET ON", new Object[]{
+                    watchDogId
+            });
         else if (!isWatchDogOn && this.isWatchDogOn)
-            LOG.error("gate have not a ping command from server - LINK SET OFF");
+            LOG.error("watchdog id : {} - gate have not a ping command from server - LINK SET OFF", new Object[]{
+                    watchDogId
+            });
         // set WatchDog flag
         this.isWatchDogOn = isWatchDogOn;
     }
