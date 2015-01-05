@@ -58,7 +58,7 @@ public class DeviceStorageServiceImpl implements DeviceStorageService {
             addDevices(userId, Collections.singletonList(test));
         }
         Device rgb = new Device();
-        rgb.setType(DeviceType.Rgbw);
+        rgb.setType(DeviceType.BinarySwitch);
         rgb.setName("RGB");
         rgb.getParameters().put(DeviceParametersNames.Level1,"30");
         devices.add(rgb);
