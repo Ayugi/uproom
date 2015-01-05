@@ -24,6 +24,9 @@
     <link href="../../components/bootstrap-switch/build/css/bootstrap2/bootstrap-switch.css" rel="stylesheet">
     <script src="../../components/bootstrap-switch/build/js/bootstrap-switch.js"></script>
 
+    <link href="../../components/mjolnic-bootstrap-colorpicker/dist/css/bootstrap-colorpicker.css" rel="stylesheet">
+    <script src="../../components/mjolnic-bootstrap-colorpicker/dist/js/bootstrap-colorpicker.js"></script>
+
     <link href="stylesheets/uproom.css" rel="stylesheet">
 
     <style type="text/css">
@@ -162,7 +165,11 @@
                         </thead>
                         <tbody>
 
-                        <tr><td>Диммер</td>
+                        <tr>
+                            <td>
+                                <i class="icon-resize-full"></i>
+                                Диммер
+                            </td>
                             <td>
 
                                 <div class="row-fluid">
@@ -179,9 +186,39 @@
 
                         <tr>
                             <td>
+                                <i class="icon-off"></i>
                                 <a href="#" id="devicename" data-type="text">Утюг</a>
                             </td>
                             <td><input data-on-label="Вкл" data-off-label="Выкл" class="bootstrap-switch-mini" name="jan9" data-id="switchCheck" type="checkbox" checked=""></td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <i class="icon-adjust"></i> Цветная лампа
+                            </td>
+                            <td>
+
+                                <!--<div id="demo_cont" class="demo demo-auto inl-bl"-->
+                                <!--data-container="#demo_cont" data-color="rgba(150,216,62,0.55)" data-inline="true">-->
+                                <!--</div>-->
+                                <!--<script>-->
+                                <!--$(function(){-->
+                                <!--$('.demo').colorpicker();-->
+                                <!--});-->
+                                <!--</script>-->
+
+                                <div class="input-group demo2">
+                                    <span class="input-group-addon"><i></i></span>
+                                </div>
+                                <script>
+                                    $(function(){
+                                        $('.demo2').colorpicker({ color: '#ff0000' });
+//                                        $('.demo2').setColor('#f00');
+
+                                    });
+                                </script>
+
+                            </td>
                         </tr>
 
                         <tr>
@@ -200,19 +237,16 @@
                             </td>
                         </tr>
 
-                        <tr>
-                            <td>
-                                <i class="icon-user"></i> Цветная лампа
-                            </td>
-                            <td>
-                                <!-- Слайдер -->
-                                <span class="stats label label-success">&nbsp;&nbsp;&nbsp;</span>
-                                <i class="icon-chevron-down"></i>
-                                <i class="icon-chevron-up"></i>
-                            </td>
-                        </tr>
-
-
+                        <!--<tr>-->
+                            <!--<td>-->
+                                <!--<i class="icon-user"></i> Цветная лампа-->
+                            <!--</td>-->
+                            <!--<td>-->
+                                <!--&lt;!&ndash; Слайдер &ndash;&gt;-->
+                                <!--<span class="stats label label-error">&nbsp;&nbsp;&nbsp;</span>-->
+                                <!--<i class="icon-chevron-down"></i>-->
+                            <!--</td>-->
+                        <!--</tr>-->
 
                         </tbody>
                     </table>
@@ -260,6 +294,8 @@
 
         // prepare bootstrap switch
         $("[name='jan9']").bootstrapSwitch();
+
+        $('.pick_color').colorpicker();
 
     });
 
