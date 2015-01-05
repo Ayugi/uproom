@@ -139,7 +139,7 @@ public class Device {
                 "id=" + id +
                 ", zid=" + zid +
                 ", name='" + name + '\'' +
-                ", user=" + user +
+                ", user=" + (user==null?"null":user.getId()) +
                 ", type=" + type +
                 ", state=" + state +
                 ", parameters=" + parameters +

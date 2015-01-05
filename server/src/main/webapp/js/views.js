@@ -1,13 +1,15 @@
 define([
     'exports', 'backbone', 'hbs!../templates/switch', 'hbs!../templates/account-menu',
     'hbs!../templates/auth', 'hbs!../templates/devices-list', 'hbs!../templates/sidebar', 'hbs!../templates/dimmer',
+    'hbs!../templates/rgbw',
     'handlebars'
-], function (exports, Backbone, SwitchTpl, AccountMenuTpl, AuthTpl, DevicesListTpl, SidebarTpl, DimmerTpl) {
+], function (exports, Backbone, SwitchTpl, AccountMenuTpl, AuthTpl, DevicesListTpl, SidebarTpl, DimmerTpl, RgbwTemplate) {
     var deviceTypesToTemplates = {
         MultilevelSwitch: DimmerTpl,
         BinarySwitch: SwitchTpl,
         BinarySensor: "senson_binary",
-        MultilevelSensor: "sensor_analog"
+        MultilevelSensor: "sensor_analog",
+        Rgbw:RgbwTemplate
     }
     var BaseView = Backbone.View.extend({
             initialize: function (options) {
@@ -166,6 +168,10 @@ define([
                     formatter: function (value) {
                         return 'Current value: ' + value;
                     }
+                });
+
+                $(function(){
+                    $('.picker'+model.id).colorpicker();
                 });
 
                 $('#switch' + model.id).bootstrapSwitch();

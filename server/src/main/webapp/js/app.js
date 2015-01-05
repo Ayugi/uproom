@@ -1,5 +1,5 @@
 define(
-    ['backbone', 'views', 'models', 'slider', 'editable', 'bootstrap_switch'],
+    ['backbone', 'views', 'models', 'slider', 'editable', 'bootstrap_switch', 'colorpicker' ],
     function (Backbone, Views, Models) {
         $.fn.editable.defaults.mode = 'inline';
         var devicesCollection = new Models.DevicesCollection();

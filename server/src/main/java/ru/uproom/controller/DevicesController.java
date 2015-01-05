@@ -49,6 +49,7 @@ public class DevicesController {
         LOG.info("listDevices");
         LOG.info("storageService " + storageService + " sessionHolder.currentUser() " + sessionHolder.currentUser());
         return storageService.fetchDevices(sessionHolder.currentUser().getId());
+
     }
 
     @RequestMapping(method = RequestMethod.PUT)
