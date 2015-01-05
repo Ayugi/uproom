@@ -15,11 +15,15 @@
 
     <script src="../../components/jquery/dist/jquery.min.js" type="text/javascript"></script>
 
-    <script src="../../components/seiyria-bootstrap-slider/js/bootstrap-slider.js"></script>
+    <!--<script src="../../components/seiyria-bootstrap-slider/js/bootstrap-slider.js"></script>-->
     <link href="../../components/seiyria-bootstrap-slider/css/bootstrap-slider.css" rel="stylesheet">
 
     <link href="../../components/x-editable/dist/bootstrap-editable/css/bootstrap-editable.css" rel="stylesheet">
-    <script src="../../components/x-editable/dist/bootstrap-editable/js/bootstrap-editable.js"></script>
+    <!--<script src="../../components/x-editable/dist/bootstrap-editable/js/bootstrap-editable.js"></script>-->
+
+    <link href="../../components/bootstrap-switch/build/css/bootstrap2/bootstrap-switch.css" rel="stylesheet">
+    <!--<script src="../../components/bootstrap-switch/build/js/bootstrap-switch.js"></script>-->
+
 
     <link href="stylesheets/uproom.css" rel="stylesheet">
 
@@ -198,7 +202,7 @@
                             <td>
                                 <a href="#" id="devicename" data-type="text">Утюг</a>
                             </td>
-                            <td><input data-id="switchCheck" type="checkbox" checked=""></td>
+                            <td><input name="jan9" data-id="switchCheck" type="checkbox" checked=""></td>
                         </tr>
 
                         <tr>
@@ -259,7 +263,15 @@
 
 
 
-<script src="../../components/bootstrap/dist/js/bootstrap.js"></script>
+<!-- Application .js -->
+<script data-main="js/app" src="../../components/requirejs-bower/require.js"></script>
+<script src="../../js/config.js"></script>
+<script>
+    //require('slider');
+</script>
+
+
+
 <script type="text/javascript">
 
     $("[rel=tooltip]").tooltip();
@@ -272,10 +284,15 @@
         //toggle `popup` / `inline` mode
         $.fn.editable.defaults.mode = 'inline';
 
-        //make devicename editable
+        // make devicename editable
         $('#devicename').editable();
 
+            // prepare bootstrap switch
+    $("[name='jan9']").bootstrapSwitch();
+
     });
+
+
 
 
 </script>

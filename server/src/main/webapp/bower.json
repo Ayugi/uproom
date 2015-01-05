@@ -25,6 +25,7 @@
         "requirejs-bower": "~2.1.15",
         "require-handlebars-plugin": "~0.8.1",
         "seiyria-bootstrap-slider": "~4.0.8",
-        "x-editable": "~1.5.1"
+        "x-editable": "~1.5.1",
+        "bootstrap-switch": "~2.0.1"
     }
 }
