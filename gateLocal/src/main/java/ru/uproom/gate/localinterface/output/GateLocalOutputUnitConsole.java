@@ -65,7 +65,7 @@ public class GateLocalOutputUnitConsole implements GateLocalOutputUnit {
         for (DeviceDTO dto : devices) {
             output.println("\tdevice id = " + dto.getZId() +
                     "; type = " + dto.getType().name() + "; parameters : ");
-            for (Map.Entry<DeviceParametersNames, String> entry : dto.getParameters().entrySet()) {
+            for (Map.Entry<DeviceParametersNames, Object> entry : dto.getParameters().entrySet()) {
                 output.println("\t\t" + entry.getKey().name() + " = " + entry.getValue() + " ;");
             }
         }
@@ -119,7 +119,7 @@ public class GateLocalOutputUnitConsole implements GateLocalOutputUnit {
         int zId = Integer.parseInt(nodeArray[1]);
         String[] paramArray = command[2].split("=");
         if (paramArray.length < 2) return;
-        Map<DeviceParametersNames, String> parameters = new HashMap<>();
+        Map<DeviceParametersNames, Object> parameters = new HashMap<>();
         parameters.put(DeviceParametersNames.valueOf(paramArray[0]), paramArray[1]);
         DeviceDTO device = new DeviceDTO(0, zId, DeviceType.None, parameters);
         parent.setCommandFromUnit(new SetDeviceParameterCommand(device));

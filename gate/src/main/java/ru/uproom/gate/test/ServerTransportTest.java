@@ -14,7 +14,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Map;
 
 /**
  * Class for testing link with server
@@ -159,9 +158,9 @@ public class ServerTransportTest implements AutoCloseable, Runnable {
                     SetDeviceParameterCommand deviceParameterCommand = (SetDeviceParameterCommand) command;
                     DeviceDTO device = deviceParameterCommand.getDevice();
                     System.out.println(String.format("TEST\tdevice = %d", device.getZId()));
-                    for (Map.Entry<DeviceParametersNames, String> entry : device.getParameters().entrySet()) {
-                        System.out.println("TEST\t\tset parameter = " + entry.getKey() + " value = " + entry.getValue());
-                    }
+//                    for (Map.Entry<DeviceParametersNames, String> entry : device.getParameters().entrySet()) {
+//                        System.out.println("TEST\t\tset parameter = " + entry.getKey() + " value = " + entry.getValue());
+//                    }
                 }
             }
             stop();

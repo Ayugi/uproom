@@ -185,16 +185,17 @@ public class ZWaveNode {
         DeviceDTO dto = new DeviceDTO(id, zId, serverType);
 
         Map<DeviceParametersNames, Object> parameters = dto.getParameters();
-        // add to map all values
+        // todo: add to map all values
         for (ZWaveDeviceParametersNames paramName : paramNames) {
             Object param = params.get(paramName);
             if (param == null) continue;
             if (param instanceof ZWaveValue)
-                parameters.put(paramName, ((ZWaveValue) param).getValueAsString());
+                //parameters.put(paramName, ((ZWaveValue) param).getValueAsString());
+                parameters.put(DeviceParametersNames.Unknown, ((ZWaveValue) param).getValueAsString());
             else if (param instanceof DeviceType)
-                parameters.put(paramName, ((DeviceType) param).name());
+                parameters.put(DeviceParametersNames.Unknown, ((DeviceType) param).name());
             else
-                parameters.put(paramName, param.toString());
+                parameters.put(DeviceParametersNames.Unknown, param.toString());
         }
 
         return dto;
@@ -206,8 +207,8 @@ public class ZWaveNode {
 
     @Override
     public String toString() {
-        return String.format("{\"id\":\"%d\",\"type\":\"%s\"}",
-                zId, params.get(DeviceParametersNames.ServerDeviceType));
+        return String.format("{\"id\":\"%d\",\"type\":\"%s\",\"serverType\":\"%s\"}",
+                zId, type, serverType);
     }
 
 
@@ -216,15 +217,19 @@ public class ZWaveNode {
 
     public boolean setParams(DeviceDTO dto) {
 
-        for (Map.Entry<DeviceParametersNames, String> entry : dto.getParameters().entrySet()) {
+        for (Map.Entry<DeviceParametersNames, Object> entry : dto.getParameters().entrySet()) {
+            // todo: add to map all values
             Object param = params.get(entry.getKey());
-            if (param == null || entry.getKey().isReadOnly()) continue;
+            //if (param == null || entry.getKey().isReadOnly()) continue;
+            if (param == null) continue;
             if (param instanceof ZWaveValue)
-                ((ZWaveValue) param).setValue(entry.getValue());
+                ((ZWaveValue) param).setValue(entry.getValue().toString());
             else if (param instanceof DeviceStateEnum)
-                params.put(entry.getKey(), DeviceStateEnum.fromString(entry.getValue()));
+                //params.put(entry.getKey(), DeviceStateEnum.fromString(entry.getValue()));
+                params.put(ZWaveDeviceParametersNames.Unknown, DeviceStateEnum.fromString(entry.getValue().toString()));
             else
-                params.put(entry.getKey(), entry.getValue());
+                //params.put(entry.getKey(), entry.getValue());
+                params.put(ZWaveDeviceParametersNames.Unknown, entry.getValue());
         }
         // some hard code
         if (dto.getId() > 0) id = dto.getId();
