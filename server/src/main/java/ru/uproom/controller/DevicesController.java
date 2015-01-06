@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import ru.uproom.domain.Device;
-import ru.uproom.domain.DeviceState;
+import ru.uproom.gate.transport.dto.DeviceState;
 import ru.uproom.domain.User;
 import ru.uproom.gate.transport.command.AddModeOnCommand;
 import ru.uproom.gate.transport.command.CancelCommand;

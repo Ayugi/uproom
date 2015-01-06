@@ -32,6 +32,7 @@ define(['exports', 'backbone', 'handlebars'
             return this;
         }
 
+        // TODO try to extract describing object as function;
         var DeviceView = Backbone.View.extend({
             events: {
                 'switch-change [data-id=switchCheck]': 'sendDevice',
@@ -79,7 +80,6 @@ define(['exports', 'backbone', 'handlebars'
             $('#devicename' + model.id).editable({
                 success: onEdit
             });
-
         }
 
     }

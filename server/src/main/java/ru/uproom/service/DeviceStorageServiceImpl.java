@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.uproom.domain.Device;
-import ru.uproom.domain.DeviceState;
+import ru.uproom.gate.transport.dto.DeviceState;
 import ru.uproom.gate.transport.command.SetDeviceParameterCommand;
 import ru.uproom.gate.transport.dto.DeviceType;
 import ru.uproom.gate.transport.dto.parameters.DeviceParametersNames;
@@ -49,7 +49,6 @@ public class DeviceStorageServiceImpl implements DeviceStorageService {
             Device test = new Device();
             test.setName("test device");
             test.getParameters().put(DeviceParametersNames.Unknown, "test");
-            test.getParameters().put(DeviceParametersNames.State, "On");
             test.setUser(SessionHolderImpl.getInstance().currentUser());
             test.setZid(-1);
             test.setState(DeviceState.On);
@@ -60,7 +59,7 @@ public class DeviceStorageServiceImpl implements DeviceStorageService {
         Device rgb = new Device();
         rgb.setType(DeviceType.BinarySwitch);
         rgb.setName("RGB");
-        rgb.getParameters().put(DeviceParametersNames.Level1,"30");
+        rgb.getParameters().put(DeviceParametersNames.Color,0);
         devices.add(rgb);
         return devices;
     }
@@ -72,6 +71,7 @@ public class DeviceStorageServiceImpl implements DeviceStorageService {
             stored.setName(device.getName());
             deviceDao.saveDevice(stored, userId);
         }
+/*
         if (null != device.getState())
             device.getParameters().put(DeviceParametersNames.State, device.getState().name());
         if (device.getParameters().containsKey(DeviceParametersNames.State))
@@ -79,7 +79,7 @@ public class DeviceStorageServiceImpl implements DeviceStorageService {
                     "On".equals(device.getParameters().get(DeviceParametersNames.State))
                             ? "true"
                             : "false"
-            );
+            );*/
         if (handleParams(device, stored))
             gateTransport.sendCommand(new SetDeviceParameterCommand(stored.toDto()), userId);
 
@@ -88,7 +88,7 @@ public class DeviceStorageServiceImpl implements DeviceStorageService {
 
     private boolean handleParams(Device device, Device stored) {
         boolean paramsChanged = false;
-        for (Map.Entry<DeviceParametersNames, String> entry : device.getParameters().entrySet()) {
+        for (Map.Entry<DeviceParametersNames, Object> entry : device.getParameters().entrySet()) {
             if (!stored.getParameters().containsKey(entry.getKey())
                     || !stored.getParameters().get(entry.getKey()).equals(entry.getValue())) {
                 stored.getParameters().put(entry.getKey(), entry.getValue());
