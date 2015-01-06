@@ -18,8 +18,6 @@ public class DeviceDTO implements Serializable {
     //##############################################################################################################
     //######    fields
 
-    // todo : discuss with Hedin about moving all parameters to map
-
     // device ID in server database
     private int id;
     // device ID in Z-Wave home net (if =0 then device removed)
@@ -38,7 +36,7 @@ public class DeviceDTO implements Serializable {
 
 
     public DeviceDTO(int id, int zId, DeviceType type) {
-        this(id,zId,type,new HashMap<DeviceParametersNames, Object>());
+        this(id, zId, type, new HashMap<DeviceParametersNames, Object>());
         this.id = id;
         this.zId = zId;
         this.type = type;

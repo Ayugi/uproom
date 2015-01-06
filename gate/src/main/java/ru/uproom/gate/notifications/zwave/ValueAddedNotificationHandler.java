@@ -25,8 +25,7 @@ public class ValueAddedNotificationHandler implements NotificationHandler {
         int paramIndex = ZWaveValueIndexFactory.createIndex(notification.getValueId());
         ZWaveDeviceParametersNames paramName = ZWaveDeviceParametersNames.byZWaveCode(paramIndex);
 
-        // todo : create normal code
-        //home.setGateDeviceParameter(notification.getNodeId(), paramName, notification.getValueId());
+        home.addGateDeviceParameter(notification.getNodeId(), paramName, notification.getValueId());
 
         LOG.debug("z-wave notification : {}; node : {}; label : {}; id : {}", new Object[]{
                 notification.getType(),

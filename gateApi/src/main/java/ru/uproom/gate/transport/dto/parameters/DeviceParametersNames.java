@@ -7,8 +7,8 @@ package ru.uproom.gate.transport.dto.parameters;
  */
 public enum DeviceParametersNames {
     // gate parameters
-    Unknown,
-    Switch,
-    Level,
-    Color;
+    Unknown, // unknown
+    Switch, // boolean
+    Level, // int
+    Color; // int
 }
