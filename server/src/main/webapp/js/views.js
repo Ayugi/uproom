@@ -1,10 +1,9 @@
 define([
     'exports', 'backbone', 'hbs!../templates/switch', 'hbs!../templates/account-menu',
-    'hbs!../templates/auth', 'hbs!../templates/devices-list', 'hbs!../templates/sidebar', 'hbs!../templates/dimmer',
-    'hbs!../templates/rgbw','js/views/device.js',
+    'hbs!../templates/auth', 'hbs!../templates/devices-list', 'hbs!../templates/sidebar',
+    'hbs!../templates/dimmer', 'hbs!../templates/rgbw', 'js/views/device.js',
     'handlebars'
-], function (exports, Backbone, SwitchTpl, AccountMenuTpl, AuthTpl, DevicesListTpl, SidebarTpl, DimmerTpl, RgbwTemplate,
-    Device) {
+], function (exports, Backbone, SwitchTpl, AccountMenuTpl, AuthTpl, DevicesListTpl, SidebarTpl, DimmerTpl, RgbwTemplate, Device) {
 
     var deviceTypesToTemplates = {
         MultilevelSwitch: DimmerTpl,
