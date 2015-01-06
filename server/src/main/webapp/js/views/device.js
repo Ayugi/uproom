@@ -3,8 +3,21 @@
  */
 define(['exports', 'backbone', 'handlebars'
     ], function (exports, Backbone) {
+        // ------------- Backbone definition --------------
+        _.extend(exports, {View: Backbone.View.extend({
+            events: {
+                'switch-change [data-id=switchCheck]': 'sendDevice',
+                'slideStop [data-id=level]': 'sendLevel'
+            },
 
-        function switchChange () {
+            sendDevice: switchChange,
+            sendLevel: changeLevel,
+            initialize: initialize,
+            render: render,
+            tagName: 'tr'
+        })});
+        // ------------- functional code --------------
+        function switchChange() {
             console.log("Click on device");
             this.model.switch();
             this.model.save();
@@ -15,7 +28,7 @@ define(['exports', 'backbone', 'handlebars'
             this.model.save();
         }
 
-        function render () {
+        function render() {
             var model = this.model;
             this.$el.html(this.template({
                 state: model.getState() == "On" ? "checked" : "",
@@ -32,32 +45,11 @@ define(['exports', 'backbone', 'handlebars'
             return this;
         }
 
-        // TODO try to extract describing object as function;
-        var DeviceView = Backbone.View.extend({
-            events: {
-                'switch-change [data-id=switchCheck]': 'sendDevice',
-                'slideStop [data-id=level]': 'sendLevel'
-            },
-
-            sendDevice: switchChange,
-
-            sendLevel: changeLevel,
-
-            initialize: function (options) {
-                Backbone.View.prototype.initialize.call(this, options);
-                this.template = options.template;
-                // Catch model change event
-                this.model.on('change', render, this);
-            },
-
-            render: render,
-
-            tagName: 'tr'
-        })
-
-        _.extend(exports, {
-            View:DeviceView
-        });
+        function initialize(options) {
+            Backbone.View.prototype.initialize.call(this, options);
+            this.template = options.template;
+            this.model.on('change', render, this);
+        }
 
         function templatePostProcessing(model) {
             $('#slider' + model.id).slider({
@@ -81,6 +73,5 @@ define(['exports', 'backbone', 'handlebars'
                 success: onEdit
             });
         }
-
     }
 )
