@@ -3,6 +3,12 @@
     <span>({{ zid }})</span>
 </td>
 <td>
-    <input data-id="switchCheck" type="checkbox" value="" {{ state }}>
+    <!--
+    <input data-on-label="Вкл" data-off-label="Выкл"
+           class="bootstrap-switch-mini" name="jan9" data-id="switchCheck"
+           type="checkbox" checked="">-->
+
+    <input data-on-label="I" data-off-label="O" class="bootstrap-switch-mini"
+            id="switch{{ id }}" data-id="switchCheck" type="checkbox" {{ state }}>
     <!-- <input data-id="level" type="text" value="0" {{ level }}> -->
 </td>

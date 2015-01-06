@@ -23,7 +23,7 @@ public class ServerTransportUnit implements Runnable {
     //######    fields
 
 
-    private static final Logger LOG = LoggerFactory.getLogger(ServerTransportImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ServerTransportUnit.class);
 
     private boolean work = true;
 

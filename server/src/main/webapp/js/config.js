@@ -11,7 +11,8 @@ requirejs.config({
         editable            : '../components/x-editable/dist/bootstrap-editable/js/bootstrap-editable',
         bootstrap_popover   : '../components/bootstrap/js/bootstrap-popover',
         bootstrap_tooltip   : '../components/bootstrap/js/bootstrap-tooltip',
-         bootstrap_switch    : '../components/bootstrap-switch/build/js/bootstrap-switch'
+        bootstrap_switch    : '../components/bootstrap-switch/build/js/bootstrap-switch',
+        colorpicker         : '../components/mjolnic-bootstrap-colorpicker/dist/js/bootstrap-colorpicker'
     },
 
     hbs: {templateExtension: 'html'},
@@ -24,10 +25,11 @@ requirejs.config({
 
         handlebars: {exports: 'Handlebars'},
         underscore: {exports: '_'},
-        slider: ['jquery'],
-        editable : ['jquery','bootstrap_popover'],
-        bootstrap_popover: ['jquery','bootstrap_tooltip'],
-        bootstrap_tooltip: ['jquery'],
-        bootstrap_switch:   ['jquery']
+        slider:             ['jquery'],
+        editable :          ['jquery','bootstrap_popover'],
+        bootstrap_popover:  ['jquery','bootstrap_tooltip'],
+        bootstrap_tooltip:  ['jquery'],
+        bootstrap_switch:   ['jquery'],
+        colorpicker:        ['jquery']
     }
 });

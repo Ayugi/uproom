@@ -2,8 +2,8 @@ package ru.uproom.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonView;
 import ru.uproom.gate.transport.dto.DeviceDTO;
+import ru.uproom.gate.transport.dto.DeviceState;
 import ru.uproom.gate.transport.dto.DeviceType;
 import ru.uproom.gate.transport.dto.parameters.DeviceParametersNames;
 
@@ -41,7 +41,7 @@ public class Device {
     @Transient
     private DeviceState state;
     @Transient
-    private Map<DeviceParametersNames, String> parameters = new HashMap<>();
+    private Map<DeviceParametersNames, Object> parameters = new HashMap<>();
 
     public Device() {
     }
@@ -107,11 +107,11 @@ public class Device {
         this.type = type;
     }
 
-    public Map<DeviceParametersNames, String> getParameters() {
+    public Map<DeviceParametersNames, Object> getParameters() {
         return parameters;
     }
 
-    public void setParameters(Map<DeviceParametersNames, String> parameters) {
+    public void setParameters(Map<DeviceParametersNames, Object> parameters) {
         this.parameters = parameters;
     }
 
@@ -139,7 +139,7 @@ public class Device {
                 "id=" + id +
                 ", zid=" + zid +
                 ", name='" + name + '\'' +
-                ", user=" + user +
+                ", user=" + (user==null?"null":user.getId()) +
                 ", type=" + type +
                 ", state=" + state +
                 ", parameters=" + parameters +

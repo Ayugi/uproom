@@ -24,7 +24,7 @@ public class Main {
     public static void main(String[] args) {
 
         LOG.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-        LOG.info("Gate Local starting ... ");
+        LOG.info(">>>>\tGate Local starting ... ");
         // spring initialization
         ClassPathXmlApplicationContext ctx =
                 new ClassPathXmlApplicationContext("applicationContext.xml");

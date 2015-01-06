@@ -4,6 +4,7 @@ package ru.uproom.gate.transport.command;
  * Created by HEDIN on 28.08.2014.
  */
 public enum CommandType {
+    None,
     AddModeOn,
     RemoveModeOn,
     Cancel,
@@ -13,5 +14,7 @@ public enum CommandType {
     SetDeviceParameter,
     NetworkControllerState,
     Shutdown,
-    Ping
+    Ping,
+    Exit,
+    Help
 }

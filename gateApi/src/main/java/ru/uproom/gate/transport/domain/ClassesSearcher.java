@@ -1,4 +1,4 @@
-package ru.uproom.gate.domain;
+package ru.uproom.gate.transport.domain;
 
 import org.reflections.Reflections;
 import org.reflections.util.ClasspathHelper;
