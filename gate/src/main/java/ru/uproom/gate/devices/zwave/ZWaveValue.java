@@ -23,7 +23,7 @@ public class ZWaveValue {
 
     private int id;
     private ValueId valueId;
-    private DeviceParametersNames valueName;
+    private ZWaveDeviceParametersNames valueName;
     private boolean readOnly;
 
     private ZWaveValueSetLevel setLevel;
