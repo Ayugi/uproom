@@ -27,7 +27,7 @@ public class DeviceDaoImpl implements DeviceDao {
     @Override
     public Device saveDevice(Device device, int userId) {
         LOG.info("saveDevice device " + device + " userId " + userId );
-        //device.setUser(entityManager.find(User.class, device.getUser().getId()));
+        device.setUser(entityManager.find(User.class, userId));
         if (device.getId() == 0 && device.getZid() > 0) {
             List<Device> devices = entityManager.createNamedQuery("userDeviceByZId", Device.class)
                     .setParameter("userId", userId)
