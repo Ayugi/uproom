@@ -1,14 +1,18 @@
 define([
     'exports', 'backbone', 'hbs!../templates/switch', 'hbs!../templates/account-menu',
-    'hbs!../templates/auth', 'hbs!../templates/devices-list', 'hbs!../templates/sidebar', 'hbs!../templates/dimmer',
+    'hbs!../templates/auth', 'hbs!../templates/devices-list', 'hbs!../templates/sidebar',
+    'hbs!../templates/dimmer', 'hbs!../templates/rgbw', 'js/views/device.js',
     'handlebars'
-], function (exports, Backbone, SwitchTpl, AccountMenuTpl, AuthTpl, DevicesListTpl, SidebarTpl, DimmerTpl) {
+], function (exports, Backbone, SwitchTpl, AccountMenuTpl, AuthTpl, DevicesListTpl, SidebarTpl, DimmerTpl, RgbwTemplate, Device) {
+
     var deviceTypesToTemplates = {
         MultilevelSwitch: DimmerTpl,
         BinarySwitch: SwitchTpl,
         BinarySensor: "senson_binary",
-        MultilevelSensor: "sensor_analog"
+        MultilevelSensor: "sensor_analog",
+        Rgbw: RgbwTemplate
     }
+
     var BaseView = Backbone.View.extend({
         initialize: function (options) {
             Backbone.View.prototype.initialize.call(this, options);
@@ -121,160 +125,83 @@ define([
                 this.layout.auth = (new exports.AuthView({el: '#auth'})).render();
                 this.layout.list = (new exports.ListView({el: '#list'})).render();
                 this.layout.sidebar = (new exports.SidebarView({el: '#sidebar'})).render();
+
                 return this;
             }
         }),
 
         // List of devices itself
-        ListView: BaseView.extend({
-            events: {
-                'click [id=add-device-btn]': 'sendAddDevice'
-            },
-
-            sendAddDevice: function () {
-                console.log("IN sendAddDevice");
-                console.log("$=", $);
-                console.log("$.ajax=", $.ajax);
-
-                $.ajax(DEVICES_URL + "/add");
-            },
-
-            add: function (model) {
-                console.log("add: function (model) ", model);
-                var template = deviceTypesToTemplates[model.get("type")];
-                if (!template)
-                    return this;
-                this.addItem(_.last(this.layout.items = this.layout.items.concat((
-                    new this.ItemView({
-                            model: model, template: template }
-                    )).render())).el);
-
-                $('#slider' + model.id).slider({
-                    formatter: function (value) {
-                        return 'Current value: ' + value;
-                    }
-                });
-
-                function onEdit(response, newValue){
-                    model.setName(newValue)
-                    model.save();
-                }
-
-                $('#devicename' + model.id).editable({
-                    success: onEdit
-                });
-
-
-                return this;
-            },
-
-            // Append actual html element to the DOM
-            addItem: function (el) {
-                this.$('[data-id=list-container]').append(el);
-                return this
-            },
-
-            // Clear internal items storage and DOM structure
-            clear: function () {
-                _.invoke(this.layout.items, 'remove');
-                this.layout.items = [];
-                return this
-            },
-
-            // List item view
-            ItemView: Backbone.View.extend({
-
+        ListView: BaseView.extend(
+            {
                 events: {
-                    'click [data-id=switchCheck]': 'sendDevice',
-                    'slideStop [data-id=level]': 'sendLevel',
+                    'click [id=add-device-btn]': 'sendAddDevice'
                 },
 
-                sendDevice: function () {
-                    console.log("Click on device");
+                sendAddDevice: function () {
+                    console.log("IN sendAddDevice");
+                    console.log("$=", $);
+                    console.log("$.ajax=", $.ajax);
 
-                    var model = this.model;
+                    $.ajax(DEVICES_URL + "/add");
 
-                    console.log("MODEL in sendDevice");
-                    console.log(model);
+                    $("#gateStatusSpan")[0].innerHTML = "test";
+                    $.ajax({
+                        type: "GET",
+                        url: "http://localhost:8080/rest/devices/status",
 
-
-                    model.switch();
-
-                    console.log("model.get(url)=" + model.get("url"));
-                    console.log("model.url=" + model.url);
-
-
-                    model.save();
-                    console.log("before checked");
-
-                },
-
-                sendLevel: function () {
-                    console.log("SEND LEVEL");
-                    var value = this.$('[data-id=level]').val();
-                    console.log(value);
-                    this.model.setLevel(value);
-                    this.model.save();
-                    console.log("LEVEL SENT");
-                },
-
-                initialize: function (options) {
-                    Backbone.View.prototype.initialize.call(this, options);
-                    this.template = options.template;
-                    // Catch model change event
-                    this.model.on('change', this.render, this);
-                },
-
-                render: function () {
-                    var model = this.model;
-                    console.log(" checked --- " + model.getState() == "On" ? "checked" : "")
-                    this.$el.html(this.template({
-                        state: model.getState() == "On" ? "checked" : "",
-                        name: model.getName(),
-                        id: model.id,
-                        value: model.getLevel(),
-                        zid: model.getZId()
-                    }));
-
-                    this.$el.data('id', model.id);
-
-                    $('#slider' + model.id).slider({
-                        formatter: function (value) {
-                            return 'Current value: ' + value;
+                        success: function (data) {
+                            $("#gateStatusSpan")[0].innerHTML = data;
                         }
                     });
 
+                },
 
+                add: function (model) {
+                    console.log("add: function (model) ", model);
+                    var template = deviceTypesToTemplates[model.get("type")];
+                    if (!template)
+                        return this;
 
-                    function onEdit(response, newValue){
-                        model.setName(newValue)
-                        model.save();
-                    }
+                    var deviceView = new Device.View({
+                        model: model, template: template })
 
-                    $('#devicename' + model.id).editable({
-                        success: onEdit
-                    });
+                    this.layout.items = this.layout.items.concat(deviceView)
+                    this.addItem(deviceView.el);
+
+                    deviceView.render();
 
                     return this;
                 },
 
-                tagName: 'tr'
+                // Append actual html element to the DOM
+                addItem: function (el) {
+                    this.$('[data-id=list-container]').append(el);
+                    return this
+                },
+
+                // Clear internal items storage and DOM structure
+                clear: function () {
+                    _.invoke(this.layout.items, 'remove');
+                    this.layout.items = [];
+                    return this
+                },
+
+                // List item view
+
+                reset: function (collection) {
+                    this.collection = collection;
+
+                    // Create new item once collection gets new model
+                    this.collection.on('add', this.add, this);
+
+                    this.clear();
+                    this.collection.each(this.add, this);
+
+                    return this;
+                },
+
+                template: DevicesListTpl
             }),
-
-            reset: function (collection) {
-                this.collection = collection;
-
-                // Create new item once collection gets new model
-                this.collection.on('add', this.add, this);
-
-                this.clear();
-                this.collection.each(this.add, this);
-
-                return this;
-            },
-
-            template: DevicesListTpl
-        }),
 
         SidebarView: BaseView.extend({template: SidebarTpl})
     })

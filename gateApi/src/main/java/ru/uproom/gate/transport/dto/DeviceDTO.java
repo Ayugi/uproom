@@ -27,8 +27,10 @@ public class DeviceDTO implements Serializable {
     // device type in server database
     private DeviceType type = DeviceType.None;
     // parameters of device
-    private Map<DeviceParametersNames, String> parameters =
-            new HashMap<DeviceParametersNames, String>();
+    private Map<DeviceParametersNames, Object> parameters =
+            new HashMap<DeviceParametersNames, Object>();
+
+    private DeviceState state;
 
 
     //##############################################################################################################
@@ -36,13 +38,13 @@ public class DeviceDTO implements Serializable {
 
 
     public DeviceDTO(int id, int zId, DeviceType type) {
-        this(id,zId,type,new HashMap<DeviceParametersNames, String>());
+        this(id,zId,type,new HashMap<DeviceParametersNames, Object>());
         this.id = id;
         this.zId = zId;
         this.type = type;
     }
 
-    public DeviceDTO(int id, int zId, DeviceType type, Map<DeviceParametersNames, String> parameters) {
+    public DeviceDTO(int id, int zId, DeviceType type, Map<DeviceParametersNames, Object> parameters) {
         this.id = id;
         this.zId = zId;
         this.type = type;
@@ -66,7 +68,7 @@ public class DeviceDTO implements Serializable {
         return type;
     }
 
-    public Map<DeviceParametersNames, String> getParameters() {
+    public Map<DeviceParametersNames, Object> getParameters() {
         return parameters;
     }
 
