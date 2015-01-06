@@ -4,9 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zwave4j.Manager;
 import org.zwave4j.ValueId;
-import ru.uproom.gate.domain.DelayTimer;
 import ru.uproom.gate.notifications.zwave.NotificationWatcherImpl;
-import ru.uproom.gate.transport.dto.parameters.DeviceParametersNames;
+import ru.uproom.gate.transport.domain.DelayTimer;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -23,7 +22,7 @@ public class ZWaveValue {
 
     private int id;
     private ValueId valueId;
-    private DeviceParametersNames valueName;
+    private ZWaveDeviceParametersNames valueName;
     private boolean readOnly;
 
     private ZWaveValueSetLevel setLevel;
@@ -37,7 +36,7 @@ public class ZWaveValue {
     public ZWaveValue(ValueId valueId) {
         this.valueId = valueId;
         this.id = ZWaveValueIndexFactory.createIndex(valueId);
-        this.valueName = DeviceParametersNames.byZWaveCode(this.id);
+        this.valueName = ZWaveDeviceParametersNames.byZWaveCode(this.id);
         this.readOnly = Manager.get().isValueReadOnly(valueId);
     }
 
@@ -164,7 +163,7 @@ public class ZWaveValue {
 
         boolean result = false;
 
-        if (valueName == DeviceParametersNames.Level) {
+        if (valueName == ZWaveDeviceParametersNames.Level) {
             // range of level are number 0-99 and 255
             int iValue = Integer.parseInt(value);
             if (iValue <= 0) value = "0";

@@ -6,9 +6,9 @@ import org.zwave4j.Manager;
 import org.zwave4j.Notification;
 import org.zwave4j.NotificationType;
 import ru.uproom.gate.devices.GateDevicesSet;
+import ru.uproom.gate.devices.zwave.ZWaveDeviceParametersNames;
 import ru.uproom.gate.devices.zwave.ZWaveValueIndexFactory;
 import ru.uproom.gate.notifications.NotificationHandler;
-import ru.uproom.gate.transport.dto.parameters.DeviceParametersNames;
 
 /**
  * Created by osipenko on 15.09.14.
@@ -23,9 +23,10 @@ public class ValueRefreshedNotificationHandler implements NotificationHandler {
     public boolean execute(Notification notification, GateDevicesSet home) {
 
         int paramIndex = ZWaveValueIndexFactory.createIndex(notification.getValueId());
-        DeviceParametersNames paramName = DeviceParametersNames.byZWaveCode(paramIndex);
+        ZWaveDeviceParametersNames paramName = ZWaveDeviceParametersNames.byZWaveCode(paramIndex);
 
-        home.setGateDeviceParameter(notification.getNodeId(), paramName, notification.getValueId());
+        // todo : create normal code
+        //home.setGateDeviceParameter(notification.getNodeId(), paramName, notification.getValueId());
 
         LOG.debug("z-wave notification : {}; node : {}; label : {}", new Object[]{
                 notification.getType(),
