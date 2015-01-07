@@ -3,10 +3,7 @@ package ru.uproom.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.uproom.domain.Device;
-import ru.uproom.gate.transport.command.Command;
-import ru.uproom.gate.transport.command.HandshakeCommand;
-import ru.uproom.gate.transport.command.PingCommand;
-import ru.uproom.gate.transport.command.SendDeviceListCommand;
+import ru.uproom.gate.transport.command.*;
 import ru.uproom.gate.transport.dto.DeviceDTO;
 
 import java.io.IOException;
@@ -47,7 +44,7 @@ public class GateSocketHandler implements Runnable {
 
     private long lastPingIssued = -1;
     private long averagePing = 0;
-    private ConnectionChecker checker = new ConnectionChecker();
+    private final ConnectionChecker checker = new ConnectionChecker();
 
     public GateSocketHandler(Socket socket, DeviceStorageService deviceStorage, GateTransport gateTransport) {
         this.socket = socket;
@@ -95,7 +92,7 @@ public class GateSocketHandler implements Runnable {
     }
 
     public void sendCommand(Command command) {
-        LOG.info("sendCommand command " + command.getType());
+        LOG.info("sendCommand command " + command.getType() + " " + command);
         try {
             output.writeObject(command);
         } catch (IOException e) {
@@ -112,7 +109,8 @@ public class GateSocketHandler implements Runnable {
         while (!stopped) {
             try {
                 Command command = (Command) input.readObject();
-                LOG.info("listen command " + command.getType());
+
+                logCommand(command);
                 // TODO handles map
                 if (command instanceof SendDeviceListCommand)
                     deviceStorage.addDevices(userId,
@@ -123,8 +121,10 @@ public class GateSocketHandler implements Runnable {
                     long lastPingInterval = System.currentTimeMillis() - ping.getIssued();
                     lastPingIssued = -1;
                     updateAveragePing(lastPingInterval);
-                    LOG.info("ping back " + lastPingInterval);
-                    checker.notify();
+                    LOG.debug("ping back " + lastPingInterval);
+                    synchronized (checker) {
+                        checker.notify();
+                    }
                 }
 
             } catch (IOException e) {
@@ -133,6 +133,20 @@ public class GateSocketHandler implements Runnable {
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    private int pingCounter;
+
+    private void logCommand(Command command) {
+        if (CommandType.Ping != command.getType()){
+            LOG.info("listen command " + command.getType());
+            return;
+        }
+        pingCounter++;
+        if (pingCounter>=10) {
+            pingCounter = 0;
+            LOG.info("average ping " + averagePing);
         }
     }
 
@@ -169,7 +183,7 @@ public class GateSocketHandler implements Runnable {
                     lastPingIssued = System.currentTimeMillis();
                     waitForNotify();
                 }
-                LOG.info("ping issued");
+                LOG.debug("ping issued");
             }
         }
 
