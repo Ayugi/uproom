@@ -10,24 +10,12 @@ define(['exports', 'backbone'], function (exports, Backbone) {
             return this.get('zid');
         },
         switch: function () {
-            console.log("switch: function () {");
+            var p = this.parameters();
+            console.log("switch" + p);
 
-//            console.log("state " +  this.get("state"));
-
-            console.log("THIS in DeviceModel = ");
-            console.log(this);
-
-
-            console.log("parameters IN MODEL = ");
-            var p = this.get("parameters");
-            console.log(p);
-            console.log(p.State);
-
-
-//            console.log("set " +  this.set );
-
-            var st = this.getState() == "On" ? "Off" : "On";
-            if ("Off" == st) {
+            var newState = !this.getState();
+            console.log("switch new state " + newState)
+            if (!newState) {
                 this.set("levelBackup", p.Level)
                 p.Level = 0;
             }
@@ -36,20 +24,20 @@ define(['exports', 'backbone'], function (exports, Backbone) {
                 if (levelBackup)
                     p.Level = levelBackup;
             }
-            this.setState(st);
+            this.setState(newState);
             console.log("state after " + this.get("state"));
         },
         setState: function (st) {
             console.log("setState");
             // TODO remove duplication
 
-            this.parameters().State = st;
+            this.parameters().Switch = st;
         },
         getState: function () {
             console.log("getState");
             var p = this.parameters();
             if (!p.Switch)
-                p.Switch = "Off"
+                p.Switch = false;
             return p.Switch;
         },
         getStateFlag: function () {
