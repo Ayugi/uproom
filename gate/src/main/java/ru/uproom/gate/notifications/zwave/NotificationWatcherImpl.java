@@ -8,8 +8,8 @@ import org.zwave4j.Notification;
 import org.zwave4j.NotificationType;
 import org.zwave4j.NotificationWatcher;
 import ru.uproom.gate.devices.GateDevicesSet;
-import ru.uproom.gate.domain.ClassesSearcher;
 import ru.uproom.gate.notifications.NotificationHandler;
+import ru.uproom.gate.transport.domain.ClassesSearcher;
 
 import javax.annotation.PostConstruct;
 import java.util.EnumMap;

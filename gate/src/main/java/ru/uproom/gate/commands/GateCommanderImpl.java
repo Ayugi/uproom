@@ -5,10 +5,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.uproom.gate.devices.GateDevicesSet;
-import ru.uproom.gate.domain.ClassesSearcher;
 import ru.uproom.gate.notifications.zwave.NotificationWatcherImpl;
 import ru.uproom.gate.transport.command.Command;
 import ru.uproom.gate.transport.command.CommandType;
+import ru.uproom.gate.transport.domain.ClassesSearcher;
 
 import javax.annotation.PostConstruct;
 import java.util.EnumMap;
@@ -44,8 +44,7 @@ public class GateCommanderImpl implements GateCommander {
     @PostConstruct
     private void prepareCommandHandlers() {
 
-        if (!getCommandHandlersFromPath())
-            getCommandHandlersFromJar();
+        getCommandHandlersFromPath();
 
     }
 
@@ -62,11 +61,6 @@ public class GateCommanderImpl implements GateCommander {
                     (CommandHandler) ClassesSearcher.instantiate(handler)
             );
         }
-
-        return commandHandlers.isEmpty();
-    }
-
-    private boolean getCommandHandlersFromJar() {
 
         return commandHandlers.isEmpty();
     }
@@ -95,6 +89,7 @@ public class GateCommanderImpl implements GateCommander {
     //------------------------------------------------------------------------
     //  executioner of commands from server
 
+    @Override
     public boolean execute(Command command) {
 
         CommandHandler handler = commandHandlers.get(command.getType());

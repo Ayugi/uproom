@@ -3,7 +3,7 @@ package ru.uproom.gate.transport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.uproom.gate.devices.GateDevicesSet;
-import ru.uproom.gate.domain.DelayTimer;
+import ru.uproom.gate.transport.domain.DelayTimer;
 
 /**
  * Created by osipenko on 22.12.14.
@@ -53,11 +53,15 @@ public class ServerTransportWatchDog implements Runnable {
     //  activate watch dog
 
     public void setWatchDogOn(boolean isWatchDogOn) {
-        // debug information
+        // log information
         if (isWatchDogOn && !this.isWatchDogOn)
-            LOG.info("gate have a ping command from server - LINK SET ON");
+            LOG.info("watchdog id : {} - gate have a ping command from server - LINK SET ON", new Object[]{
+                    watchDogId
+            });
         else if (!isWatchDogOn && this.isWatchDogOn)
-            LOG.error("gate have not a ping command from server - LINK SET OFF");
+            LOG.error("watchdog id : {} - gate have not a ping command from server - LINK SET OFF", new Object[]{
+                    watchDogId
+            });
         // set WatchDog flag
         this.isWatchDogOn = isWatchDogOn;
     }

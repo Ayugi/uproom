@@ -1,4 +1,4 @@
-package ru.uproom.domain;
+package ru.uproom.gate.transport.dto;
 
 /**
  * Created by hedin on 13.07.2014.
