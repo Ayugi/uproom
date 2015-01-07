@@ -12,7 +12,7 @@ public interface ServerTransport {
 
     public void sendCommand(Command command);
 
-    public void restartLink(int linkId);
+    public void restartLink(String host, boolean restart);
 
     public long getPingPeriod();
 

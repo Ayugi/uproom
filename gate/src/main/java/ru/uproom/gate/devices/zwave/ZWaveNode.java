@@ -179,6 +179,21 @@ public class ZWaveNode {
             parameters.put(DeviceParametersNames.Level, ((ZWaveValue) o).getValueAsInt());
         }
 
+        // color
+        o = params.get(ZWaveDeviceParametersNames.Color);
+        if (o != null && o instanceof ZWaveValue) {
+            parameters.put(DeviceParametersNames.Color, ((ZWaveValue) o).getValueAsInt());
+        } else {
+            ZWaveValue levelRed = (ZWaveValue) params.get(ZWaveDeviceParametersNames.LevelRed);
+            ZWaveValue levelGreen = (ZWaveValue) params.get(ZWaveDeviceParametersNames.LevelGreen);
+            ZWaveValue levelBlue = (ZWaveValue) params.get(ZWaveDeviceParametersNames.LevelBlue);
+            if (levelRed != null && levelGreen != null && levelBlue != null) {
+                Integer color = (256 * 256 * levelRed.getValueAsInt()) +
+                        (256 * levelGreen.getValueAsInt()) + levelBlue.getValueAsInt();
+                parameters.put(DeviceParametersNames.Color, color);
+            }
+        }
+
         return dto;
     }
 
@@ -215,6 +230,25 @@ public class ZWaveNode {
             ZWaveValue param = (ZWaveValue) params.get(ZWaveDeviceParametersNames.Level);
             if (param != null) {
                 param.setValue(o.toString());
+            }
+        }
+
+        // color
+        o = dto.getParameters().get(DeviceParametersNames.Color);
+        if (o != null) {
+            ZWaveValue param = (ZWaveValue) params.get(ZWaveDeviceParametersNames.Color);
+            if (param != null) {
+                param.setValue(o.toString());
+            } else {
+                Integer newColor = (Integer) o;
+                ZWaveValue levelRed = (ZWaveValue) params.get(ZWaveDeviceParametersNames.LevelRed);
+                ZWaveValue levelGreen = (ZWaveValue) params.get(ZWaveDeviceParametersNames.LevelGreen);
+                ZWaveValue levelBlue = (ZWaveValue) params.get(ZWaveDeviceParametersNames.LevelBlue);
+                if (levelRed != null && levelGreen != null && levelBlue != null) {
+                    levelBlue.setValue(String.valueOf(newColor % 256));
+                    levelGreen.setValue(String.valueOf(newColor / 256 % 256));
+                    levelRed.setValue(String.valueOf(newColor / 256 / 256 % 256));
+                }
             }
         }
 

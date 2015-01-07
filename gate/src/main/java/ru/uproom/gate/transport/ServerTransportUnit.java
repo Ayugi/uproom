@@ -32,33 +32,57 @@ public class ServerTransportUnit implements Runnable {
     private String host;
     private int port;
     private int gateId;
-    private int linkId;
+    private long period;
 
     private Socket socket;
     private ObjectInputStream input;
     private ObjectOutputStream output;
+
+    private ConnectionChecker checker;
 
 
     //##############################################################################################################
     //######    constructors
 
 
-    ServerTransportUnit(String host, int port, int gateId, ServerTransport transport, int linkId) {
+    ServerTransportUnit(String host, int port, int gateId, ServerTransport transport, long period) {
         this.host = host;
         this.port = port;
         this.gateId = gateId;
         this.transport = transport;
-        this.linkId = linkId;
+        this.period = period;
+    }
+
+
+    //##############################################################################################################
+    //######    inner classes
+
+    public void setWork(boolean work) {
+        if (this.work && !work) stop(false);
+        this.work = work;
     }
 
 
     //##############################################################################################################
     //######    getters & setters
 
-
-    public void setWork(boolean work) {
-        if (this.work && !work) stop();
-        this.work = work;
+    public boolean open() {
+        try {
+            socket = new Socket(this.host, this.port);
+            output = new ObjectOutputStream(socket.getOutputStream());
+            return true;
+        } catch (UnknownHostException e) {
+            LOG.error("[UnknownHostException] host : {} - {}", new Object[]{
+                    host,
+                    e.getMessage()
+            });
+        } catch (IOException e) {
+            LOG.error("[IOException] host : {} - {}", new Object[]{
+                    host,
+                    e.getMessage()
+            });
+        }
+        return false;
     }
 
 
@@ -69,39 +93,19 @@ public class ServerTransportUnit implements Runnable {
     //------------------------------------------------------------------------
     //  open connections
 
-    public boolean open() {
-        try {
-            socket = new Socket(this.host, this.port);
-            output = new ObjectOutputStream(socket.getOutputStream());
-            return true;
-        } catch (UnknownHostException e) {
-            LOG.error("[UnknownHostException] - link id : {} - {}", new Object[]{
-                    linkId,
-                    e.getMessage()
-            });
-        } catch (IOException e) {
-            LOG.error("[IOException] - link id : {} - {}", new Object[]{
-                    linkId,
-                    e.getMessage()
-            });
-        }
-        return false;
-    }
+    private void stop(boolean restart) {
 
+        checker.stop();
+        checker.notify();
 
-    //------------------------------------------------------------------------
-    //  close connection
-
-    private void stop() {
-
-        // cloud server
+        work = false;
         try {
             if (input != null) input.close();
             if (output != null) output.close();
             if (socket != null) socket.close();
         } catch (IOException e) {
-            LOG.error("[IOException] - link id : {} - {}", new Object[]{
-                    linkId,
+            LOG.error("[IOException] - host : {} - {}", new Object[]{
+                    host,
                     e.getMessage()
             });
         }
@@ -109,30 +113,32 @@ public class ServerTransportUnit implements Runnable {
         input = null;
         output = null;
 
+        transport.restartLink(host, restart);
+
     }
 
 
     //------------------------------------------------------------------------
-    //  send command to server
+    //  close connection
 
     public void sendCommand(Command command) {
         try {
             if (output != null) output.writeObject(command);
             if (!(command instanceof PingCommand)) {
                 if (command instanceof HandshakeCommand) {
-                    LOG.debug("link id : {} - Done handshake with server ( Gate ID = {} )", new Object[]{
-                            linkId,
+                    LOG.debug("host : {} - Done handshake with server ( Gate ID = {} )", new Object[]{
+                            host,
                             ((HandshakeCommand) command).getGateId()
                     });
                 } else
-                    LOG.debug("link id : {} - Send command to server : {}", new Object[]{
-                            linkId,
+                    LOG.debug("host : {} - Send command to server : {}", new Object[]{
+                            host,
                             command.getType().name()
                     });
             }
         } catch (IOException e) {
-            LOG.error("[IOException] - link id : {} - {}", new Object[]{
-                    linkId,
+            LOG.error("[IOException] - host : {} - {}", new Object[]{
+                    host,
                     e.getMessage()
             });
         }
@@ -140,7 +146,7 @@ public class ServerTransportUnit implements Runnable {
 
 
     //------------------------------------------------------------------------
-    //  create input stream
+    //  send command to server
 
     public boolean getInputStream() {
         try {
@@ -154,7 +160,25 @@ public class ServerTransportUnit implements Runnable {
 
 
     //------------------------------------------------------------------------
-    //  reader thread
+    //  create input stream
+
+    public void backPingToServer(Command ping) {
+
+//        if (checker == null) {
+//            checker = new ConnectionChecker(this);
+//            new Thread(checker).start();
+//        }
+        sendCommand(ping);
+        LOG.debug("host : {} - send back command : {}", new Object[]{
+                host,
+                ping.getType().name()
+        });
+
+    }
+
+
+    //------------------------------------------------------------------------
+    //  create input stream
 
     @Override
     public void run() {
@@ -176,26 +200,84 @@ public class ServerTransportUnit implements Runnable {
                     command = (Command) input.readObject();
             } catch (IOException | ClassNotFoundException e) {
                 work = false;
-                LOG.error("link id : {} - {}", new Object[]{
-                        linkId,
+                LOG.error("host : {} - {}", new Object[]{
+                        host,
                         e.getMessage()
                 });
             }
 
             if (command != null) {
-                if (command.getType() != CommandType.Ping)
-                    LOG.debug("link id : {} - receive command : {}", new Object[]{
-                            linkId,
+                if (command.getType() != CommandType.Ping) {
+                    LOG.debug("host : {} - receive command : {}", new Object[]{
+                            host,
                             command.getType().name()
                     });
-                else
-                    ((PingCommand) command).setLinkId(linkId);
-                if (transport.getCommander() != null) transport.getCommander().execute(command);
+                    if (transport.getCommander() != null) transport.getCommander().execute(command);
+                } else {
+                    LOG.debug("host : {} - receive command : {}", new Object[]{
+                            host,
+                            command.getType().name()
+                    });
+                    backPingToServer(command);
+                }
             } else work = false;
         }
 
         // restart connection
-        transport.restartLink(linkId);
+        LOG.debug("host : {} - RESTART", new Object[]{
+                host
+        });
+        stop(true);
+    }
+
+
+    //------------------------------------------------------------------------
+    //  reader thread
+
+    private class ConnectionChecker implements Runnable {
+
+        private boolean stopped;
+        private long currentTime;
+        private ServerTransportUnit parent;
+
+        public ConnectionChecker(ServerTransportUnit parent) {
+            this.parent = parent;
+        }
+
+        public void stop() {
+            stopped = true;
+        }
+
+        private void waitForNotify(long period) {
+            try {
+                wait(period);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void run() {
+
+            LOG.info("gate have a ping command from server ({}) - LINK SET ON", new Object[]{
+                    host
+            });
+
+            while (!stopped) {
+                synchronized (this) {
+                    currentTime = System.currentTimeMillis();
+                    waitForNotify(period);
+                    if (stopped) continue;
+                    if (System.currentTimeMillis() - currentTime > period) {
+                        LOG.info("gate lost a ping command from server ({}) - LINK SET OFF", new Object[]{
+                                host
+                        });
+                        parent.stop(false);
+                    }
+                }
+            }
+
+        }
     }
 
 }

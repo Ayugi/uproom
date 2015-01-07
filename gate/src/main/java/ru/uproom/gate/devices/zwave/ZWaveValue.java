@@ -118,13 +118,11 @@ public class ZWaveValue {
     //  get parameter value
 
     public Boolean getValueAsBool() {
-        Object obj = getValue();
-        return (obj == null) ? false : (Boolean) obj;
+        return Boolean.parseBoolean(getValueAsString());
     }
 
     public Integer getValueAsInt() {
-        Object obj = getValue();
-        return (obj == null) ? -1 : (Integer) obj;
+        return Integer.parseInt(getValueAsString());
     }
 
     public String getValueAsString() {

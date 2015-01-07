@@ -33,7 +33,9 @@ public enum ZWaveDeviceParametersNames {
     Power(3277064, true),
     Exporting(3277088, true),
     Reset(3277089, false),
-    TruePeriod(7340289, true),
+    // todo: IDs are not unique. must be remake.
+    //TruePeriod(7340289, true),
+    Color(7340289, false),
     SendOutBasicCommand(7340290, true),
     MeterReportPeriod(7340291, false),
     LibraryVersion(8782080, true),
