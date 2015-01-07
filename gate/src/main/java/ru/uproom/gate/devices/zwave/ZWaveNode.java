@@ -36,8 +36,8 @@ public class ZWaveNode {
     private DeviceType type = DeviceType.None;
     // server device type
     private DeviceType serverType = DeviceType.None;
-    // server device type
-    private int state = 0;
+    // device state
+    private DeviceStateEnum state = DeviceStateEnum.Down;
     // device parameters
     private Map<ZWaveDeviceParametersNames, Object> params =
             new EnumMap<>(ZWaveDeviceParametersNames.class);
@@ -53,8 +53,6 @@ public class ZWaveNode {
         zId = gateDeviceId;
         id = 0;
         setDeviceType();
-        setManufacturerName();
-        setProductName();
 
     }
 
@@ -112,36 +110,6 @@ public class ZWaveNode {
 
 
     //------------------------------------------------------------------------
-    //  set node manufacturer name in Z-Wave net
-
-    public void setManufacturerName() {
-        params.put(
-                ZWaveDeviceParametersNames.ManufacturerName,
-                Manager.get().getNodeManufacturerName(home.getHomeId(), (short) zId)
-        );
-        params.put(
-                ZWaveDeviceParametersNames.ManufacturerId,
-                Manager.get().getNodeManufacturerId(home.getHomeId(), (short) zId)
-        );
-    }
-
-
-    //------------------------------------------------------------------------
-    //  set node product name in Z-Wave net
-
-    public void setProductName() {
-        params.put(
-                ZWaveDeviceParametersNames.ProductName,
-                Manager.get().getNodeProductName(home.getHomeId(), (short) zId)
-        );
-        params.put(
-                ZWaveDeviceParametersNames.ProductId,
-                Manager.get().getNodeProductId(home.getHomeId(), (short) zId)
-        );
-    }
-
-
-    //------------------------------------------------------------------------
     //  node groups
     public void setGroup(Integer index) {
         if (!isExistGroup(index)) groups.add(index);
@@ -155,7 +123,7 @@ public class ZWaveNode {
     //------------------------------------------------------------------------
     //  events handling
 
-    public Object setParameter(ZWaveDeviceParametersNames name, Object value) {
+    public Object addParameter(ZWaveDeviceParametersNames name, Object value) {
         return params.put(name, value);
     }
 
@@ -165,6 +133,18 @@ public class ZWaveNode {
 
     public Map<ZWaveDeviceParametersNames, Object> getParameters() {
         return params;
+    }
+
+
+    //------------------------------------------------------------------------
+    // node state
+
+    public DeviceStateEnum getState() {
+        return state;
+    }
+
+    public void setState(DeviceStateEnum state) {
+        this.state = state;
     }
 
 
@@ -183,19 +163,35 @@ public class ZWaveNode {
     public DeviceDTO getDeviceParameters(ZWaveDeviceParametersNames... paramNames) {
 
         DeviceDTO dto = new DeviceDTO(id, zId, serverType);
-
         Map<DeviceParametersNames, Object> parameters = dto.getParameters();
-        // todo: add to map all values
-        for (ZWaveDeviceParametersNames paramName : paramNames) {
-            Object param = params.get(paramName);
-            if (param == null) continue;
-            if (param instanceof ZWaveValue)
-                //parameters.put(paramName, ((ZWaveValue) param).getValueAsString());
-                parameters.put(DeviceParametersNames.Unknown, ((ZWaveValue) param).getValueAsString());
-            else if (param instanceof DeviceType)
-                parameters.put(DeviceParametersNames.Unknown, ((DeviceType) param).name());
-            else
-                parameters.put(DeviceParametersNames.Unknown, param.toString());
+
+        // todo : this code must be parted to different classes
+
+        // switch
+        Object o = params.get(ZWaveDeviceParametersNames.Switch);
+        if (o != null && o instanceof ZWaveValue) {
+            parameters.put(DeviceParametersNames.Switch, ((ZWaveValue) o).getValueAsBool());
+        }
+
+        // level
+        o = params.get(ZWaveDeviceParametersNames.Level);
+        if (o != null && o instanceof ZWaveValue) {
+            parameters.put(DeviceParametersNames.Level, ((ZWaveValue) o).getValueAsInt());
+        }
+
+        // color
+        o = params.get(ZWaveDeviceParametersNames.Color);
+        if (o != null && o instanceof ZWaveValue) {
+            parameters.put(DeviceParametersNames.Color, ((ZWaveValue) o).getValueAsInt());
+        } else {
+            ZWaveValue levelRed = (ZWaveValue) params.get(ZWaveDeviceParametersNames.LevelRed);
+            ZWaveValue levelGreen = (ZWaveValue) params.get(ZWaveDeviceParametersNames.LevelGreen);
+            ZWaveValue levelBlue = (ZWaveValue) params.get(ZWaveDeviceParametersNames.LevelBlue);
+            if (levelRed != null && levelGreen != null && levelBlue != null) {
+                Integer color = (256 * 256 * levelRed.getValueAsInt()) +
+                        (256 * levelGreen.getValueAsInt()) + levelBlue.getValueAsInt();
+                parameters.put(DeviceParametersNames.Color, color);
+            }
         }
 
         return dto;
@@ -217,21 +213,46 @@ public class ZWaveNode {
 
     public boolean setParams(DeviceDTO dto) {
 
-        for (Map.Entry<DeviceParametersNames, Object> entry : dto.getParameters().entrySet()) {
-            // todo: add to map all values
-            Object param = params.get(entry.getKey());
-            //if (param == null || entry.getKey().isReadOnly()) continue;
-            if (param == null) continue;
-            if (param instanceof ZWaveValue)
-                ((ZWaveValue) param).setValue(entry.getValue().toString());
-            else if (param instanceof DeviceStateEnum)
-                //params.put(entry.getKey(), DeviceStateEnum.fromString(entry.getValue()));
-                params.put(ZWaveDeviceParametersNames.Unknown, DeviceStateEnum.fromString(entry.getValue().toString()));
-            else
-                //params.put(entry.getKey(), entry.getValue());
-                params.put(ZWaveDeviceParametersNames.Unknown, entry.getValue());
+        // todo : this code must be parted to different classes
+
+        // switch
+        Object o = dto.getParameters().get(DeviceParametersNames.Switch);
+        if (o != null) {
+            ZWaveValue param = (ZWaveValue) params.get(ZWaveDeviceParametersNames.Switch);
+            if (param != null) {
+                param.setValue(o.toString());
+            }
         }
-        // some hard code
+
+        // level
+        o = dto.getParameters().get(DeviceParametersNames.Level);
+        if (o != null) {
+            ZWaveValue param = (ZWaveValue) params.get(ZWaveDeviceParametersNames.Level);
+            if (param != null) {
+                param.setValue(o.toString());
+            }
+        }
+
+        // color
+        o = dto.getParameters().get(DeviceParametersNames.Color);
+        if (o != null) {
+            ZWaveValue param = (ZWaveValue) params.get(ZWaveDeviceParametersNames.Color);
+            if (param != null) {
+                param.setValue(o.toString());
+            } else {
+                Integer newColor = (Integer) o;
+                ZWaveValue levelRed = (ZWaveValue) params.get(ZWaveDeviceParametersNames.LevelRed);
+                ZWaveValue levelGreen = (ZWaveValue) params.get(ZWaveDeviceParametersNames.LevelGreen);
+                ZWaveValue levelBlue = (ZWaveValue) params.get(ZWaveDeviceParametersNames.LevelBlue);
+                if (levelRed != null && levelGreen != null && levelBlue != null) {
+                    levelBlue.setValue(String.valueOf(newColor % 256));
+                    levelGreen.setValue(String.valueOf(newColor / 256 % 256));
+                    levelRed.setValue(String.valueOf(newColor / 256 / 256 % 256));
+                }
+            }
+        }
+
+        // server ID
         if (dto.getId() > 0) id = dto.getId();
 
         return true;

@@ -87,7 +87,7 @@ public class ServerTransportWatchDog implements Runnable {
         while (watchDogWork) {
             if (isWatchDogOn && watchDogCounter == watchDogCounterPrevious) {
                 setWatchDogOn(false);
-                home.getTransport().restartLink(watchDogId);
+                //home.getTransport().restartLink(watchDogId);
             }
             watchDogCounterPrevious = watchDogCounter;
             DelayTimer.sleep(periodWaitPing);

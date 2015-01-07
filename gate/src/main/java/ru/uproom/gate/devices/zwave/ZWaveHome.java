@@ -13,7 +13,6 @@ import ru.uproom.gate.transport.command.SendDeviceListCommand;
 import ru.uproom.gate.transport.command.SetDeviceParameterCommand;
 import ru.uproom.gate.transport.domain.DelayTimer;
 import ru.uproom.gate.transport.dto.DeviceDTO;
-import ru.uproom.gate.transport.dto.parameters.DeviceParametersNames;
 import ru.uproom.gate.transport.dto.parameters.DeviceStateEnum;
 
 import javax.annotation.PostConstruct;
@@ -36,6 +35,7 @@ public class ZWaveHome implements GateDevicesSet {
     //######    fields
 
     private static final Logger LOG = LoggerFactory.getLogger(GateDevicesSet.class);
+
     private final Map<Integer, ZWaveNode> nodes = new HashMap<>();
     @Value("${zwave_stick}")
     private String zWaveStick;
@@ -173,25 +173,18 @@ public class ZWaveHome implements GateDevicesSet {
     // device parameters
 
     @Override
-    public void setGateDeviceParameter(int indexDevice, DeviceParametersNames paramName, Object paramValue) {
+    public void addGateDeviceParameter(int indexDevice, ZWaveDeviceParametersNames paramName, Object paramValue) {
         ZWaveNode node = nodes.get(indexDevice);
         if (node == null) return;
         if (paramValue instanceof ValueId) paramValue = new ZWaveValue((ValueId) paramValue);
-        // todo : create normal code
-        node.setParameter(ZWaveDeviceParametersNames.Unknown, paramValue);
-        if (!isReady()) return;
-        // todo : create normal code
-        transport.sendCommand(new SetDeviceParameterCommand(
-                node.getDeviceParameters(ZWaveDeviceParametersNames.Unknown)
-        ));
+        node.addParameter(paramName, paramValue);
     }
 
     @Override
-    public void removeGateDeviceParameter(int indexDevice, DeviceParametersNames paramName) {
+    public void removeGateDeviceParameter(int indexDevice, ZWaveDeviceParametersNames paramName) {
         ZWaveNode node = nodes.get(indexDevice);
         if (node == null) return;
-        // todo : create normal code
-        node.removeParameter(ZWaveDeviceParametersNames.Unknown);
+        node.removeParameter(paramName);
     }
 
 
@@ -246,10 +239,7 @@ public class ZWaveHome implements GateDevicesSet {
         ZWaveNode node = nodes.get(index);
 
         if (node != null) {
-            //Object o = node.getParameters().get(DeviceParametersNames.State);
-            // todo : create normal code
-            Object o = new Object();
-            if (o != null && o instanceof DeviceStateEnum) state = (DeviceStateEnum) o;
+            state = node.getState();
         }
 
         return state;
@@ -265,8 +255,7 @@ public class ZWaveHome implements GateDevicesSet {
         }
 
         if (node != null) {
-            // todo : create normal code
-            //node.getParameters().put(DeviceParametersNames.State, state);
+            node.setState(state);
         }
 
         if (clearRequest) requestState = DeviceStateEnum.Unknown;

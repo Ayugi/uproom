@@ -8,12 +8,12 @@ import org.springframework.stereotype.Service;
 import ru.uproom.gate.commands.GateCommander;
 import ru.uproom.gate.transport.command.Command;
 import ru.uproom.gate.transport.command.PingCommand;
-import ru.uproom.gate.transport.domain.DelayTimer;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * class with functionality of changing data with server
@@ -46,8 +46,8 @@ public class ServerTransportImpl implements ServerTransport {
     @Value("${period_wait_ping}")
     private int periodWaitPing;
 
-    private Map<Integer, ServerTransportUnit> transportUnits = new HashMap<>();
-    private Map<Integer, Thread> threadTransportUnits = new HashMap<>();
+    private ConcurrentMap<String, ServerTransportUnit> transportUnits = new ConcurrentHashMap<>();
+    private ConcurrentMap<String, Thread> threadTransportUnits = new ConcurrentHashMap<>();
 
     private boolean running = false;
     private boolean failed = false;
@@ -69,25 +69,18 @@ public class ServerTransportImpl implements ServerTransport {
 
     @PostConstruct
     public void init() {
-        init(1);
-        init(2);
+        init(host, port);
+        //init(2);
     }
 
-    public void init(int linkId) {
+    public void init(String host, int port) {
 
-        switch (linkId) {
-            case 1:
-                transportUnits.put(linkId, new ServerTransportUnit(host, port, gateId, this, linkId));
-                break;
-            case 2:
-                transportUnits.put(linkId, new ServerTransportUnit("127.0.0.1", localPort, gateId, this, linkId));
-                break;
-            default:
-                return;
-        }
+        ServerTransportUnit unit = new ServerTransportUnit(host, port, gateId, this, periodWaitPing);
+        transportUnits.put(host, unit);
+        Thread thread = new Thread(unit);
+        threadTransportUnits.put(host, thread);
+        thread.start();
 
-        threadTransportUnits.put(linkId, new Thread(transportUnits.get(linkId)));
-        threadTransportUnits.get(linkId).start();
     }
 
 
@@ -122,10 +115,10 @@ public class ServerTransportImpl implements ServerTransport {
 
     @PreDestroy
     public void close() {
-        for (Map.Entry<Integer, ServerTransportUnit> entry : transportUnits.entrySet()) {
+        for (Map.Entry<String, ServerTransportUnit> entry : transportUnits.entrySet()) {
             entry.getValue().setWork(false);
         }
-        for (Map.Entry<Integer, Thread> entry : threadTransportUnits.entrySet()) {
+        for (Map.Entry<String, Thread> entry : threadTransportUnits.entrySet()) {
             entry.getValue().interrupt();
         }
     }
@@ -145,7 +138,7 @@ public class ServerTransportImpl implements ServerTransport {
 
             // another commands
         } else {
-            for (Map.Entry<Integer, ServerTransportUnit> entry : transportUnits.entrySet()) {
+            for (Map.Entry<String, ServerTransportUnit> entry : transportUnits.entrySet()) {
                 entry.getValue().sendCommand(command);
             }
         }
@@ -157,12 +150,24 @@ public class ServerTransportImpl implements ServerTransport {
     //  restart connection from outside
 
     @Override
-    public void restartLink(int linkId) {
+    public void restartLink(String host, boolean restart) {
 
-        ServerTransportUnit unit = transportUnits.get(linkId);
-        if (unit != null) unit.setWork(false);
-        DelayTimer.sleep(periodBetweenAttempts);
-        init(linkId);
+        ServerTransportUnit unit = transportUnits.get(host);
+//        if (unit != null) unit.setWork(false);
+//        transportUnits.remove(linkId, unit);
+//
+//        Thread thread = threadTransportUnits.get(linkId);
+//        if (thread != null) thread.interrupt();
+//        threadTransportUnits.remove(linkId, thread);
+//
+//        DelayTimer.sleep(periodBetweenAttempts);
+//        LOG.debug("link id : {} - END", new Object[]{
+//                linkId
+//        });
+//        init(linkId);
+//        LOG.debug("link id : {} - POST INIT", new Object[]{
+//                linkId
+//        });
 
     }
 
