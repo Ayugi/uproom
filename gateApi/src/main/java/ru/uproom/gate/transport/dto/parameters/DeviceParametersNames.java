@@ -1,5 +1,7 @@
 package ru.uproom.gate.transport.dto.parameters;
 
+import java.awt.*;
+
 /**
  * contains names of device parameters which not included in z-wave conception
  * <p/>
@@ -40,7 +42,9 @@ public enum DeviceParametersNames {
     MeterReportPeriod(7340291, false),
     LibraryVersion(8782080, true),
     ProtocolVersion(8782081, true),
-    ApplicationVersion(8782082, true);
+    ApplicationVersion(8782082, true),
+
+    Color(-1,false);
 
     private int zwaveCode;
     private boolean readOnly;
