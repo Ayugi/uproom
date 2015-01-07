@@ -37,7 +37,8 @@ define(['exports', 'backbone', 'handlebars'
                 name: model.getName(),
                 id: model.id,
                 value: model.getLevel(),
-                zid: model.getZId()
+                zid: model.getZId(),
+                color: '#' + model.getColor().toString(16)
             }));
 
             this.$el.data('id', model.id);
@@ -48,8 +49,10 @@ define(['exports', 'backbone', 'handlebars'
         }
 
         function changeColor(ev) {
-            console.log("change color" + ev.color.toHex() + parseInt(ev.color.toHex().substring(1), 16))
-            this.model.setColor(parseInt(ev.color.toHex().substring(1)));
+            var color = ev.color.toHex();
+            var colorAsInt = parseInt(color.substring(1), 16);
+            console.log("change color" + color + " " + colorAsInt)
+            this.model.setColor(colorAsInt);
             this.model.save();
         }
 

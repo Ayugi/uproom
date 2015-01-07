@@ -42,23 +42,15 @@ define(['exports', 'backbone'], function (exports, Backbone) {
         setState: function (st) {
             console.log("setState");
             // TODO remove duplication
-            var p = this.get("parameters");
-            if (!p) {
-                p = {};
-                this.set("parameters", p);
-            }
-            p.State = st;
+
+            this.parameters().State = st;
         },
         getState: function () {
             console.log("getState");
-            var p = this.get("parameters");
-            if (!p) {
-                p = {};
-                this.set("parameters", p);
-            }
-            if (!p.State)
-                p.State = "Off"
-            return p.State;
+            var p = this.parameters();
+            if (!p.Switch)
+                p.Switch = "Off"
+            return p.Switch;
         },
         getStateFlag: function () {
             console.log("getStateFlag " + this.getState() == "On");
@@ -97,7 +89,7 @@ define(['exports', 'backbone'], function (exports, Backbone) {
 
         getColor: function(){
             if (!this.parameters().Color)
-                this.parameters().Color=0;
+                return 0;
             return  this.parameters().Color;
         },
 
