@@ -183,7 +183,7 @@ public class GateSocketHandler implements Runnable {
                     lastPingIssued = System.currentTimeMillis();
                     waitForNotify();
                 }
-                LOG.info("ping issued");
+                LOG.debug("ping issued");
             }
         }
 
