@@ -7,11 +7,13 @@ define(['exports', 'backbone', 'handlebars'
         _.extend(exports, {View: Backbone.View.extend({
             events: {
                 'switch-change [data-id=switchCheck]': 'sendDevice',
-                'slideStop [data-id=level]': 'sendLevel'
+                'slideStop [data-id=level]': 'sendLevel',
+                'changeColor [data-id=colorPicker]':'changeColor'
             },
 
             sendDevice: switchChange,
             sendLevel: changeLevel,
+            changeColor: changeColor,
             initialize: initialize,
             render: render,
             tagName: 'tr'
@@ -35,7 +37,8 @@ define(['exports', 'backbone', 'handlebars'
                 name: model.getName(),
                 id: model.id,
                 value: model.getLevel(),
-                zid: model.getZId()
+                zid: model.getZId(),
+                color: '#' + model.getColor().toString(16)
             }));
 
             this.$el.data('id', model.id);
@@ -44,6 +47,15 @@ define(['exports', 'backbone', 'handlebars'
 
             return this;
         }
+
+        function changeColor(ev) {
+            var color = ev.color.toHex();
+            var colorAsInt = parseInt(color.substring(1), 16);
+            console.log("change color" + color + " " + colorAsInt)
+            this.model.setColor(colorAsInt);
+            this.model.save();
+        }
+
 
         function initialize(options) {
             Backbone.View.prototype.initialize.call(this, options);
@@ -59,7 +71,7 @@ define(['exports', 'backbone', 'handlebars'
             });
 
             $(function () {
-                $('.picker' + model.id).colorpicker();
+                $('#picker' + model.id).colorpicker();
             });
 
             $('#switch' + model.id).bootstrapSwitch();

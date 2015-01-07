@@ -42,54 +42,55 @@ define(['exports', 'backbone'], function (exports, Backbone) {
         setState: function (st) {
             console.log("setState");
             // TODO remove duplication
-            var p = this.get("parameters");
-            if (!p) {
-                p = {};
-                this.set("parameters", p);
-            }
-            p.State = st;
+
+            this.parameters().State = st;
         },
         getState: function () {
             console.log("getState");
-            var p = this.get("parameters");
-            if (!p) {
-                p = {};
-                this.set("parameters", p);
-            }
-            if (!p.State)
-                p.State = "Off"
-            return p.State;
+            var p = this.parameters();
+            if (!p.Switch)
+                p.Switch = "Off"
+            return p.Switch;
         },
         getStateFlag: function () {
             console.log("getStateFlag " + this.getState() == "On");
             return this.getState() == "On";
         },
-        setLevel: function (level) {
-            // TODO remove duplication
+        parameters: function(){
             var p = this.get("parameters");
             if (!p) {
                 p = {};
                 this.set("parameters", p);
             }
+            return p;
+        },
+        setLevel: function (level) {
+            // TODO remove duplication
             if (level > 0 && !this.getStateFlag())
                 this.setState("On")
 
             if (level == 0 && this.getStateFlag())
                 this.setState("Off")
 
-            p.Level = level;
+            this.parameters().Level = level;
         },
 
         getLevel: function () {
             // TODO remove duplication
-            var p = this.get("parameters");
-            if (!p) {
-                p = {};
-                this.set("parameters", p);
-            }
+            var p = this.parameters();
             if (!p.Level)
                 p.Level = 0;
             return p.Level;
+        },
+
+        setColor: function(color){
+            this.parameters().Color = color;
+        },
+
+        getColor: function(){
+            if (!this.parameters().Color)
+                return 0;
+            return  this.parameters().Color;
         },
 
         url: DEVICES_URL

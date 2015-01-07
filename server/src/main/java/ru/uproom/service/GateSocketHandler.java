@@ -47,7 +47,7 @@ public class GateSocketHandler implements Runnable {
 
     private long lastPingIssued = -1;
     private long averagePing = 0;
-    private ConnectionChecker checker = new ConnectionChecker();
+    private final ConnectionChecker checker = new ConnectionChecker();
 
     public GateSocketHandler(Socket socket, DeviceStorageService deviceStorage, GateTransport gateTransport) {
         this.socket = socket;
@@ -124,7 +124,9 @@ public class GateSocketHandler implements Runnable {
                     lastPingIssued = -1;
                     updateAveragePing(lastPingInterval);
                     LOG.info("ping back " + lastPingInterval);
-                    checker.notify();
+                    synchronized (checker) {
+                        checker.notify();
+                    }
                 }
 
             } catch (IOException e) {
