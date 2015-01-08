@@ -1,10 +1,10 @@
 define([
     'exports', 'backbone', 'hbs!../templates/switch', 'hbs!../templates/account-menu',
     'hbs!../templates/auth', 'hbs!../templates/devices-list', 'hbs!../templates/sidebar',
-    'hbs!../templates/dimmer', 'hbs!../templates/rgbw', 'js/views/device.js',
+    'hbs!../templates/dimmer', 'hbs!../templates/rgbw', 'js/views/device.js', 'js/views/scene.js',
     'handlebars'
 ], function (exports, Backbone, SwitchTpl, AccountMenuTpl, AuthTpl, DevicesListTpl, SidebarTpl,
-             DimmerTpl, RgbwTemplate, Device) {
+             DimmerTpl, RgbwTemplate, Device, Scene) {
 
     var deviceTypesToTemplates = {
         MultilevelSwitch: DimmerTpl,
@@ -91,7 +91,7 @@ define([
         }),
 
         // Manage application core views
-        DevicesView: BaseView.extend({
+        MainView: BaseView.extend({
             activate: function () {
                 this.layout.auth.$el.hide();
 
@@ -122,17 +122,20 @@ define([
             },
 
             render: function () {
+                var model = this.model;
                 this.layout.accountMenu = (new exports.AccountMenuView({app: this, el: '#fat-menu'})).render();
                 this.layout.auth = (new exports.AuthView({el: '#auth'})).render();
-                this.layout.list = (new exports.ListView({el: '#list'})).render();
+                this.layout.list = (new exports.DeviceView({el: '#main-frame'})).render();
                 this.layout.sidebar = (new exports.SidebarView({el: '#sidebar'})).render();
 
                 return this;
             }
         }),
 
+        SceneView: Scene.View,
+
         // List of devices itself
-        ListView: BaseView.extend(
+        DeviceView: BaseView.extend(
             {
                 events: {
                     'click [id=add-device-btn]': 'sendAddDevice'

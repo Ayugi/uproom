@@ -4,6 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.uproom.domain.ColorScene;
+import ru.uproom.domain.ColorSceneDeviceParam;
 import ru.uproom.domain.Device;
 import ru.uproom.gate.transport.dto.DeviceState;
 import ru.uproom.gate.transport.command.SetDeviceParameterCommand;
@@ -70,25 +72,35 @@ public class DeviceStorageServiceImpl implements DeviceStorageService {
     }
 
     @Override
+    public Device fetchDevice(int userId, int deviceId) {
+        return userStorage.get(userId).getDeviceById(deviceId);
+    }
+
+    @Override
     public Device updateDevice(int userId, Device device) {
         Device stored = userStorage.get(userId).getDeviceById(device.getId());
         if (!stored.getName().equals(device.getName())) {
             stored.setName(device.getName());
             deviceDao.saveDevice(stored, userId);
         }
-/*
-        if (null != device.getState())
-            device.getParameters().put(DeviceParametersNames.State, device.getState().name());
-        if (device.getParameters().containsKey(DeviceParametersNames.State))
-            device.getParameters().put(DeviceParametersNames.Switch,
-                    "On".equals(device.getParameters().get(DeviceParametersNames.State))
-                            ? "true"
-                            : "false"
-            );*/
         if (handleParams(device, stored))
             gateTransport.sendCommand(new SetDeviceParameterCommand(stored.toDto()), userId);
 
         return stored;
+    }
+
+    @Override
+    public void applyScene(int userId, ColorScene scene) {
+        UserDeviceStorage userDeviceStorage = userStorage.get(userId);
+        Set<Device> affectedDevices = new HashSet<>();
+        for (ColorSceneDeviceParam param : scene.getDeviceParams()) {
+            Device device = userDeviceStorage.getDeviceById(param.getDeviceId());
+            device.getParameters().put(param.getParametersName(),
+                    param.restoreParamValueObject());
+            affectedDevices.add(device);
+        }
+        for (Device device : affectedDevices)
+            gateTransport.sendCommand(new SetDeviceParameterCommand(device.toDto()), userId);
     }
 
     private boolean handleParams(Device device, Device stored) {

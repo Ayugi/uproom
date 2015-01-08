@@ -3,7 +3,7 @@ define(
     function (Backbone, Views, Models) {
         $.fn.editable.defaults.mode = 'inline';
         var devicesCollection = new Models.DevicesCollection();
-        var app = (new Views.DevicesView({})).render();
+        var app = (new Views.MainView({})).render();
 
         // Reset list with empty collection it will catch add/change event
         app.layout.list.reset(devicesCollection);

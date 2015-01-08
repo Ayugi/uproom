@@ -9,4 +9,5 @@ public interface SessionHolder {
     void touchSession(String sid);
     void newSession(String sid, User user);
     User currentUser();
+    int currentUserId();
 }

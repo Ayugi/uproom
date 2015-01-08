@@ -48,14 +48,14 @@ public class DevicesController {
     public Collection<Device> listDevices() {
         LOG.info("listDevices");
         LOG.info("storageService " + storageService + " sessionHolder.currentUser() " + sessionHolder.currentUser());
-        return storageService.fetchDevices(sessionHolder.currentUser().getId());
+        return storageService.fetchDevices(sessionHolder.currentUserId());
 
     }
 
     @RequestMapping(method = RequestMethod.PUT)
     @ResponseBody
     public Device updateDevice(@RequestBody Device device) {
-        return storageService.updateDevice(sessionHolder.currentUser().getId(), device);
+        return storageService.updateDevice(sessionHolder.currentUserId(), device);
     }
 
     @RequestMapping(method = RequestMethod.DELETE, value = "{id}")
@@ -75,21 +75,21 @@ public class DevicesController {
     @RequestMapping(method = RequestMethod.GET, value = "add")
     @ResponseBody
     public String addDeviceMode(){
-        gateTransport.sendCommand(new AddModeOnCommand(),sessionHolder.currentUser().getId());
+        gateTransport.sendCommand(new AddModeOnCommand(),sessionHolder.currentUserId());
         return "ok";
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "remove")
     @ResponseBody
     public String removeDeviceMode(){
-        gateTransport.sendCommand(new RemoveModeOnCommand(),sessionHolder.currentUser().getId());
+        gateTransport.sendCommand(new RemoveModeOnCommand(),sessionHolder.currentUserId());
         return "ok";
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "cancel")
     @ResponseBody
     public String cancelAddDeviceMode(){
-        gateTransport.sendCommand(new CancelCommand(),sessionHolder.currentUser().getId());
+        gateTransport.sendCommand(new CancelCommand(),sessionHolder.currentUserId());
         return "ok";
     }
     private Device deviceStub() {
