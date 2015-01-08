@@ -1,8 +1,8 @@
 package ru.uproom.gate.devices;
 
+import ru.uproom.gate.devices.zwave.ZWaveDeviceParametersNames;
 import ru.uproom.gate.transport.ServerTransport;
 import ru.uproom.gate.transport.dto.DeviceDTO;
-import ru.uproom.gate.transport.dto.parameters.DeviceParametersNames;
 import ru.uproom.gate.transport.dto.parameters.DeviceStateEnum;
 
 import java.util.List;
@@ -36,9 +36,9 @@ public interface GateDevicesSet {
 
     public void addDeviceGroup(int indexDevice, int indexGroup);
 
-    public void setGateDeviceParameter(int indexDevice, DeviceParametersNames paramName, Object paramValue);
+    public void addGateDeviceParameter(int indexDevice, ZWaveDeviceParametersNames paramName, Object paramValue);
 
-    public void removeGateDeviceParameter(int indexDevice, DeviceParametersNames paramName);
+    public void removeGateDeviceParameter(int indexDevice, ZWaveDeviceParametersNames paramName);
 
     public void requestMode(DeviceStateEnum mode);
 

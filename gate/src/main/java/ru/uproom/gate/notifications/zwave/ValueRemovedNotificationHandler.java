@@ -25,8 +25,7 @@ public class ValueRemovedNotificationHandler implements NotificationHandler {
         int paramIndex = ZWaveValueIndexFactory.createIndex(notification.getValueId());
         ZWaveDeviceParametersNames paramName = ZWaveDeviceParametersNames.byZWaveCode(paramIndex);
 
-        // todo : create normal code
-        //home.removeGateDeviceParameter(notification.getNodeId(), paramName);
+        home.removeGateDeviceParameter(notification.getNodeId(), paramName);
 
         LOG.debug("z-wave notification : {}; node : {}; label : {}", new Object[]{
                 notification.getType(),
