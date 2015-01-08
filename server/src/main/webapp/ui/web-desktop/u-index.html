@@ -9,6 +9,7 @@
     <meta name="author" content="">
 
     <link rel="stylesheet" type="text/css" href="../../components/bootstrap-css/css/bootstrap.css">
+    <link href="../../components/bootstrap-css/css/bootstrap-responsive.css" rel="stylesheet">
 
     <link rel="stylesheet" type="text/css" href="stylesheets/theme.css">
     <link rel="stylesheet" href="../../components/font-awesome-css/css/font-awesome.css">
@@ -74,54 +75,55 @@
 <div class="navbar">
     <div class="navbar-inner">
 
-        <ul class="nav pull-right">
+        <!--<ul class="nav pull-right">-->
 
 
-            <li class="showping">
-                <a href="#" role="button" class="showping">
-                    <span class="stats label label-success">Дом на связи</span>
-                </a>
-            </li>
+            <!--<li class="showping">-->
+                <!--<a href="#" role="button" class="showping">-->
+                    <!--<span class="stats label label-success">Дом на связи</span>-->
+                <!--</a>-->
+            <!--</li>-->
 
-            <li class="showping">
-                <a href="#" role="button" class="showping">
-                    <span class="stats label label-important">Нет связи</span>
-                </a>
-            </li>
+            <!--<li class="showping">-->
+                <!--<a href="#" role="button" class="showping">-->
+                    <!--<span class="stats label label-important">Нет связи</span>-->
+                <!--</a>-->
+            <!--</li>-->
 
-            <li class="showping">
-                <a href="#" role="button" class="showping">
-                    <span class="stats label label-warning">Плохая связь</span>
-                </a>
-            </li>
+            <!--<li class="showping">-->
+                <!--<a href="#" role="button" class="showping">-->
+                    <!--<span class="stats label label-warning">Плохая связь</span>-->
+                <!--</a>-->
+            <!--</li>-->
 
-            <li id="fat-menu" class="dropdown">
-                <a href="#" role="button" class="dropdown-toggle" data-toggle="dropdown">
-                    <i class="icon-user"></i> Иван Иванович
-                    <i class="icon-caret-down"></i>
-                </a>
+            <!--<li id="fat-menu" class="dropdown">-->
+                <!--<a href="#" role="button" class="dropdown-toggle" data-toggle="dropdown">-->
+                    <!--<i class="icon-user"></i> Иван Иванович-->
+                    <!--<i class="icon-caret-down"></i>-->
+                <!--</a>-->
 
-                <ul class="dropdown-menu">
-                    <li><a tabindex="-1" href="#">Мой профиль</a></li>
-                    <li class="divider"></li>
-                    <li><a tabindex="-1" class="visible-phone" href="#">Настройки</a></li>
-                    <li class="divider visible-phone"></li>
-                    <li><a tabindex="-1" href="sign-in.html">Выйти</a></li>
-                </ul>
-            </li>
+                <!--<ul class="dropdown-menu">-->
+                    <!--<li><a tabindex="-1" href="#">Мой профиль</a></li>-->
+                    <!--<li class="divider"></li>-->
+                    <!--<li><a tabindex="-1" class="visible-phone" href="#">Настройки</a></li>-->
+                    <!--<li class="divider visible-phone"></li>-->
+                    <!--<li><a tabindex="-1" href="sign-in.html">Выйти</a></li>-->
+                <!--</ul>-->
+            <!--</li>-->
 
-        </ul>
-        <a class="brand" href="index.html"><span class="second">Uproom</span></a>
+        <!--</ul>-->
+        <a class="brand" href="index.html"><span class="second">Режиссер комфорта</span></a>
     </div>
 </div>
 
 
 
 
-<div class="sidebar-nav">
+<div class="sidebar-nav visible-desktop">
 
     <!-- <a href="devices.html" class="nav-header"><i class="icon-question-sign"></i>Приборы</a> -->
     <a href="#" class="nav-header"><i class="icon-off"></i>Приборы</a>
+    <a href="#" class="nav-header"><i class="icon-play-circle"></i>Сцены</a>
 
     <a href="#video-menu" class="nav-header" data-toggle="collapse">
         <i class="icon-facetime-video"></i>Видео
@@ -140,169 +142,39 @@
 
     <div class="header">
 
-        <h1 class="page-title">Элетроприборы в доме</h1>
+        <h1 class="page-title">Заголовок раздела</h1>
     </div>
 
-    <ul class="breadcrumb">
-        <li><a href="index.html">Главная</a> <span class="divider">/</span></li>
-        <li class="active">Приборы</li>
-    </ul>
+    <!--<ul class="breadcrumb">-->
+        <!--<li><a href="index.html">Главная</a> <span class="divider">/</span></li>-->
+        <!--<li class="active">Текущий раздел</li>-->
+    <!--</ul>-->
 
-    <div class="container-fluid">
-        <div class="row-fluid">
+    <footer>
+        <hr>
 
-            <div class="block span6">
-                <a href="#tablewidget" class="block-heading" data-toggle="collapse">Кухня</a>
-
-                <div id="tablewidget" class="block-body">
-
-                    <table class="table utable">
-                        <thead>
-                        <tr>
-                            <th>Название</th>
-                            <th>Состояние</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-
-                        <tr>
-                            <td>
-                                <i class="icon-resize-full"></i>
-                                Диммер
-                            </td>
-                            <td>
-
-                                <div class="row-fluid">
-                                    <div class="block u-block span3">
-                                        <input data-id="switchCheck" type="checkbox" checked="">
-                                    </div>
-
-                                    <div class="block u-block span9">
-                                        <div class="slider slider-horizontal" id="slider"><div class="slider-track"><div class="slider-selection" style="left: 0%; width: 0%;"></div><div class="slider-handle min-slider-handle round" tabindex="0" style="left: 0%;"></div><div class="slider-handle max-slider-handle round hide" tabindex="0" style="left: 0%;"></div></div><div class="tooltip tooltip-main top" style="left: 0%; margin-left: -47px;"><div class="tooltip-arrow"></div><div class="tooltip-inner">Current value: 0</div></div><div class="tooltip tooltip-min top"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div><div class="tooltip tooltip-max bottom" style="top: 18px;"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div></div><input id="slider159" data-id="level" data-slider-id="slider" type="text" data-slider-min="0" data-slider-max="100" data-slider-step="1" data-slider-value="0" data="value: '0'" value="0" style="display: none;">
-                                    </div>
-                                </div>
-
-                            </td></tr>
-
-                        <tr>
-                            <td>
-                                <i class="icon-off"></i>
-                                <a href="#" id="devicename" data-type="text">Утюг</a>
-                            </td>
-                            <td><input data-on-label="Вкл" data-off-label="Выкл"
-                                       class="bootstrap-switch-mini" name="jan9" data-id="switchCheck"
-                                       type="checkbox" checked=""></td>
-                        </tr>
-
-                        <tr>
-                            <td>
-                                <i class="icon-adjust"></i> Цветная лампа
-                            </td>
-                            <td>
-
-                                <!--<div id="demo_cont" class="demo demo-auto inl-bl"-->
-                                <!--data-container="#demo_cont" data-color="rgba(150,216,62,0.55)" data-inline="true">-->
-                                <!--</div>-->
-                                <!--<script>-->
-                                <!--$(function(){-->
-                                <!--$('.demo').colorpicker();-->
-                                <!--});-->
-                                <!--</script>-->
-
-                                <div class="input-group demo2">
-                                    <span class="input-group-addon"><i></i></span>
-                                </div>
-                                <script>
-                                    $(function(){
-                                        $('.demo2').colorpicker({ color: '#ff0000' });
-//                                        $('.demo2').setColor('#f00');
-
-                                    });
-                                </script>
-
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td>Бинарный сенсор</td>
-                            <td>
-                                <!-- Слайдер -->
-                                таск
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td>Аналоговый сенсор</td>
-                            <td>
-                                <!-- Слайдер -->
-                                таск
-                            </td>
-                        </tr>
-
-                        <!--<tr>-->
-                            <!--<td>-->
-                                <!--<i class="icon-user"></i> Цветная лампа-->
-                            <!--</td>-->
-                            <!--<td>-->
-                                <!--&lt;!&ndash; Слайдер &ndash;&gt;-->
-                                <!--<span class="stats label label-error">&nbsp;&nbsp;&nbsp;</span>-->
-                                <!--<i class="icon-chevron-down"></i>-->
-                            <!--</td>-->
-                        <!--</tr>-->
-
-                        </tbody>
-                    </table>
-
-                </div>
-            </div>
+        <p>&copy; 2014-2015 <a href="http://www.freshcube.ru" target="_blank">Freshcube</a></p>
+    </footer>
 
 
-            <!--<div class="btn-toolbar">-->
-            <!--<button class="btn btn-primary"><i class="icon-plus"></i> Добавить устройство</button>-->
-            <!--<!-- <a href="#myModal" data-toggle="modal" class="btn">Удалить устройство</a> -->
-            <!--</div>-->
-
-        </div>
-
-
-
-        <footer>
-            <hr>
-
-            <p>&copy; 2014 <a href="http://www.freshcube.ru" target="_blank">Freshcube</a></p>
-        </footer>
-
-    </div>
 </div>
 
 <script type="text/javascript">
 
-//    $("[rel=tooltip]").tooltip();
-//    $(function() {
-//        $('.demo-cancel-click').click(function(){return false;});
-//    });
-
-//    $.fn.bootstrapSwitch.defaults.size = 'mini';
-//    $.fn.bootstrapSwitch.defaults.onColor = 'success';
-
-
     // Prepare X-edit
     $(document).ready(function() {
         //toggle `popup` / `inline` mode
-        $.fn.editable.defaults.mode = 'inline';
+//        $.fn.editable.defaults.mode = 'inline';
 
         // make devicename editable
-        $('#devicename').editable();
+//        $('#devicename').editable();
 
         // prepare bootstrap switch
-        $("[name='jan9']").bootstrapSwitch();
+//        $("[name='jan9']").bootstrapSwitch();
 
-        $('.pick_color').colorpicker();
+//        $('.pick_color').colorpicker();
 
     });
-
-
-
 
 </script>
 

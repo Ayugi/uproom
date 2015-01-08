@@ -9,7 +9,9 @@
 /* customize Bootstrap */
 
 .u-block {
-border: none;
+    border: none;
+    padding-left: 20px;
+    padding-right: 20px;
 }
 
 /*.showping a:hover {*/
@@ -39,6 +41,10 @@ border: none;
     background-clip: padding-box;
     border: 0px none;
     border-collapse: collapse;
+}
+
+.utable {
+    padding-top: 50px;
 }
 
 .utable th,
