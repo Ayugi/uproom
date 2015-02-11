@@ -1,17 +1,18 @@
 define([
-    'exports', 'backbone', 'hbs!../templates/switch', 'hbs!../templates/account-menu',
+    'exports', 'backbone', 'hbs!../templates/account-menu',
     'hbs!../templates/auth', 'hbs!../templates/devices-list', 'hbs!../templates/sidebar',
-    'hbs!../templates/dimmer', 'hbs!../templates/rgbw', 'js/views/device.js', 'js/views/scene.js',
+     'js/views/deviceV.js', 'js/views/scene.js',
     'handlebars'
-], function (exports, Backbone, SwitchTpl, AccountMenuTpl, AuthTpl, DevicesListTpl, SidebarTpl,
-             DimmerTpl, RgbwTemplate, Device, Scene) {
+], function (exports, Backbone, AccountMenuTpl,
+             AuthTpl, DevicesListTpl, SidebarTpl,
+              Device, Scene) {
 
     var deviceTypesToTemplates = {
-        MultilevelSwitch: DimmerTpl,
-        BinarySwitch: SwitchTpl,
+        MultilevelSwitch: Device.Dimmer,
+        BinarySwitch: Device.Switch,
         BinarySensor: "senson_binary",
         MultilevelSensor: "sensor_analog",
-        Rgbw: RgbwTemplate
+        Rgbw: Device.Rgbw
     }
 
     var BaseView = Backbone.View.extend({
@@ -162,12 +163,12 @@ define([
 
                 add: function (model) {
                     console.log("add: function (model) ", model);
-                    var template = deviceTypesToTemplates[model.get("type")];
-                    if (!template)
+
+                    if (!model.get("type"))
                         return this;
 
                     var deviceView = new Device.View({
-                        model: model, template: template })
+                        model: model, type: model.get("type") })
 
                     this.layout.items = this.layout.items.concat(deviceView)
                     this.addItem(deviceView.el);
