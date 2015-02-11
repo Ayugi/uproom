@@ -7,14 +7,6 @@ define([
              AuthTpl, DevicesListTpl, SidebarTpl,
               Device, Scene) {
 
-    var deviceTypesToTemplates = {
-        MultilevelSwitch: Device.Dimmer,
-        BinarySwitch: Device.Switch,
-        BinarySensor: "senson_binary",
-        MultilevelSensor: "sensor_analog",
-        Rgbw: Device.Rgbw
-    }
-
     var BaseView = Backbone.View.extend({
         initialize: function (options) {
             Backbone.View.prototype.initialize.call(this, options);

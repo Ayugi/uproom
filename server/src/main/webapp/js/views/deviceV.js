@@ -4,8 +4,7 @@
 define(['exports', 'backbone', 'hbs!../../../templates/rgbw', 'hbs!../templates/dimmer',
         'hbs!../templates/switch',
         'handlebars'],
-    function (exports, Backbone, RgbwTemplate, DimmerTpl,
-        SwitchTpl) {
+    function (exports, Backbone, RgbwTemplate, DimmerTpl, SwitchTpl) {
         var deviceTypesToTemplates = {
             MultilevelSwitch: DimmerTpl,
             BinarySwitch: SwitchTpl,
@@ -28,11 +27,7 @@ define(['exports', 'backbone', 'hbs!../../../templates/rgbw', 'hbs!../templates/
             initialize: initialize,
             render: render,
             tagName: 'tr'
-        }),
-            Rgbw: RgbwTemplate,
-            Dimmer: DimmerTpl,
-            Switch: SwitchTpl
-        });
+        })});
         // ------------- functional code --------------
         function switchChange() {
             console.log("Click on device");
@@ -75,7 +70,7 @@ define(['exports', 'backbone', 'hbs!../../../templates/rgbw', 'hbs!../templates/
         function initialize(options) {
             Backbone.View.prototype.initialize.call(this, options);
             this.template = deviceTypesToTemplates[options.type];
-                //options.template;
+            //options.template;
             this.model.on('change', render, this);
         }
 
