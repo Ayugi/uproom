@@ -1,8 +1,8 @@
 /**
  * Created by HEDIN on 05.01.2015.
  */
-define(['exports', 'backbone', 'hbs!../../../templates/rgbw', 'hbs!../templates/dimmer',
-        'hbs!../templates/switch',
+define(['exports', 'backbone', 'hbs!../../../templates/rgbw', 'hbs!../../../templates/dimmer',
+        'hbs!../../../templates/switch',
         'handlebars'],
     function (exports, Backbone, RgbwTemplate, DimmerTpl, SwitchTpl) {
         var deviceTypesToTemplates = {
