@@ -32,25 +32,33 @@
     <!--custom-->
     <script src="initcontrols.js"></script>
 
+    <script src="../../components/raphael/raphael.js"></script>
+    <!-- <script src="../../components/colorwheel2/raphael.js"></script> -->
+    <script src="../../components/colorwheel/colorwheel.js"></script>
+
     <style type="text/css">
         #line-chart {
-            height:300px;
-            width:800px;
+            height: 300px;
+            width: 800px;
             margin: 0px auto;
             margin-top: 1em;
         }
-        .brand { font-family: georgia, serif; }
+
+        .brand {
+            font-family: georgia, serif;
+        }
+
         .brand .first {
             color: #ccc;
             font-style: italic;
         }
+
         .brand .second {
             color: #fff;
             font-weight: bold;
         }
 
     </style>
-
 
 
     <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
@@ -66,10 +74,14 @@
     <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">
 </head>
 
-<!--[if lt IE 7 ]> <body class="ie ie6"> <![endif]-->
-<!--[if IE 7 ]> <body class="ie ie7 "> <![endif]-->
-<!--[if IE 8 ]> <body class="ie ie8 "> <![endif]-->
-<!--[if IE 9 ]> <body class="ie ie9 "> <![endif]-->
+<!--[if lt IE 7 ]>
+<body class="ie ie6"> <![endif]-->
+<!--[if IE 7 ]>
+<body class="ie ie7 "> <![endif]-->
+<!--[if IE 8 ]>
+<body class="ie ie8 "> <![endif]-->
+<!--[if IE 9 ]>
+<body class="ie ie9 "> <![endif]-->
 <!--[if (gt IE 9)|!(IE)]><!-->
 <body class="">
 <!--<![endif]-->
@@ -80,8 +92,6 @@
         <a class="brand" href="index.html"><span class="second">Режиссер комфорта</span></a>
     </div>
 </div>
-
-
 
 
 <div class="sidebar-nav visible-desktop">
@@ -95,12 +105,11 @@
         <i class="icon-caret-down pull-right"></i>
     </a>
     <ul id="video-menu" class="nav nav-list collapse">
-        <li ><a href="video.html">Камеры</a></li>
-        <li ><a href="video-add.html">Добавить камеру</a></li>
+        <li><a href="video.html">Камеры</a></li>
+        <li><a href="video-add.html">Добавить камеру</a></li>
     </ul>
 
 </div>
-
 
 
 <div class="content">
@@ -110,8 +119,8 @@
     </div>
 
     <!--<ul class="breadcrumb">-->
-        <!--<li><a href="index.html">Главная</a> <span class="divider">/</span></li>-->
-        <!--<li class="active">Приборы</li>-->
+    <!--<li><a href="index.html">Главная</a> <span class="divider">/</span></li>-->
+    <!--<li class="active">Приборы</li>-->
     <!--</ul>-->
 
     <div class="container-fluid">
@@ -120,6 +129,7 @@
             <div class="btn-toolbar">
                 <button class="btn btn-primary"><i class="fa fa-plus-square-o"></i> Добавить устройство</button>
                 <a href="#myModal" data-toggle="modal" class="btn"><i class="fa fa-times"></i> Удалить устройство</a>
+
                 <div class="btn-group">
                 </div>
             </div>
@@ -145,49 +155,37 @@
                             <tbody>
 
                             <tr>
-                                <td class="span4"><i style="color: red" class="fa fa-lightbulb-o">
-                                </i> Цветная лампа
+                                <td class="span4">
+                                    <i style="color: red" class="fa fa-lightbulb-o"></i> Цветная лампа
                                 </td>
-                                
-                                <td class="span1">                                    
+
+                                <td class="span1">
                                     <input data-on-label="I" data-off-label="O"
-                                               class="bootstrap-switch-mini" name="jan9" data-id="switchCheck"
-                                               type="checkbox" checked="">
+                                           class="bootstrap-switch-mini" name="jan9" data-id="switchCheck"
+                                           type="checkbox" checked="">
                                 </td>
 
                                 <td class="span7" align="left">
-
-                                <i style="color: red" class="fa fa-chevron-down">
-
-<!--                                    <div class="input-group demo2">
-                                        <span class="input-group-addon"><i></i>
-                                        </span>                                
-                                    </div>
-                                    <script>
-                                        $(function(){
-                                            $('.demo2').colorpicker({ color: '#ff0000' });
-                                        });
-                                    </script>
- -->
-                                    
+                                    <a href="#">
+                                        <span style="background-color: red">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                                        <i style="color: red" class="fa fa-chevron-down"></i>
+                                    </a>
                                 </td>
-                                
+
                             </tr>
 
-
-                            
                             <tr>
                                 <td class="span4"><i class="fa fa-lightbulb-o">
                                 </i> Лампа
                                 </td>
-                                <td class="span1">                                    
+                                <td class="span1">
                                     <input data-on-label="I" data-off-label="O"
-                                               class="bootstrap-switch-mini" name="jan9" data-id="switchCheck"
-                                               type="checkbox" checked="">
+                                           class="bootstrap-switch-mini" name="jan9" data-id="switchCheck"
+                                           type="checkbox" checked="">
                                 </td>
                                 <td class="span7" align="left">
                                     &nbsp;
-                                </td>                                
+                                </td>
                             </tr>
 
                             <tr>
@@ -197,7 +195,8 @@
                                     <!--<i class="fa fa-check-square-o"></i>-->
                                     &nbsp;&nbsp;&nbsp;&nbsp;
 
-                                    <input id="dp6" data-id="level" data-slider-id='slider' type="text" data-slider-min="0"
+                                    <input id="dp6" data-id="level" data-slider-id='slider' type="text"
+                                           data-slider-min="0"
                                            data-slider-max="100" data-slider-step="1" data-slider-value="25"/>
                                 </td>
 
@@ -207,17 +206,18 @@
 
                             </tr>
 
-                            <td class="span4">
-                                <i class="fa fa-power-off"></i> Розетка
+                            <tr>
+                                <td class="span4">
+                                    <i class="fa fa-power-off"></i> Розетка
                                 </td>
-                                <td class="span1">                                    
+                                <td class="span1">
                                     <input data-on-label="I" data-off-label="O"
-                                               class="bootstrap-switch-mini" name="jan9" data-id="switchCheck"
-                                               type="checkbox" checked="">
+                                           class="bootstrap-switch-mini" name="jan9" data-id="switchCheck"
+                                           type="checkbox" checked="">
                                 </td>
                                 <td class="span7" align="left">
                                     &nbsp;
-                                </td>                                
+                                </td>
                             </tr>
 
                             </tbody>
@@ -236,36 +236,68 @@
                             <tbody>
 
                             <tr>
-                                <td class="span6"><i style="color: red" class="fa fa-lightbulb-o">
-                                </i> Цветная лампа
+                                <td class="span4"><i class="fa fa-lightbulb-o">
+                                </i> Лампа
                                 </td>
-                                <td class="span4">
-                                    <div class="input-group demo2">
-                                        <span class="input-group-addon"><i></i></span>
-                                    </div>
-                                    <script>
-                                        $(function(){
-                                            $('.demo2').colorpicker({ color: '#ff0000' });
-//                                        $('.demo2').setColor('#f00');
-
-                                        });
-                                    </script>
+                                <td class="span1">
+                                    <input data-on-label="I" data-off-label="O"
+                                           class="bootstrap-switch-mini" name="jan9" data-id="switchCheck"
+                                           type="checkbox" checked="">
                                 </td>
-                                <td class="span2">&nbsp;</td>
+                                <td class="span7" align="left">
+                                    &nbsp;
+                                </td>
                             </tr>
 
                             <tr>
-                                <td class="span4"><i class="icon-resize-full"></i> Диммер</td>
-                                <td class="span2">
-                                    <input data-id="switchCheck" type="checkbox" checked="">
-                                    <!--<i class="fa fa-check-square-o"></i>-->
-                                    &nbsp;&nbsp;&nbsp;&nbsp;
+                                <td class="span1">
+                                    <i style="color: red" class="fa fa-lightbulb-o"></i> Цветная лампа
+                                </td>
 
-                                    <input id="dp6" data-id="level" data-slider-id='slider' type="text" data-slider-min="0"
-                                           data-slider-max="100" data-slider-step="1" data-slider-value="25"/>
+                                <td class="span10">
+                                    <div class="row-fluid">
+                                        <div class="span12" id="cw1" style="margin-top: 15px;">
+                                        </div>
+                                    </div>
+
+                                    <div class="row-fluid">
+                                        &nbsp;
+                                    </div>
+
+                                    <div class="row-fluid">
+                                        <div class="span6" id="color-mon"
+                                             style=
+                                             "padding: 5px; color: rgb(255, 255, 255); background: #00F; width: 250px">
+                                        </div>
+                                        <div class="span6">
+                                            &nbsp;
+                                        </div>
+                                    </div>
+
+                                </td>
+
+                                <td class="span1" align="left">
+                                    <a href="#">
+                                        <i style="color: red" class="fa  fa-lg fa-chevron-up"></i>
+                                    </a>
                                 </td>
 
                             </tr>
+
+                            <tr>
+                                <td class="span4">
+                                    <i class="fa fa-power-off"></i> Розетка
+                                </td>
+                                <td class="span1">
+                                    <input data-on-label="I" data-off-label="O"
+                                           class="bootstrap-switch-mini" name="jan9" data-id="switchCheck"
+                                           type="checkbox" checked="">
+                                </td>
+                                <td class="span7" align="left">
+                                    &nbsp;
+                                </td>
+                            </tr>
+
 
                             </tbody>
                         </table>
@@ -290,7 +322,6 @@
 
 
 </div>
-
 
 
 </body>
