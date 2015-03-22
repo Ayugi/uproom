@@ -81,9 +81,10 @@ define(['exports', 'backbone', 'hbs!../../../templates/rgbw', 'hbs!../../../temp
                 }
             });
 
+            /*
             $(function () {
                 $('#picker' + model.id).colorpicker();
-            });
+            });*/
 
             $('#switch' + model.id).bootstrapSwitch();
 

@@ -12,6 +12,11 @@
         <div>
             <input type="text" id="picker{{ id }}" data-id="colorPicker"
                    data-format="hex" value="{{ color }}"/>
+            <div id="colorDisplay{{ id }}" style="background-color:{{ color }}">
+                <span>&nbsp;</span>
+            </div>
+            <br/>
+            <div id="colorPickerContainer"></div>
         </div>
 
         <!--
