@@ -65,6 +65,7 @@ define(['exports', 'backbone', 'hbs!../../../templates/devices-list', 'js/views/
                     this.collection = collection;
 
                     // Create new item once collection gets new model
+                    this.collection.off('add', this.add, this);
                     this.collection.on('add', this.add, this);
 
                     this.clear();

@@ -1,7 +1,7 @@
 define(['exports', 'backbone', 'js/views/baseV.js', 'js/views/accountMenu.js', 'js/views/auth.js', 'js/views/deviceList.js',
-        'js/views/scene.js','hbs!../../../templates/sidebar', 'handlebars', ],
+        'js/views/sceneList.js','hbs!../../../templates/sidebar', 'handlebars', ],
     function (exports, Backbone, Base, AccountMenu, Auth, DevicesList,
-              Scene, SidebarTpl) {
+              SceneList, SidebarTpl) {
         var SidebarView = Base.View.extend({template: SidebarTpl});
         _.extend(exports, {
             View: Base.View.extend({
@@ -37,14 +37,21 @@ define(['exports', 'backbone', 'js/views/baseV.js', 'js/views/accountMenu.js', '
                 },
 
                 render: function () {
-                    var model = this.model;
                     this.layout.accountMenu = (new AccountMenu.View({app: this, el: '#fat-menu'})).render();
                     this.layout.auth = (new Auth.View({el: '#auth'})).render();
                     $('#main-frame').empty();
-                    if (model.getActiveFrame() == 'devices')
-                        this.layout.list = (new DevicesList.View({el: '#main-frame'})).render();
-                    else
-                        this.layout.list = (new Scene.View({el: '#main-frame'})).render();
+                    if (this.model.modes.getActiveFrame() == 'devices'){
+                        this.layout.list = (new DevicesList.View({el: '#main-frame'}));
+                        this.layout.list.render();
+                        this.layout.list.reset(this.model.devices);
+                        this.model.devices.fetch();
+                    }
+                    else {
+                        this.layout.list = (new SceneList.View({el: '#main-frame'}));
+                        this.layout.list.render();
+                        this.layout.list.reset(this.model.scenes);
+                        this.model.scenes.fetch();
+                    }
                     this.layout.sidebar = (new SidebarView({el: '#sidebar'})).render();
                     var frameChange = this.frameChange;
                     // TODO this looks ugly, consider how to make it better

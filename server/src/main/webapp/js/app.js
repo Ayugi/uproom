@@ -2,23 +2,23 @@ define(
     ['backbone', 'views', 'models', 'slider', 'editable', 'bootstrap_switch', 'colorpicker' ],
     function (Backbone, Views, Models) {
         $.fn.editable.defaults.mode = 'inline';
-        var devicesCollection = new Models.DevicesCollection();
-        //var testModel = Backbone.Model.extend({url: &quot;&quot;});
-        //var test = new testModel();
 
-        var modes = new Models.ViewModesModel();
-        modes.setActiveFrame('devices');
+        var modelInstances = prepareModelInstances();
 
-        var mainView = (new Views.MainView({model: modes, frameChange: frameChange})).render();
+        var mainView = (new Views.MainView({model: modelInstances, frameChange: frameChange})).render();
 
         // Reset list with empty collection it will catch add/change event
-        mainView.layout.list.reset(devicesCollection);
+        mainView.layout.list.reset(modelInstances.devices);
+
+        // Reset list with empty collection it will catch add/change event
+        mainView.layout.list.reset(modelInstances.scenes);
 
         // WARN Query backend for user session state here
         mainView.layout.auth.setCallback({success: function (user) {
             mainView.user = user;
 
-            devicesCollection.fetch();
+            //modelInstances.devices.fetch();
+            //modelInstances.scenes.fetch();
             mainView.layout.accountMenu.reset(user);
 
             // And prepare UI
@@ -34,11 +34,23 @@ define(
         }});
 
         function frameChange(mode){
-            modes.setActiveFrame(mode);
+            modelInstances.modes.setActiveFrame(mode);
             mainView.render();
         }
 
         $("#nav-devices").on('click',function(){frameChange('devices')});
         $("#nav-scenes").on('click',function(){frameChange('scenes')});
+
+        function prepareModelInstances() {
+            var devices = new Models.DevicesCollection();
+            var scenes = new Models.ScenesCollection();
+            //var testModel = Backbone.Model.extend({url: &quot;&quot;});
+            //var test = new testModel();
+
+            var modes = new Models.ViewModesModel();
+            modes.setActiveFrame('devices');
+
+            return {devices: devices, scenes : scenes, modes:modes};
+        }
     })
 				

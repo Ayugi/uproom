@@ -41,6 +41,11 @@ public class SceneController {
     @ResponseBody
     public Collection<ColorScene> listScenes() {
         List<ColorScene> colorScenes = sceneDao.fetchUserScenes(sessionHolder.currentUserId());
+        if (colorScenes.isEmpty()) {
+            ColorScene test = new ColorScene();
+            test.setName("test");
+            colorScenes.add(test);
+        }
         for (ColorScene scene : colorScenes)
             scene.prepareDeviceIds();
         return colorScenes;
@@ -48,7 +53,7 @@ public class SceneController {
 
     @RequestMapping(method = RequestMethod.PUT)
     @ResponseBody
-    public ColorScene updateDevice(@RequestBody ColorScene scene) {
+    public ColorScene updateScene(@RequestBody ColorScene scene) {
         scene.setDeviceParams(prepareSceneParams(scene));
 
         sceneDao.saveScene(scene, sessionHolder.currentUserId());
