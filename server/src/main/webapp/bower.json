@@ -1,6 +1,6 @@
 {
-  "name": "devices",
-  "version": "0.0.0",
+  "name": "Uproom",
+  "version": "0.0.1",
   "authors": [
     "Uproom Team"
   ],
@@ -27,7 +27,9 @@
     "seiyria-bootstrap-slider": "~4.0.8",
     "x-editable": "~1.5.1",
     "bootstrap-switch": "~2.0.1",
-    "mjolnic-bootstrap-colorpicker": "~2.0.1"
+    "mjolnic-bootstrap-colorpicker": "~2.0.1",
+    "raphael": "2.1.2",
+    "colorwheel": "~1.0.0"
   },
   "resolutions": {
     "jquery": "~2.1.3"
