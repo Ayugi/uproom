@@ -12,7 +12,9 @@ requirejs.config({
         bootstrap_popover   : '../components/bootstrap/js/bootstrap-popover',
         bootstrap_tooltip   : '../components/bootstrap/js/bootstrap-tooltip',
         bootstrap_switch    : '../components/bootstrap-switch/build/js/bootstrap-switch',
-        colorpicker         : '../components/mjolnic-bootstrap-colorpicker/dist/js/bootstrap-colorpicker',
+        //colorpicker         : '../components/mjolnic-bootstrap-colorpicker/dist/js/bootstrap-colorpicker',
+        raphael             : '../components/raphael/raphael',
+        colorwheel          : '../components/colorwheel/colorwheel'
         //baseView            : 'views/baseV'
     },
 
@@ -31,7 +33,8 @@ requirejs.config({
         bootstrap_popover:  ['jquery','bootstrap_tooltip'],
         bootstrap_tooltip:  ['jquery'],
         bootstrap_switch:   ['jquery'],
-        colorpicker:        ['jquery'],
+        colorwheel      :   ['raphael'],
+        raphael         :   ['jquery']
         //baseView:           ['Backbone']
     }
 });

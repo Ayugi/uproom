@@ -1,7 +1,6 @@
 define(['exports', 'backbone', 'js/views/baseV.js', 'js/views/accountMenu.js', 'js/views/auth.js', 'js/views/deviceList.js',
-        'js/views/sceneList.js','hbs!../../../templates/sidebar', 'handlebars', ],
-    function (exports, Backbone, Base, AccountMenu, Auth, DevicesList,
-              SceneList, SidebarTpl) {
+        'js/views/sceneList.js', 'hbs!../../../templates/sidebar', 'handlebars', ],
+    function (exports, Backbone, Base, AccountMenu, Auth, DevicesList, SceneList, SidebarTpl) {
         var SidebarView = Base.View.extend({template: SidebarTpl});
         _.extend(exports, {
             View: Base.View.extend({
@@ -40,18 +39,21 @@ define(['exports', 'backbone', 'js/views/baseV.js', 'js/views/accountMenu.js', '
                     this.layout.accountMenu = (new AccountMenu.View({app: this, el: '#fat-menu'})).render();
                     this.layout.auth = (new Auth.View({el: '#auth'})).render();
                     $('#main-frame').empty();
-                    if (this.model.modes.getActiveFrame() == 'devices'){
+                    if (this.model.modes.getActiveFrame() == 'devices') {
                         this.layout.list = (new DevicesList.View({el: '#main-frame'}));
                         this.layout.list.render();
                         this.layout.list.reset(this.model.devices);
                         this.model.devices.fetch();
                     }
-                    else {
+                    else if (this.model.modes.getActiveFrame() == 'scenes') {//
                         this.layout.list = (new SceneList.View({el: '#main-frame'}));
                         this.layout.list.render();
                         this.layout.list.reset(this.model.scenes);
                         this.model.scenes.fetch();
+                    } else {
+                        // video
                     }
+
                     this.layout.sidebar = (new SidebarView({el: '#sidebar'})).render();
                     var frameChange = this.frameChange;
                     // TODO this looks ugly, consider how to make it better
