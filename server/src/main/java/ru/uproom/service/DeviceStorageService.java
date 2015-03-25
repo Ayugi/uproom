@@ -1,5 +1,6 @@
 package ru.uproom.service;
 
+import ru.uproom.domain.ColorScene;
 import ru.uproom.domain.Device;
 
 import java.util.Collection;
@@ -15,5 +16,9 @@ public interface DeviceStorageService {
 
     Collection<Device> fetchDevices(int userId);
 
+    Device fetchDevice(int userId, int deviceId);
+
     Device updateDevice(int userId, Device device);
+
+    void applyScene(int userId, ColorScene scene);
 }

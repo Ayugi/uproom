@@ -38,4 +38,11 @@ public class SessionHolderImpl implements SessionHolder{
     public User currentUser() {
         return user.get();
     }
+
+    @Override
+    public int currentUserId() {
+        if (null == currentUser())
+            return 0;
+        return currentUser().getId();
+    }
 }
