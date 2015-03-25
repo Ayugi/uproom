@@ -1,7 +1,9 @@
 define(['exports', 'backbone', 'js/views/baseV.js', 'js/views/accountMenu.js', 'js/views/auth.js', 'js/views/deviceList.js',
-        'js/views/sceneList.js', 'hbs!../../../templates/sidebar', 'handlebars', ],
-    function (exports, Backbone, Base, AccountMenu, Auth, DevicesList, SceneList, SidebarTpl) {
+        'js/views/sceneList.js', 'hbs!../../../templates/sidebar', 'hbs!../../../templates/video', 'handlebars', ],
+    function (exports, Backbone, Base, AccountMenu, Auth, DevicesList, SceneList, SidebarTpl, VideoTpl) {
         var SidebarView = Base.View.extend({template: SidebarTpl});
+
+        var VideoView = Base.View.extend({template: VideoTpl});
         _.extend(exports, {
             View: Base.View.extend({
                 activate: function () {
@@ -40,18 +42,18 @@ define(['exports', 'backbone', 'js/views/baseV.js', 'js/views/accountMenu.js', '
                     this.layout.auth = (new Auth.View({el: '#auth'})).render();
                     $('#main-frame').empty();
                     if (this.model.modes.getActiveFrame() == 'devices') {
-                        this.layout.list = (new DevicesList.View({el: '#main-frame'}));
+                        this.layout.list = new DevicesList.View({el: '#main-frame'});
                         this.layout.list.render();
                         this.layout.list.reset(this.model.devices);
                         this.model.devices.fetch();
                     }
                     else if (this.model.modes.getActiveFrame() == 'scenes') {//
-                        this.layout.list = (new SceneList.View({el: '#main-frame'}));
+                        this.layout.list = new SceneList.View({el: '#main-frame'});
                         this.layout.list.render();
                         this.layout.list.reset(this.model.scenes);
                         this.model.scenes.fetch();
                     } else {
-                        // video
+                        this.layout.list = (new VideoView({el: '#main-frame'})).render();
                     }
 
                     this.layout.sidebar = (new SidebarView({el: '#sidebar'})).render();
@@ -63,7 +65,9 @@ define(['exports', 'backbone', 'js/views/baseV.js', 'js/views/accountMenu.js', '
                     $("#nav-scenes").on('click', function () {
                         frameChange('scenes')
                     });
-
+                    $("#nav-video").on('click', function () {
+                        frameChange('video')
+                    });
                     return this;
                 }
             })
