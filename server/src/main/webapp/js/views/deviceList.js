@@ -32,7 +32,7 @@ define(['exports', 'backbone', 'hbs!../../../templates/devices-list', 'js/views/
                 add: function (model) {
                     console.log("add: function (model) ", model);
 
-                    if (!model.get("type"))
+                    if (!model.get("type") || !Device.isDeviceViewable(model.get("type")))
                         return this;
 
                     var deviceView = new Device.View({

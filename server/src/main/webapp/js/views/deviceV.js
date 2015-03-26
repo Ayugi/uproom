@@ -8,26 +8,31 @@ define(['exports', 'backbone', 'hbs!../../../templates/rgbw', 'hbs!../../../temp
         var deviceTypesToTemplates = {
             MultilevelSwitch: DimmerTpl,
             BinarySwitch: SwitchTpl,
-            BinarySensor: "senson_binary",
-            MultilevelSensor: "sensor_analog",
+            //BinarySensor: "senson_binary",
+            //MultilevelSensor: "sensor_analog",
             Rgbw: RgbwTemplate
         }
 
         // ------------- Backbone definition -------------
-        _.extend(exports, {View: Backbone.View.extend({
-            events: {
-                'switch-change [data-id=switchCheck]': 'sendDevice',
-                'slideStop [data-id=level]': 'sendLevel',
-                'changeColor [data-id=colorPicker]': 'changeColor'
-            },
+        _.extend(exports, {
+            View: Backbone.View.extend({
+                events: {
+                    'switch-change [data-id=switchCheck]': 'sendDevice',
+                    'slideStop [data-id=level]': 'sendLevel',
+                    'changeColor [data-id=colorPicker]': 'changeColor'
+                },
 
-            sendDevice: switchChange,
-            sendLevel: changeLevel,
-            changeColor: changeColor,
-            initialize: initialize,
-            render: render,
-            tagName: 'tr'
-        })});
+                sendDevice: switchChange,
+                sendLevel: changeLevel,
+                changeColor: changeColor,
+                initialize: initialize,
+                render: render,
+                tagName: 'tr'
+            }),
+            isDeviceViewable : function (type){
+                return deviceTypesToTemplates[type]
+            }
+        });
         // ------------- functional code --------------
         function switchChange() {
             console.log("Click on device");
@@ -83,15 +88,15 @@ define(['exports', 'backbone', 'hbs!../../../templates/rgbw', 'hbs!../../../temp
 
             console.log("model.getColor().toString(16) " + model.getColor().toString(16));
             var colorPicker = Raphael.colorwheel($("#colorPickerContainer" + model.id), 250, 180)
-                .color("#"+ model.getColor().toString(16));
+                .color("#" + model.getColor().toString(16));
 
 
             // colorPicker.onchange(function (color) {
             colorPicker.ondrag(null, function (color) {
                 var colors = [parseInt(color.r), parseInt(color.g), parseInt(color.b)];
-                console.log("colorPicker.onchange" , color);
-                $("#colorDisplay"+model.id).css("background", color.hex);
-                model.setColor(parseInt(color.r)*256*256+parseInt(color.g)*256 + parseInt(color.b));
+                console.log("colorPicker.onchange", color);
+                $("#colorDisplay" + model.id).css("background", color.hex);
+                model.setColor(parseInt(color.r) * 256 * 256 + parseInt(color.g) * 256 + parseInt(color.b));
                 model.save();
             })
 
