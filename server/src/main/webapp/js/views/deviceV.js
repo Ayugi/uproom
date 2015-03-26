@@ -34,9 +34,9 @@ define(['exports', 'backbone', 'hbs!../../../templates/rgbw', 'hbs!../../../temp
             }
         });
         // ------------- functional code --------------
-        function switchChange() {
+        function switchChange(event, state) {
             console.log("Click on device");
-            this.model.switch();
+            this.model.setState(state.value);
             this.model.save();
         }
 
@@ -79,6 +79,14 @@ define(['exports', 'backbone', 'hbs!../../../templates/rgbw', 'hbs!../../../temp
             this.model.on('change', render, this);
         }
 
+        function hidePicker(model){
+
+        }
+
+        function showPicker(model){
+
+        }
+
         function templatePostProcessing(model) {
             $('#slider' + model.id).slider({
                 formatter: function (value) {
@@ -100,6 +108,26 @@ define(['exports', 'backbone', 'hbs!../../../templates/rgbw', 'hbs!../../../temp
                     model.setColor(parseInt(color.r) * 256 * 256 + parseInt(color.g) * 256 + parseInt(color.b));
                     model.save();
                 });
+
+                function hide(){
+                    $("#colorPickerContainer" + model.id).hide();
+                    var pickerSwitch = $("#colorPickerSwitch" + model.id);
+                    pickerSwitch.on('click',show);
+                    pickerSwitch.removeClass("fa-chevron-up");
+                    pickerSwitch.addClass("fa-chevron-down");
+                }
+
+                function show(){
+                    $("#colorPickerContainer" + model.id).show();
+                    var pickerSwitch = $("#colorPickerSwitch" + model.id);
+                    pickerSwitch.on('click',hide);
+                    pickerSwitch.removeClass("fa-chevron-down");
+                    pickerSwitch.addClass("fa-chevron-up");
+                }
+
+                $("#colorPickerSwitch" + model.id).on('click',hide());
+
+                $("#nav-video").on();
             }
 
 
