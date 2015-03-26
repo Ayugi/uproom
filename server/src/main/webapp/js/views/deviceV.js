@@ -87,19 +87,20 @@ define(['exports', 'backbone', 'hbs!../../../templates/rgbw', 'hbs!../../../temp
             });
 
             console.log("model.getColor().toString(16) " + model.getColor().toString(16));
-            if (model.get("type") == "Rgbw")
+            if (model.get("type") == "Rgbw") {
                 var colorPicker = Raphael.colorwheel($("#colorPickerContainer" + model.id), 250, 180)
                     .color("#" + model.getColor().toString(16));
 
 
-            // colorPicker.onchange(function (color) {
-            colorPicker.ondrag(null, function (color) {
-                var colors = [parseInt(color.r), parseInt(color.g), parseInt(color.b)];
-                console.log("colorPicker.onchange", color);
-                $("#colorDisplay" + model.id).css("background", color.hex);
-                model.setColor(parseInt(color.r) * 256 * 256 + parseInt(color.g) * 256 + parseInt(color.b));
-                model.save();
-            })
+                // colorPicker.onchange(function (color) {
+                colorPicker.ondrag(null, function (color) {
+                    var colors = [parseInt(color.r), parseInt(color.g), parseInt(color.b)];
+                    console.log("colorPicker.onchange", color);
+                    $("#colorDisplay" + model.id).css("background", color.hex);
+                    model.setColor(parseInt(color.r) * 256 * 256 + parseInt(color.g) * 256 + parseInt(color.b));
+                    model.save();
+                });
+            }
 
 
             /*
