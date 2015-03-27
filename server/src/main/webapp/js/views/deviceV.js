@@ -47,8 +47,9 @@ define(['exports', 'backbone', 'hbs!../../../templates/rgbw', 'hbs!../../../temp
 
         function render() {
             var model = this.model;
+            $('#switch' + model.id).empty();
             this.$el.html(this.template({
-                state: model.getState() == "On" ? "checked" : "",
+                state: model.getState() ? "checked" : "",
                 name: model.getName(),
                 id: model.id,
                 value: model.getLevel(),
@@ -60,6 +61,7 @@ define(['exports', 'backbone', 'hbs!../../../templates/rgbw', 'hbs!../../../temp
 
             templatePostProcessing(model);
 
+            model.on('change', this.render);
             return this;
         }
 
