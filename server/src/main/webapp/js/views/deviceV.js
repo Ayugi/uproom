@@ -17,12 +17,12 @@ define(['exports', 'backbone', 'hbs!../../../templates/rgbw', 'hbs!../../../temp
         _.extend(exports, {
             View: Backbone.View.extend({
                 events: {
-                    'switch-change [data-id=switchCheck]': 'sendDevice',
+                    'switch-change [data-id=switchCheck]': 'switchChange',
                     'slideStop [data-id=level]': 'sendLevel',
                     'changeColor [data-id=colorPicker]': 'changeColor'
                 },
 
-                sendDevice: switchChange,
+                switchChange: switchChange,
                 sendLevel: changeLevel,
                 changeColor: changeColor,
                 initialize: initialize,
@@ -38,6 +38,7 @@ define(['exports', 'backbone', 'hbs!../../../templates/rgbw', 'hbs!../../../temp
             console.log("Click on device");
             this.model.setState(state.value);
             this.model.save();
+            this.render();
         }
 
         function changeLevel() {
