@@ -32,10 +32,17 @@ define(['exports', 'backbone'], function (exports, Backbone) {
             console.log("state after " + this.get("state"));
         },
         setState: function (st) {
-            console.log("setState");
-            // TODO remove duplication
+            var p = this.parameters();
+            p.Switch = st;
 
-            this.parameters().Switch = st;
+            if (st) {
+                var levelBackup = this.get("levelBackup");
+                if (levelBackup)
+                    p.Level = levelBackup;
+            } else {
+                this.set("levelBackup", p.Level)
+                p.Level = 0;
+            }
         },
         getState: function () {
             console.log("getState");
@@ -45,8 +52,8 @@ define(['exports', 'backbone'], function (exports, Backbone) {
             return p.Switch;
         },
         getStateFlag: function () {
-            console.log("getStateFlag " + this.getState() == "On");
-            return this.getState() == "On";
+            console.log("getStateFlag " + this.getState());
+            return this.getState();
         },
         parameters: function(){
             var p = this.get("parameters");
@@ -59,10 +66,10 @@ define(['exports', 'backbone'], function (exports, Backbone) {
         setLevel: function (level) {
             // TODO remove duplication
             if (level > 0 && !this.getStateFlag())
-                this.setState("On")
+                this.setState(true)
 
             if (level == 0 && this.getStateFlag())
-                this.setState("Off")
+                this.setState(false)
 
             this.parameters().Level = level;
         },
