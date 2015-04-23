@@ -24,8 +24,6 @@ define(
             // And prepare UI
             mainView.activate();
             frameChange('devices');
-            frameChange('devices');
-
         }});
 
         mainView.layout.auth.setCallback({fail: function (user) {
@@ -51,7 +49,7 @@ define(
             //var test = new testModel();
 
             var modes = new Models.ViewModesModel();
-            modes.setActiveFrame('devices');
+            modes.setActiveFrame('auth');
 
             return {devices: devices, scenes : scenes, modes:modes};
         }

@@ -27,7 +27,11 @@ define(['exports', 'backbone', 'hbs!../../../templates/rgbw', 'hbs!../../../temp
                 changeColor: changeColor,
                 initialize: initialize,
                 render: render,
-                tagName: 'tr'
+                update: update,
+                templatePostProcessing:templatePostProcessing,
+                tagName: 'tr',
+
+                renderedFlag : false
             }),
             isDeviceViewable: function (type) {
                 return deviceTypesToTemplates[type]
@@ -38,7 +42,6 @@ define(['exports', 'backbone', 'hbs!../../../templates/rgbw', 'hbs!../../../temp
             console.log("Click on device");
             this.model.setState(state.value);
             this.model.save();
-            this.render();
         }
 
         function changeLevel() {
@@ -47,6 +50,7 @@ define(['exports', 'backbone', 'hbs!../../../templates/rgbw', 'hbs!../../../temp
         }
 
         function render() {
+            console.log("render" + arguments + " renderedFlag " + this.renderedFlag);
             var model = this.model;
             $('#switch' + model.id).empty();
             this.$el.html(this.template({
@@ -60,10 +64,23 @@ define(['exports', 'backbone', 'hbs!../../../templates/rgbw', 'hbs!../../../temp
 
             this.$el.data('id', model.id);
 
-            templatePostProcessing(model);
-
-            model.on('change', this.render);
+            this.templatePostProcessing(model);
+            var _this = this;
+            function callUpdate(){
+                _this.update();
+            }
+            model.off('change');
+            model.on('change', callUpdate);
+            this.renderedFlag = true;
             return this;
+        }
+
+        function update() {
+            console.log("update renderedFlag " + this.renderedFlag);
+
+            $('#switch' + this.model.id).bootstrapSwitch('setState', this.model.getState());
+            if (this.slider)
+                this.slider.slider('setValue', parseInt(this.model.getLevel()));
         }
 
         function changeColor(ev) {
@@ -79,19 +96,19 @@ define(['exports', 'backbone', 'hbs!../../../templates/rgbw', 'hbs!../../../temp
             Backbone.View.prototype.initialize.call(this, options);
             this.template = deviceTypesToTemplates[options.type];
             //options.template;
-            this.model.on('change', render, this);
+            //this.model.on('change', render, this);
         }
 
-        function hidePicker(model){
+        function hidePicker(model) {
 
         }
 
-        function showPicker(model){
+        function showPicker(model) {
 
         }
 
         function templatePostProcessing(model) {
-            $('#slider' + model.id).slider({
+            this.slider = $('#slider' + model.id).slider({
                 formatter: function (value) {
                     return 'Current value: ' + value;
                 }
@@ -112,23 +129,23 @@ define(['exports', 'backbone', 'hbs!../../../templates/rgbw', 'hbs!../../../temp
                     model.save();
                 });
 
-                function hide(){
+                function hide() {
                     $("#colorPickerContainer" + model.id).hide();
                     var pickerSwitch = $("#colorPickerSwitch" + model.id);
-                    pickerSwitch.on('click',show);
+                    pickerSwitch.on('click', show);
                     pickerSwitch.removeClass("fa-chevron-up");
                     pickerSwitch.addClass("fa-chevron-down");
                 }
 
-                function show(){
+                function show() {
                     $("#colorPickerContainer" + model.id).show();
                     var pickerSwitch = $("#colorPickerSwitch" + model.id);
-                    pickerSwitch.on('click',hide);
+                    pickerSwitch.on('click', hide);
                     pickerSwitch.removeClass("fa-chevron-down");
                     pickerSwitch.addClass("fa-chevron-up");
                 }
 
-                $("#colorPickerSwitch" + model.id).on('click',hide());
+                $("#colorPickerSwitch" + model.id).on('click', hide());
 
                 $("#nav-video").on();
             }
@@ -139,7 +156,7 @@ define(['exports', 'backbone', 'hbs!../../../templates/rgbw', 'hbs!../../../temp
              $('#picker' + model.id).colorpicker();
              });*/
 
-            $('#switch' + model.id).bootstrapSwitch();
+            this.switch = $('#switch' + model.id).bootstrapSwitch();
 
             function onEdit(response, newValue) {
                 model.setName(newValue)

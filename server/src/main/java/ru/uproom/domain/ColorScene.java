@@ -35,7 +35,7 @@ public class ColorScene {
 
     @OneToMany(mappedBy = "scene")
     @JsonIgnore
-    private List<ColorSceneDeviceParam> deviceParams;
+    private List<ColorSceneDeviceParam> deviceParams = new ArrayList<>();
 
     @Transient
     private Set<Integer> deviceIds;
