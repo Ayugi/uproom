@@ -39,10 +39,13 @@ define(['exports', 'backbone'], function (exports, Backbone) {
                 var levelBackup = this.get("levelBackup");
                 if (levelBackup)
                     p.Level = levelBackup;
+                else
+                    p.Level = 100;
             } else {
                 this.set("levelBackup", p.Level)
                 p.Level = 0;
             }
+            this.trigger("change", "state");
         },
         getState: function () {
             console.log("getState");
@@ -72,6 +75,8 @@ define(['exports', 'backbone'], function (exports, Backbone) {
                 this.setState(false)
 
             this.parameters().Level = level;
+
+            this.trigger("change", "level");
         },
 
         getLevel: function () {

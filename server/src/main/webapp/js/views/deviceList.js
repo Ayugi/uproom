@@ -10,72 +10,86 @@ define(['exports', 'backbone', 'hbs!../../../templates/devices-list', 'js/views/
                     'click [id=add-device-btn]': 'sendAddDevice'
                 },
 
-                sendAddDevice: function () {
-                    console.log("IN sendAddDevice");
-                    console.log("$=", $);
-                    console.log("$.ajax=", $.ajax);
+                sendAddDevice: sendAddDevice,
+                rendered: [],
+                add: add,
 
-                    $.ajax(DEVICES_URL + "/add");
-
-                    $("#gateStatusSpan")[0].innerHTML = "test";
-                    $.ajax({
-                        type: "GET",
-                        url: "http://localhost:8080/rest/devices/status",
-
-                        success: function (data) {
-                            $("#gateStatusSpan")[0].innerHTML = data;
-                        }
-                    });
-
-                },
-
-                add: function (model) {
-                    console.log("add: function (model) ", model);
-
-                    if (!model.get("type") || !Device.isDeviceViewable(model.get("type")))
-                        return this;
-
-                    var deviceView = new Device.View({
-                        model: model, type: model.get("type") })
-
-                    this.layout.items = this.layout.items.concat(deviceView)
-                    this.addItem(deviceView.el);
-
-                    deviceView.render();
-
-                    return this;
-                },
-
-                // Append actual html element to the DOM
-                addItem: function (el) {
-                    this.$('[data-id=list-container]').append(el);
-                    return this
-                },
 
                 // Clear internal items storage and DOM structure
-                clear: function () {
-                    _.invoke(this.layout.items, 'remove');
-                    this.layout.items = [];
-                    return this
-                },
+                clear: clear,
 
                 // List item view
 
-                reset: function (collection) {
-                    this.collection = collection;
-
-                    // Create new item once collection gets new model
-                    this.collection.off('add', this.add, this);
-                    this.collection.on('add', this.add, this);
-
-                    this.clear();
-                    this.collection.each(this.add, this);
-
-                    return this;
-                },
+                reset: reset,
 
                 template: DevicesListTpl
             })
         });
+
+        function sendAddDevice() {
+            console.log("IN sendAddDevice");
+            console.log("$=", $);
+            console.log("$.ajax=", $.ajax);
+
+            $.ajax(DEVICES_URL + "/add");
+
+            $("#gateStatusSpan")[0].innerHTML = "test";
+            $.ajax({
+                type: "GET",
+                url: "http://localhost:8080/rest/devices/status",
+
+                success: function (data) {
+                    $("#gateStatusSpan")[0].innerHTML = data;
+                }
+            });
+
+        }
+
+        function add(model) {
+            if ($.inArray(model.id, this.rendered)>=0)
+                return;
+            this.rendered.push( model.id);
+            console.log("add: function (model) ", model);
+
+            if (!model.get("type") || !Device.isDeviceViewable(model.get("type")))
+                return this;
+
+            var deviceView = new Device.View({
+                model: model, type: model.get("type") })
+
+            this.layout.items = this.layout.items.concat(deviceView)
+            addItem(deviceView.el);
+
+            deviceView.render();
+
+            return this;
+        }
+
+        // Append actual html element to the DOM
+        function addItem(el) {
+            $('[data-id=list-container]').append(el);
+            return this
+        }
+
+        function clear() {
+            _.invoke(this.layout.items, 'remove');
+            this.layout.items = [];
+            return this
+        }
+
+        function reset (collection) {
+
+            this.collection = collection;
+            this.rendered = [];
+
+            // Create new item once collection gets new model
+            this.collection.off('add', this.add, this);
+            this.collection.on('add', this.add, this);
+
+            this.clear();
+            this.collection.each(this.add, this);
+
+            return this;
+        }
     }
 );
