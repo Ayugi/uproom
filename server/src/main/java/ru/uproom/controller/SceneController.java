@@ -45,6 +45,7 @@ public class SceneController {
             ColorScene test = new ColorScene();
             test.setName("test");
             colorScenes.add(test);
+            sceneDao.saveScene(test, sessionHolder.currentUserId());
         }
         for (ColorScene scene : colorScenes)
             scene.prepareDeviceIds();
