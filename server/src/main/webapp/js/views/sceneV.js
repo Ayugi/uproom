@@ -7,8 +7,9 @@ define(['exports', 'backbone', 'hbs!../../../templates/scene', 'handlebars'],
         _.extend(exports, {
             View: Backbone.View.extend({
                 events: {
+                    'click [data-id=delete]': 'deleteScene'
                 },
-
+                deleteScene: deleteScene,
                 template: scene,
                 initialize: initialize,
                 render: render,
@@ -23,6 +24,11 @@ define(['exports', 'backbone', 'hbs!../../../templates/scene', 'handlebars'],
             }
         });
         // ------------- functional code --------------
+
+        function deleteScene() {
+            console.log("deleteScene" + this.model.id);
+            this.model.destroy();
+        }
 
         function render() {
             console.log("render" + arguments + " renderedFlag " + this.renderedFlag);

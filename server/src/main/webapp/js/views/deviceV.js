@@ -19,7 +19,8 @@ define(['exports', 'backbone', 'hbs!../../../templates/rgbw', 'hbs!../../../temp
                 events: {
                     'switch-change [data-id=switchCheck]': 'switchChange',
                     'slideStop [data-id=level]': 'sendLevel',
-                    'changeColor [data-id=colorPicker]': 'changeColor'
+                    'changeColor [data-id=colorPicker]': 'changeColor',
+                    'change [data-id=sceneSelect]': 'sceneSelect'
                 },
 
                 switchChange: switchChange,
@@ -28,15 +29,21 @@ define(['exports', 'backbone', 'hbs!../../../templates/rgbw', 'hbs!../../../temp
                 initialize: initialize,
                 render: render,
                 update: update,
-                templatePostProcessing:templatePostProcessing,
+                templatePostProcessing: templatePostProcessing,
+                sceneSelect: sceneSelect,
                 tagName: 'tr',
 
-                renderedFlag : false
+                renderedFlag: false
             }),
             isDeviceViewable: function (type) {
                 return deviceTypesToTemplates[type]
             }
         });
+
+        function sceneSelect(event) {
+            this.selectDeviceForScene(this.model.id, event.target.checked)
+        }
+
         // ------------- functional code --------------
         function switchChange(event, state) {
             console.log("Click on device");
@@ -59,16 +66,19 @@ define(['exports', 'backbone', 'hbs!../../../templates/rgbw', 'hbs!../../../temp
                 id: model.id,
                 value: model.getLevel(),
                 zid: model.getZId(),
-                color: '#' + model.getColor().toString(16)
+                color: '#' + model.getColor().toString(16),
+                selectScene: "newScene" == this.mode
             }));
 
             this.$el.data('id', model.id);
 
             this.templatePostProcessing(model);
             var _this = this;
-            function callUpdate(){
+
+            function callUpdate() {
                 _this.update();
             }
+
             model.off('change');
             model.on('change', callUpdate);
             this.renderedFlag = true;
@@ -91,12 +101,12 @@ define(['exports', 'backbone', 'hbs!../../../templates/rgbw', 'hbs!../../../temp
             this.model.save();
         }
 
-
         function initialize(options) {
             Backbone.View.prototype.initialize.call(this, options);
+            console.log(Backbone.View.prototype.initialize);
             this.template = deviceTypesToTemplates[options.type];
-            //options.template;
-            //this.model.on('change', render, this);
+            this.mode = options.mode;
+            this.selectDeviceForScene = options.selectDeviceForScene;
         }
 
         function hidePicker(model) {

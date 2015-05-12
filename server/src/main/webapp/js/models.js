@@ -11,10 +11,9 @@ define(['exports', 'backbone', 'js/models/deviceM.js', 'js/models/viewModes.js',
         exports.ViewModesModel = ViewModes.Model;
 
         exports.ScenesCollection = Backbone.Collection.extend({
-            model:Scene.Model,
+            model: Scene.Model,
             url: SCENES_URL
         });
-
 
 
     });

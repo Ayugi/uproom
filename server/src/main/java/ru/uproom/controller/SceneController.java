@@ -3,6 +3,7 @@ package ru.uproom.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import ru.uproom.domain.ColorScene;
@@ -52,9 +53,9 @@ public class SceneController {
         return colorScenes;
     }
 
-    @RequestMapping(method = RequestMethod.PUT)
+    @RequestMapping(method = RequestMethod.PUT, value = "{id}")
     @ResponseBody
-    public ColorScene updateScene(@RequestBody ColorScene scene) {
+    public ColorScene updateScene(@RequestBody ColorScene scene, @PathVariable int id) {
         scene.setDeviceParams(prepareSceneParams(scene));
 
         sceneDao.saveScene(scene, sessionHolder.currentUserId());
@@ -62,8 +63,25 @@ public class SceneController {
         return scene;
     }
 
+    @RequestMapping(method = RequestMethod.POST)
+    @ResponseBody
+    public ColorScene addScene(@RequestBody ColorScene scene) {
+        scene.setDeviceParams(prepareSceneParams(scene));
+
+        sceneDao.saveScene(scene, sessionHolder.currentUserId());
+
+        return scene;
+    }
+
+    @RequestMapping(method = RequestMethod.DELETE,value = "{id}",
+            consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.ALL_VALUE})
+    @ResponseBody
+    public ColorScene deleteScene( @PathVariable int id) {
+        return sceneDao.removeScene(sessionHolder.currentUserId(),id);
+    }
+
     @RequestMapping(method = RequestMethod.GET, value = "apply/{id}")
-    public void applyScene(@PathVariable int id){
+    public void applyScene(@PathVariable int id) {
         ColorScene scene = sceneDao.fetchUserScene(sessionHolder.currentUserId(), id);
         storageService.applyScene(sessionHolder.currentUserId(), scene);
     }
@@ -74,7 +92,7 @@ public class SceneController {
             Device device = storageService.fetchDevice(sessionHolder.currentUserId(), deviceId);
             for (Map.Entry<DeviceParametersNames, Object> entry : device.getParameters().entrySet())
                 params.add(new ColorSceneDeviceParam(
-                        deviceId,entry.getKey(),
+                        deviceId, entry.getKey(),
                         String.valueOf(entry.getValue())
                 ));
         }

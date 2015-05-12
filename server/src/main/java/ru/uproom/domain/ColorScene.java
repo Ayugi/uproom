@@ -25,7 +25,7 @@ public class ColorScene {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user")
     @JsonIgnore
     private User user;
@@ -38,7 +38,7 @@ public class ColorScene {
     private List<ColorSceneDeviceParam> deviceParams = new ArrayList<>();
 
     @Transient
-    private Set<Integer> deviceIds;
+    private Set<Integer> deviceIds = new HashSet<>();
 
     public int getId() {
         return id;

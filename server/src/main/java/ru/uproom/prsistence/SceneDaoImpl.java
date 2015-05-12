@@ -36,6 +36,14 @@ public class SceneDaoImpl implements SceneDao {
     }
 
     @Override
+    public ColorScene removeScene(int userId, int sceneId) {
+        ColorScene scene = entityManager.find(ColorScene.class, sceneId);
+        if (null != scene && scene.getUser().getId() == userId)
+            entityManager.remove(scene);
+        return scene;
+    }
+
+    @Override
     public List<ColorScene> fetchUserScenes(int userId) {
         User user = new User();
         user.setId(userId);

@@ -11,6 +11,8 @@ import java.util.List;
 public interface SceneDao {
     ColorScene saveScene(ColorScene scene, int userId);
 
+    ColorScene removeScene(int userId, int sceneId);
+
     List<ColorScene> fetchUserScenes(int userId);
 
     ColorScene fetchUserScene(int userId, int sceneId);
