@@ -17,8 +17,8 @@ define(['exports', 'backbone', 'hbs!../../../templates/rgbw', 'hbs!../../../temp
         _.extend(exports, {
             View: Backbone.View.extend({
                 events: {
-                    'switch-change [data-id=switchCheck]': 'switchChange',
-                    'slideStop [data-id=level]': 'sendLevel',
+                    'change [data-id=switchCheck]': 'switchChange',
+                    'change [data-id=level]': 'sendLevel',
                     'changeColor [data-id=colorPicker]': 'changeColor',
                     'change [data-id=sceneSelect]': 'sceneSelect'
                 },
@@ -31,7 +31,7 @@ define(['exports', 'backbone', 'hbs!../../../templates/rgbw', 'hbs!../../../temp
                 update: update,
                 templatePostProcessing: templatePostProcessing,
                 sceneSelect: sceneSelect,
-                tagName: 'tr',
+                tagName: 'div',
 
                 renderedFlag: false
             }),
@@ -45,13 +45,14 @@ define(['exports', 'backbone', 'hbs!../../../templates/rgbw', 'hbs!../../../temp
         }
 
         // ------------- functional code --------------
-        function switchChange(event, state) {
+        function switchChange(event) {
             console.log("Click on device");
-            this.model.setState(state.value);
+            this.model.setState(event.currentTarget.checked);
             this.model.save();
         }
 
         function changeLevel() {
+            console.log("changeLevel");
             this.model.setLevel(this.$('[data-id=level]').val());
             this.model.save();
         }
@@ -88,9 +89,11 @@ define(['exports', 'backbone', 'hbs!../../../templates/rgbw', 'hbs!../../../temp
         function update() {
             console.log("update renderedFlag " + this.renderedFlag);
 
-            $('#switch' + this.model.id).bootstrapSwitch('setState', this.model.getState());
+            //$('#switch' + this.model.id).bootstrapSwitch('setState', this.model.getState());
             if (this.slider)
-                this.slider.slider('setValue', parseInt(this.model.getLevel()));
+                this.slider.val(parseInt(this.model.getLevel()));
+            //if ($('#switch' + this.model.id)[0].checked != this.model.getState())
+                $('#switch' + this.model.id)[0].checked = this.model.getState();
         }
 
         function changeColor(ev) {
@@ -118,11 +121,38 @@ define(['exports', 'backbone', 'hbs!../../../templates/rgbw', 'hbs!../../../temp
         }
 
         function templatePostProcessing(model) {
-            this.slider = $('#slider' + model.id).slider({
-                formatter: function (value) {
-                    return 'Current value: ' + value;
-                }
-            });
+            var deviceView = this;
+            if ($('#slider' + model.id)[0]) {
+                $('#slider' + model.id).each(function () {
+                    var isStart = $(this).data('is-start');
+
+                    deviceView.slider = $(this).noUiSlider({
+                        start: isStart,
+                        range: {
+                            'min': 0,
+                            'max': 100
+                        }
+                    });
+                });
+            }
+
+            /*
+
+             if($('#slider' + model.id)) {
+             $('#slider' + model.id).Link('lower').to($('#s_value'), null, wNumb({
+             decimals: 0,
+             postfix: '%',
+             }));
+             // $('#theslider').Link('lower').to($('#s_value'));
+             }
+
+
+             /*
+             this.slider = $('#slider' + model.id).slider({
+             formatter: function (value) {
+             return 'Current value: ' + value;
+             }
+             });*/
 
             console.log("model.getColor().toString(16) " + model.getColor().toString(16));
             if (model.get("type") == "Rgbw") {
@@ -166,15 +196,16 @@ define(['exports', 'backbone', 'hbs!../../../templates/rgbw', 'hbs!../../../temp
              $('#picker' + model.id).colorpicker();
              });*/
 
-            this.switch = $('#switch' + model.id).bootstrapSwitch();
+            //this.switch = $('#switch' + model.id).bootstrapSwitch();
 
-            function onEdit(response, newValue) {
-                model.setName(newValue)
-                model.save();
-            }
+            /*
+             function onEdit(response, newValue) {
+             model.setName(newValue)
+             model.save();
+             }
 
-            $('#devicename' + model.id).editable({
-                success: onEdit
-            });
+             $('#devicename' + model.id).editable({
+             success: onEdit
+             });*/
         }
     })

@@ -48,8 +48,45 @@ define(['exports', 'backbone', 'hbs!../../../templates/auth', 'js/views/baseV.js
                     return this;
                 },
 
+                initialize: function (options) {
+                    Base.View.prototype.initialize.call(this, options);
+                    this.callback = {};
+                    this.callback.success = options.authSuccess;
+                },
+
+                render: render,
+
                 template: AuthTpl
             })
         });
+
+        function render() {
+            console.log("render auth ");
+            this.$el.html(this.template({}));
+            inputDecoration();
+        }
+
+        function inputDecoration(){
+            //Add blue animated border and remove with condition when focus and blur
+            if($('.fg-line')[0]) {
+                $('body').on('focus', '.form-control', function(){
+                    $(this).closest('.fg-line').addClass('fg-toggled');
+                })
+
+                $('body').on('blur', '.form-control', function(){
+                    var p = $(this).closest('.form-group');
+                    var i = p.find('.form-control').val();
+
+                    if (p.hasClass('fg-float')) {
+                        if (i.length == 0) {
+                            $(this).closest('.fg-line').removeClass('fg-toggled');
+                        }
+                    }
+                    else {
+                        $(this).closest('.fg-line').removeClass('fg-toggled');
+                    }
+                });
+            }
+        }
     }
 );
