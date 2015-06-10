@@ -7,5 +7,7 @@ define(['exports', 'backbone'], function (exports, Backbone) {
         setName: function (name) {
             this.set('name', name);
         }
+//        ,        url: SCENES_URL
+
     });
 });

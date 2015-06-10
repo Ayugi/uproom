@@ -38,19 +38,28 @@ define(['exports', 'backbone', 'js/views/baseV.js', 'js/views/accountMenu.js', '
                 },
 
                 render: function () {
+                    var _this = this;
+                    function modeChange(frame,mode){
+                        console.log("modeChange" + _this.model.modes.getActiveFrame());
+                        _this.model.modes.setMode(mode);
+                        _this.frameChange(frame);
+                    }
                     this.layout.accountMenu = (new AccountMenu.View({app: this, el: '#fat-menu'})).render();
                     this.layout.auth = (new Auth.View({el: '#auth'})).render();
                     $('#main-frame').empty();
                     if (this.model.modes.getActiveFrame() == 'devices') {
-                        this.layout.list = new DevicesList.View({el: '#main-frame'});
+                        console.log("devices mode " + this.model.modes.getMode());
+                        this.layout.list = new DevicesList.View({el: '#main-frame',
+                            mode:this.model.modes.getMode(),
+                            sceneCollection: this.model.scenes});
                         this.layout.list.render();
-                        this.layout.list.reset(this.model.devices);
+                        this.layout.list.reset(this.model.devices, modeChange);
                         this.model.devices.fetch();
                     }
                     else if (this.model.modes.getActiveFrame() == 'scenes') {//
                         this.layout.list = new SceneList.View({el: '#main-frame'});
                         this.layout.list.render();
-                        this.layout.list.reset(this.model.scenes);
+                        this.layout.list.reset(this.model.scenes, modeChange);
                         this.model.scenes.fetch();
                     } else {
                         this.layout.list = (new VideoView({el: '#main-frame'})).render();

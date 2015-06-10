@@ -9,6 +9,13 @@ define(['exports', 'backbone'], function (exports, Backbone) {
         },
         setActiveFrame: function (frame) {
             this.set('activeFrame', frame);
+        },
+        getMode : function(){
+            return this.get('mode');
+        },
+        setMode : function(mode){
+            this.set('mode',mode);
         }
+
     });
 });

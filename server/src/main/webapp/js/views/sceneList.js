@@ -1,61 +1,82 @@
 /**
  * Created by HEDIN on 09.01.2015.
  */
-define(['exports', 'backbone', 'hbs!../../../templates/scene-list', 'js/views/baseV.js', 'handlebars'], function (exports, Backbone, SceneListTpl, Base) {
-    _.extend(exports, {
-        View: Base.View.extend({
-            events: {
-                /*'switch-change [data-id=switchCheck]': 'sendDevice',
-                 'slideStop [data-id=level]': 'sendLevel',
-                 'changeColor [data-id=colorPicker]': 'changeColor'*/
-            },
-            reset: reset,
-            add: add,
-            clear: clear,
-            template: SceneListTpl
-        })
-    });
+define(['exports', 'backbone', 'hbs!../../../templates/scene-list', 'js/views/baseV.js', 'js/views/sceneV.js',
+        'js/models/sceneM.js', 'handlebars'],
+    function (exports, Backbone, SceneListTpl, Base, Scene, SceneModel) {
+        _.extend(exports, {
+            View: Base.View.extend({
+                events: {
+                    'click [id=add-scene-btn]': 'addscene'
 
-    function add(model) {
-        if ($.inArray(model.id, this.rendered)>=0)
-            return;
-        this.rendered.push( model.id);
-        console.log("add: function (model) ", model);
+                    /*'switch-change [data-id=switchCheck]': 'sendDevice',
+                     'slideStop [data-id=level]': 'sendLevel',
+                     'changeColor [data-id=colorPicker]': 'changeColor'*/
+                },
+                addscene: addScene,
+                reset: reset,
+                add: add,
+                destroy:destroy,
+                clear: clear,
+                template: SceneListTpl
+            })
+        });
 
-        if (!model.get("type") || !Device.isDeviceViewable(model.get("type")))
+        function addScene(){
+            //var newScene = this.collection.create({name: 'new'});
+            this.modeChange("devices","newScene");
+            //add(newScene);
+        }
+
+        function add(model) {
+            console.log("scene add rendered model", this.rendered, model.id);
+            if (!model.id)
+                return;
+            if ($.inArray(model.id, this.rendered) >= 0)
+                return;
+            this.rendered.push(model.id);
+
+            var sceneView = new Scene.View({model: model})
+
+            this.layout.items = this.layout.items.concat(sceneView)
+            addItem(sceneView.el);
+
+            sceneView.render();
+
             return this;
+        }
 
-        var deviceView = new Device.View({
-            model: model, type: model.get("type") })
+        function destroy(model){
+            console.log("on collection model destroy" + model.id);
+        }
 
-        this.layout.items = this.layout.items.concat(deviceView)
-        addItem(deviceView.el);
+        function addItem(el) {
+            $('[data-id=list-container]').append(el);
+        }
 
-        deviceView.render();
+        function reset(collection, modeChange) {
+            console.log("reset" );
+            this.modeChange = modeChange;
+            this.collection = collection;
+            this.rendered = [];
 
-        return this;
-    }
+            // Create new item once collection gets new model
+            this.collection.off('add', this.add, this);
+            this.collection.off('destroy', this.destroy, this);
+            this.collection.on('add', this.add, this);
+            this.collection.on('destroy', this.destroy, this);
 
-    function reset(collection) {
+            this.clear();
+            this.collection.each(this.add, this);
 
-        this.collection = collection;
-        this.rendered = [];
+            return this;
+        }
 
-        // Create new item once collection gets new model
-        this.collection.off('add', this.add, this);
-        this.collection.on('add', this.add, this);
-
-        this.clear();
-        this.collection.each(this.add, this);
-
-        return this;
-    }
-
-    function clear() {
-        _.invoke(this.layout.items, 'remove');
-        this.layout.items = [];
-        return this
-    }
+        function clear() {
+            _.invoke(this.layout.items, 'remove');
+            this.layout.items = [];
+            return this
+        }
 
 
-})
+    })

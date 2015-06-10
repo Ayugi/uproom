@@ -7,24 +7,24 @@ define(['exports', 'backbone', 'hbs!../../../templates/devices-list', 'js/views/
         _.extend(exports, {
             View: Base.View.extend({
                 events: {
-                    'click [id=add-device-btn]': 'sendAddDevice'
-                },
+                    'click [id=add-device-btn]': 'sendAddDevice',
+                    'click [id=add-scene-finish-btn]': 'sendAddScene'
 
+
+                },
                 sendAddDevice: sendAddDevice,
+                sendAddScene: sendAddScene,
                 rendered: [],
                 add: add,
-
-
-                // Clear internal items storage and DOM structure
                 clear: clear,
-
-                // List item view
-
                 reset: reset,
-
-                template: DevicesListTpl
+                template: DevicesListTpl,
+                render: render ,
+                initialize: initialize
             })
         });
+
+        var _this = this.View;
 
         function sendAddDevice() {
             console.log("IN sendAddDevice");
@@ -45,19 +45,47 @@ define(['exports', 'backbone', 'hbs!../../../templates/devices-list', 'js/views/
 
         }
 
-        function add(model) {
-            if ($.inArray(model.id, this.rendered)>=0)
+        function sendAddScene(event){
+            console.log("sendAddScene " , _this.selectedDevices);
+            if (!_this.selectedDevices)
                 return;
-            this.rendered.push( model.id);
+            this.sceneCollection.create({name: 'new', deviceIds: _this.selectedDevices});
+            _this.selectedDevices = null;
+            this.modeChange("scenes","");
+        }
+
+        function selectDeviceForScene(id, selecet){
+            if (selecet)
+                _this.selectedDevices.push(id);
+            else
+                _this.selectedDevices.splice(_this.selectedDevices.indexOf(id),1);
+            console.log(id  + " " + selecet, _this.selectedDevices);
+        }
+
+        function render() {
+            console.log("render device list " + this.mode);
+            var model = this.model;
+            this.$el.html(this.template({
+                sceneSelect: "newScene" == this.mode
+            }));
+        }
+
+        function add(model) {
+            if ($.inArray(model.id, this.rendered) >= 0)
+                return;
+            this.rendered.push(model.id);
             console.log("add: function (model) ", model);
 
             if (!model.get("type") || !Device.isDeviceViewable(model.get("type")))
                 return this;
 
             var deviceView = new Device.View({
-                model: model, type: model.get("type") })
+                model: model,
+                type: model.get("type"),
+                mode: this.mode ,
+                selectDeviceForScene: selectDeviceForScene});
 
-            this.layout.items = this.layout.items.concat(deviceView)
+            this.layout.items = this.layout.items.concat(deviceView);
             addItem(deviceView.el);
 
             deviceView.render();
@@ -77,7 +105,9 @@ define(['exports', 'backbone', 'hbs!../../../templates/devices-list', 'js/views/
             return this
         }
 
-        function reset (collection) {
+        function reset(collection, modeChange) {
+            this.modeChange = modeChange;
+            console.log("this.prototype.initialize" + this.__proto__.initialize);
 
             this.collection = collection;
             this.rendered = [];
@@ -91,5 +121,15 @@ define(['exports', 'backbone', 'hbs!../../../templates/devices-list', 'js/views/
 
             return this;
         }
+
+        function initialize(options) {
+            this.__proto__.initialize(options);
+            //Backbone.View.prototype.initialize.call(this, options);
+            this.mode = options.mode;
+            if ("newScene" == this.mode)
+                _this.selectedDevices = [];
+            this.sceneCollection = options.sceneCollection;
+        }
+
     }
 );
