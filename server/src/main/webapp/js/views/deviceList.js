@@ -66,7 +66,7 @@ define(['exports', 'backbone', 'hbs!../../../templates/devices-list', 'js/views/
             console.log("render device list " + this.mode);
             var model = this.model;
             this.$el.html(this.template({
-                sceneSelect: "newScene" == this.mode
+                //sceneSelect: "newScene" == this.mode
             }));
         }
 

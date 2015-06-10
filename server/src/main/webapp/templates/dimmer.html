@@ -1,3 +1,31 @@
+<div class="lv-item">
+    <div class="row">
+
+        <div class="col-xs-3">
+            {{ name }}({{ zid }})
+        </div>
+
+        <div class="checkbox col-xs-1">
+            <input data-on-label="I" data-off-label="O" class="bootstrap-switch-mini"
+                   id="switch{{ id }}" data-id="switchCheck" type="checkbox" {{ state }}>
+
+            <i class="input-helper"></i>
+        </div>
+
+        <div style="padding: 8px;" class="col-xs-5">
+            <div data-id="level" id="slider{{ id }}" class="input-slider"  data-is-start="35"></div>
+            <!-- id="theslider" -->
+        </div>
+
+        <div class="col-xs-2">
+            <span class="f-12" id="s_value"></span>
+        </div>
+
+    </div>
+</div>
+
+
+<!--
 {{#if selectScene }}
 <td>
     <input id="sceneSelect{{ id }}" data-id="sceneSelect" type="checkbox"/>
@@ -20,3 +48,4 @@
     </div>
 
 </td>
+-->
