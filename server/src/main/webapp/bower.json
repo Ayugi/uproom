@@ -32,5 +32,10 @@
         "jquery.nicescroll": "3.6.0",
         "waves": "0.7.2",
         "nouislider" : "7.0.10"
+    },
+    "resolutions": {
+        "jquery": ">= 1.9.1",
+        "bootstrap": "~3.3.4"
     }
+
 }
