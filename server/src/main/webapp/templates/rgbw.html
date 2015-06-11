@@ -1,38 +1,60 @@
-{{#if selectScene }}
-<td>
-    <input id="sceneSelect{{ id }}" data-id="sceneSelect" type="checkbox"/>
-</td>
-{{/if}}
-<td>
-    <a href="#" id="devicename{{ id }}" data-id="deviceName" data-type="text">{{ name }}</a>
-    <span>({{ zid }})</span>
-</td>
-<td>
-    <div class="row-fluid">
-        <div class="block u-block span2">
-            <input data-on-label="I" data-off-label="O" class="bootstrap-switch-mini"
-                   id="switch{{ id }}" data-id="switchCheck" type="checkbox" {{ state }}>
-        </div>
+<span>{{ name }}({{ zid }})</span>
 
-        <!-- <input type="text" id="picker{{ id }}" data-id="colorPicker"
-               data-format="hex" value="{{ color }}"/> -->
-        <div id="colorDisplay{{ id }}" class="span1" style="background-color:{{ color }}">
-            <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
-        </div>
-        <div class="span1">
-            <i id="colorPickerSwitch{{ id }}" style="color: red" class="fa  fa-lg fa-chevron-up"></i>
-        </div>
-        <br/>
+<div class="container-fluid">
+    <div class="row">
 
-    </div>
-    <div class="row-fluid">
-        <div style="visibility: visible; " class="span12" id="colorPickerContainer{{ id }}"></div>
+        <div class="cpicker" id="colorPickerContainer{{ id }}"></div>
     </div>
 
-    <!--
-    <div class="block u-block span9">
-        <input id="slider{{ id }}" data-id="level" data-slider-id='slider' type="text" data-slider-min="0"
-               data-slider-max="100" data-slider-step="1" data-slider-value="{{ value }}"/>
-    </div>-->
+    <div class="row">
+        &nbsp;
+    </div>
 
-</td>
+    <div class="row">
+        <div id="colorDisplay{{ id }}"
+             style="padding: 5px; color: rgb(255, 255, 255); background: #00F; width: 100%">
+            RGB: ------
+        </div>
+
+    </div>
+</div>
+
+
+<!--{{#if selectScene }}-->
+<!--<td>-->
+    <!--<input id="sceneSelect{{ id }}" data-id="sceneSelect" type="checkbox"/>-->
+<!--</td>-->
+<!--{{/if}}-->
+<!--<td>-->
+    <!--<a href="#" id="devicename{{ id }}" data-id="deviceName" data-type="text">{{ name }}</a>-->
+    <!--<span>({{ zid }})</span>-->
+<!--</td>-->
+<!--<td>-->
+    <!--<div class="row-fluid">-->
+        <!--<div class="block u-block span2">-->
+            <!--<input data-on-label="I" data-off-label="O" class="bootstrap-switch-mini"-->
+                   <!--id="switch{{ id }}" data-id="switchCheck" type="checkbox" {{ state }}>-->
+        <!--</div>-->
+
+        <!--&lt;!&ndash; <input type="text" id="picker{{ id }}" data-id="colorPicker"-->
+               <!--data-format="hex" value="{{ color }}"/> &ndash;&gt;-->
+        <!--<div id="colorDisplay{{ id }}" class="span1" style="background-color:{{ color }}">-->
+            <!--<span>&nbsp;&nbsp;&nbsp;&nbsp;</span>-->
+        <!--</div>-->
+        <!--<div class="span1">-->
+            <!--<i id="colorPickerSwitch{{ id }}" style="color: red" class="fa  fa-lg fa-chevron-up"></i>-->
+        <!--</div>-->
+        <!--<br/>-->
+
+    <!--</div>-->
+    <!--<div class="row-fluid">-->
+        <!--<div style="visibility: visible; " class="span12" id="colorPickerContainer{{ id }}"></div>-->
+    <!--</div>-->
+
+    <!--&lt;!&ndash;-->
+    <!--<div class="block u-block span9">-->
+        <!--<input id="slider{{ id }}" data-id="level" data-slider-id='slider' type="text" data-slider-min="0"-->
+               <!--data-slider-max="100" data-slider-step="1" data-slider-value="{{ value }}"/>-->
+    <!--</div>&ndash;&gt;-->
+
+<!--</td>-->

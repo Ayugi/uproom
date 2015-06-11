@@ -1,5 +1,5 @@
 define(
-    ['backbone', 'views', 'models', 'nouislider', 'functions' ],
+    ['backbone', 'views', 'models', 'nouislider', 'functions', 'colorwheel' ],
     function (Backbone, Views, Models) {
 //        $.fn.editable.defaults.mode = 'inline';
 
