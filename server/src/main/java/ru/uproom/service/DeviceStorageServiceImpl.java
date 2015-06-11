@@ -58,7 +58,6 @@ public class DeviceStorageServiceImpl implements DeviceStorageService {
             devices.add(test);
             addDevices(userId, Collections.singletonList(test));
         }
-        devices.iterator().next().setType(DeviceType.Rgbw);
         /*if (userStorage.get(userId).getDeviceById(2) == null) {
             Device rgb = new Device();
             rgb.setType(DeviceType.Rgbw);
