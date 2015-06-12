@@ -55,6 +55,7 @@ define(['exports', 'backbone', 'hbs!../../../templates/rgbw', 'hbs!../../../temp
             console.log("changeLevel");
             this.model.setLevel(Math.round(this.$('[data-id=level]').val()));
             this.model.save();
+            $("#sliderValue" + this.model.id).html(this.model.getLevel() + "%");
         }
 
         function render() {
@@ -94,6 +95,7 @@ define(['exports', 'backbone', 'hbs!../../../templates/rgbw', 'hbs!../../../temp
                 this.slider.val(parseInt(this.model.getLevel()));
             //if ($('#switch' + this.model.id)[0].checked != this.model.getState())
             $('#switch' + this.model.id)[0].checked = this.model.getState();
+            $("#sliderValue" + this.model.id).html(this.model.getLevel() + "%");
         }
 
         function changeColor(ev) {
