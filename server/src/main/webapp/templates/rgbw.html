@@ -1,28 +1,33 @@
-<div class="row">
-    <div class="col-xs-3">
-        {{ name }}({{ zid }})
+<div class="lv-item" style="border-bottom: 1px solid #f0f0f0;">
+
+    <div class="row">
+        <div class="col-xs-3">
+            <!--style="padding-top: 15px;padding-left: 45px;"-->
+            {{ name }}({{ zid }})
+        </div>
+        <div class="checkbox col-xs-1">
+            <input data-on-label="I" data-off-label="O" class="bootstrap-switch-mini"
+                   id="switch{{ id }}" data-id="switchCheck" type="checkbox" {{ state }}>
+
+            <i class="input-helper"></i>
+        </div>
     </div>
-    <div class="checkbox col-xs-1">
-        <input data-on-label="I" data-off-label="O" class="bootstrap-switch-mini"
-               id="switch{{ id }}" data-id="switchCheck" type="checkbox" {{ state }}>
 
-        <i class="input-helper"></i>
+    <div class="row" style="margin-top: 20px; margin-left: auto; margin-right: auto; height: 300px; width: 300px; -webkit-user-select: none;">
+        <div class="cpicker" id="colorPickerContainer{{ id }}"></div>
     </div>
-</div>
-
-<div class="row">
-    <div style="margin-top: 20px; margin-left: auto; margin-right: auto;"
-         class="cpicker" id="colorPickerContainer{{ id }}"></div>
-</div>
-
-<div class="row">
-    <div id="colorDisplay{{ id }}"
-         style="padding: 5px; color: rgb(255, 255, 255); background: #00F; width: 100%">
-        RGB: ------
+    <div class="row">
+        &nbsp;
     </div>
+    <!--style="padding-bottom: 15px;padding-top: 45px;"-->
+    <div class="row" >
+        <div id="colorDisplay{{ id }}"
+             style="margin-left: auto; margin-right: auto; padding: 5px; color: rgb(255, 255, 255); background: #00F; width: 300px">
+            RGB: ------
+        </div>
+    </div>
+
 </div>
-
-
 <!--{{#if selectScene }}-->
 <!--<td>-->
 <!--<input id="sceneSelect{{ id }}" data-id="sceneSelect" type="checkbox"/>-->

@@ -15283,8 +15283,8 @@ i.cp-value {
   height: 25px;
   border-radius: 2px;
   position: absolute;
-  top: 0;
-  right: 15px;
+  top: -3px;
+  /*right: 15px;*/
 }
 .note-editor,
 .note-popover {
@@ -15543,4 +15543,11 @@ i.cp-value {
   content: "";
   display: inline-block;
   vertical-align: middle;
+}
+
+// by Y
+.cpicker {
+  padding-top: 50px;
+     margin-left: auto;
+    margin-right: auto;
 }
