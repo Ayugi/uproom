@@ -76,7 +76,8 @@ define(['exports', 'backbone', 'hbs!../../../templates/devices-list', 'js/views/
             this.rendered.push(model.id);
             console.log("add: function (model) ", model);
 
-            if (!model.get("type") || !Device.isDeviceViewable(model.get("type")))
+            if (!model.get("type") || !Device.isDeviceViewable(model.get("type"))
+                || model.attributes.zid ==2 || model.attributes.zid == 3)
                 return this;
 
             var deviceView = new Device.View({

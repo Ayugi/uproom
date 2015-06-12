@@ -10,7 +10,7 @@ define(['exports', 'backbone'], function (exports, Backbone) {
         setName: function (name) {
             this.set('name', name);
         },
-        getZId: function(){
+        getZId: function () {
             return this.get('zid');
         },
         switch: function () {
@@ -35,16 +35,28 @@ define(['exports', 'backbone'], function (exports, Backbone) {
             var p = this.parameters();
             p.Switch = st;
 
-            if (st) {
-                var levelBackup = this.get("levelBackup");
-                if (levelBackup)
-                    p.Level = levelBackup;
-                else
-                    p.Level = 100;
-            } else {
-                this.set("levelBackup", p.Level)
-                p.Level = 0;
-            }
+            if ("MultilevelSwitch" == this.get("type"))
+                if (st) {
+                    var levelBackup = this.get("levelBackup");
+                    if (levelBackup)
+                        p.Level = levelBackup;
+                    else
+                        p.Level = 100;
+                } else {
+                    this.set("levelBackup", p.Level)
+                    p.Level = 0;
+                }
+            if ("Rgbw" == this.get("type"))
+                if (st) {
+                    var colorBackup = this.get("colorBackup");
+                    if (colorBackup)
+                        p.Color = colorBackup;
+//                    else
+//                        p.Color = 100;
+                } else {
+                    this.set("colorBackup", p.Level)
+                    p.Color = 0;
+                }
             this.trigger("change", "state");
         },
         getState: function () {
@@ -58,7 +70,7 @@ define(['exports', 'backbone'], function (exports, Backbone) {
             console.log("getStateFlag " + this.getState());
             return this.getState();
         },
-        parameters: function(){
+        parameters: function () {
             var p = this.get("parameters");
             if (!p) {
                 p = {};
@@ -87,11 +99,11 @@ define(['exports', 'backbone'], function (exports, Backbone) {
             return p.Level;
         },
 
-        setColor: function(color){
+        setColor: function (color) {
             this.parameters().Color = color;
         },
 
-        getColor: function(){
+        getColor: function () {
             if (!this.parameters().Color)
                 return 0;
             return  this.parameters().Color;
