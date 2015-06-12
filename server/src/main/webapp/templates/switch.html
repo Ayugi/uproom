@@ -1,14 +1,32 @@
-{{#if selectScene }}
-<td>
-    <input id="sceneSelect{{ id }}" data-id="sceneSelect" type="checkbox"/>
-</td>
-{{/if}}
-<td>
-    <a href="#" id="devicename{{ id }}" data-id="deviceName" data-type="text">{{ name }}</a>
-    <span>({{ zid }})</span>
-</td>
-<td>
+<div class="lv-item">
+    <div class="row">
 
-    <input data-on-label="I" data-off-label="O" class="bootstrap-switch-mini"
-            id="switch{{ id }}" data-id="switchCheck" type="checkbox" {{ state }}>
-</td>
+        <div class="col-xs-3">
+            {{ name }}({{ zid }})
+        </div>
+
+        <div class="checkbox col-xs-1">
+            <input data-on-label="I" data-off-label="O" class="bootstrap-switch-mini"
+                   id="switch{{ id }}" data-id="switchCheck" type="checkbox" {{ state }}>
+
+            <i class="input-helper"></i>
+        </div>
+    </div>
+</div>
+
+
+
+<!--{{#if selectScene }}-->
+<!--<td>-->
+    <!--<input id="sceneSelect{{ id }}" data-id="sceneSelect" type="checkbox"/>-->
+<!--</td>-->
+<!--{{/if}}-->
+<!--<td>-->
+    <!--<a href="#" id="devicename{{ id }}" data-id="deviceName" data-type="text">{{ name }}</a>-->
+    <!--<span>({{ zid }})</span>-->
+<!--</td>-->
+<!--<td>-->
+
+    <!--<input data-on-label="I" data-off-label="O" class="bootstrap-switch-mini"-->
+            <!--id="switch{{ id }}" data-id="switchCheck" type="checkbox" {{ state }}>-->
+<!--</td>-->

@@ -156,7 +156,7 @@ define(['exports', 'backbone', 'hbs!../../../templates/rgbw', 'hbs!../../../temp
 
             console.log("model.getColor().toString(16) " + model.getColor().toString(16));
             if (model.get("type") == "Rgbw") {
-                var colorPicker = Raphael.colorwheel($("#colorPickerContainer" + model.id), 250, 180)
+                var colorPicker = Raphael.colorwheel($("#colorPickerContainer" + model.id), 300, 180)
                     .color("#" + model.getColor().toString(16));
 
 
