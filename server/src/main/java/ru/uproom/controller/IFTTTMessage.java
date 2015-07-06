@@ -16,6 +16,7 @@ public class IFTTTMessage {
     private String img;
     private String map;
     private String event;
+    private String key;
 
     public String getAt() {
         return at;
@@ -49,6 +50,14 @@ public class IFTTTMessage {
         this.event = event;
     }
 
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
     @Override
     public String toString() {
         return "IFTTTMessage{" +
@@ -56,6 +65,7 @@ public class IFTTTMessage {
                 ", img='" + img + '\'' +
                 ", map='" + map + '\'' +
                 ", event='" + event + '\'' +
+                ", key='" + key + '\'' +
                 '}';
     }
 }
