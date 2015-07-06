@@ -100,6 +100,11 @@ define(['exports', 'backbone'], function (exports, Backbone) {
         },
 
         setColor: function (color) {
+            if (color > 0 && !this.getStateFlag())
+                this.setState(true)
+            if (color == 0 && this.getStateFlag())
+                this.setState(false)
+
             this.parameters().Color = color;
         },
 

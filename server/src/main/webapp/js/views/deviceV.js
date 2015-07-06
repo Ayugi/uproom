@@ -160,7 +160,7 @@ define(['exports', 'backbone', 'hbs!../../../templates/rgbw', 'hbs!../../../temp
             if (model.get("type") == "Rgbw") {
                 var colorPicker = Raphael.colorwheel($("#colorPickerContainer" + model.id), 300, 180)
                     .color("#" + model.getColor().toString(16));
-
+                deviceView.colorPicker = colorPicker;
 
                 // colorPicker.onchange(function (color) {
                 colorPicker.ondrag(null, function (color) {
