@@ -18,8 +18,10 @@ public class IFTTTController {
 
     private static final Logger LOG = LoggerFactory.getLogger(IFTTTController.class);
 
-    @RequestMapping(method = RequestMethod.POST)
-    public void updateDevice(@RequestBody IFTTTMessage message) {
+    @RequestMapping(method = RequestMethod.POST,produces="text/plain")
+    @ResponseBody
+    public String updateDevice(@RequestBody IFTTTMessage message) {
         LOG.info("ifttt message " + message);
+        return "ok";
     }
 }
