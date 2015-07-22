@@ -31,7 +31,9 @@
         "animate.css": "3.2.5",
         "jquery.nicescroll": "3.6.0",
         "waves": "0.7.2",
-        "nouislider" : "7.0.10"
+        "nouislider" : "7.0.10",
+        "font-awesome" : "4.3.0"
+
     },
     "resolutions": {
         "jquery": ">= 1.9.1",

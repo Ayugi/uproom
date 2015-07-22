@@ -62,14 +62,14 @@ define(['exports', 'backbone', 'hbs!../../../templates/scene', 'handlebars'],
         }
 
         function templatePostProcessing(model) {
-            function onEdit(response, newValue) {
-                model.setName(newValue)
-                model.save();
-            }
-
-            $('#scenename' + model.id).editable({
-                success: onEdit
-            });
+//            function onEdit(response, newValue) {
+//                model.setName(newValue)
+//                model.save();
+//            }
+//
+//            $('#scenename' + model.id).editable({
+//                success: onEdit
+//            });
         }
     }
 );

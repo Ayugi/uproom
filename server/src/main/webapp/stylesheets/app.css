@@ -9120,6 +9120,49 @@ body #content {
   -o-transform: scale(1);
   transform: scale(1);
 }
+
+/*--------- Inner pages menu trigger by Y --------------------------- */
+
+#menu-trigger2 {
+  width: 65px;
+  height: 35px;
+  cursor: pointer;
+}
+#menu-trigger2 .line-wrap .line {
+  background-color: #fff;
+}
+#menu-trigger2:before {
+  content: "";
+  position: absolute;
+  top: 9px;
+  left: 7px;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  /*background: rgba(255, 255, 255, 0.22);*/
+  -webkit-transition: all;
+  -o-transition: all;
+  transition: all;
+  -webkit-transition-duration: 300ms;
+  transition-duration: 300ms;
+  -webkit-backface-visibility: hidden;
+  -moz-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transform: scale(0);
+  -ms-transform: scale(0);
+  -o-transform: scale(0);
+  transform: scale(0);
+  z-index: 0;
+}
+#menu-trigger2.open:before {
+  -webkit-transform: scale(1);
+  -ms-transform: scale(1);
+  -o-transform: scale(1);
+  transform: scale(1);
+}
+
+/*--------- Inner pages menu trigger --------------------------- */
+
 .top-menu {
   list-style: none;
   padding: 0;
