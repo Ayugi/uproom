@@ -61,17 +61,21 @@ define(['exports', 'backbone', 'js/views/baseV.js', 'js/views/accountMenu.js', '
                         this.layout.list.reset(this.model.devices, modeChange);
                         this.model.devices.fetch();
                     }
-//                    else if (this.model.modes.getActiveFrame() == 'scenes') {//
-//                        this.layout.list = new SceneList.View({el: '#main-frame'});
-//                        this.layout.list.render();
-//                        this.layout.list.reset(this.model.scenes, modeChange);
-//                        this.model.scenes.fetch();
-//                    } else {
+                    else if (this.model.modes.getActiveFrame() == 'scenes') {//
+                        this.layout.list = new SceneList.View({el: '#container'});
+                        this.layout.list.render();
+                        this.layout.list.reset(this.model.scenes, modeChange);
+                        this.model.scenes.fetch();
+                    }
+//                    else {
 //                        this.layout.list = (new VideoView({el: '#main-frame'})).render();
 //                    }
 
                     this.layout.sidebar = (new SidebarView({el: '#sidebar'})).render();
-
+                    console.log("devices link", $("#devices_list"));
+                    var frameChange = this.frameChange;
+                    $("#devices_list").on( "click", function (){frameChange("devices")});
+                    $("#scenes_list").on( "click", function (){frameChange("scenes")});
 //                    var frameChange = this.frameChange;
 //                    // TODO this looks ugly, consider how to make it better
 //                    $("#nav-devices").on('click', function () {
