@@ -15,7 +15,7 @@ define(['exports', 'backbone', 'hbs!../../../templates/scene', 'handlebars'],
                 render: render,
                 update: update,
                 templatePostProcessing: templatePostProcessing,
-                tagName: 'tr',
+                tagName: 'div',
 
                 renderedFlag: false
             }),
