@@ -14,10 +14,10 @@ public class SphinxTest {
 // Set path to acoustic model. configuration.setAcousticModelPath("resource:/edu/cmu/sphinx/models/en-us/en-us");
         configuration.setAcousticModelPath("resource:/zero_ru.cd_cont_4000");
 // Set path to dictionary.
-        configuration.setDictionaryPath("resource:/ru.dic");
+        configuration.setDictionaryPath("resource:/ru-short.dic");
         // edu/cmu/sphinx/models/en-us/cmudict-en-us.dict
 // Set language model. configuration.setLanguageModelPath("resource:/9421.lm");
-        configuration.setLanguageModelPath("resource:/ru.lm");
+        configuration.setLanguageModelPath("resource:/ru-short.lm");
         // /edu/cmu/sphinx/models/en-us/en-us.lm.bin
 
         LiveSpeechRecognizer recognizer = new LiveSpeechRecognizer(configuration);
