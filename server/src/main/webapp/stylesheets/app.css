@@ -1,16 +1,3 @@
-TypeError: 'undefined' is not a function (evaluating 'document.querySelectorAll.bind(document)')
-
-  http://hello.digital-fresh.ru/up/vendors/waves/waves.min.js:1
-  http://hello.digital-fresh.ru/up/vendors/waves/waves.min.js:1
-  http://hello.digital-fresh.ru/up/vendors/waves/waves.min.js:1
-ReferenceError: Can't find variable: Waves
-
-  http://hello.digital-fresh.ru/up/js/functions-scenes.js:628
-  http://hello.digital-fresh.ru/up/js/functions-scenes.js:630
-  http://hello.digital-fresh.ru/up/js/jquery-2.1.1.min.js:2
-  http://hello.digital-fresh.ru/up/js/jquery-2.1.1.min.js:2
-  http://hello.digital-fresh.ru/up/js/jquery-2.1.1.min.js:2
-  http://hello.digital-fresh.ru/up/js/jquery-2.1.1.min.js:2 in I
 /*** uncss> filename: http://hello.digital-fresh.ru/up/css/app.css ***/
 
 /*
